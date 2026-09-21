@@ -625,3 +625,38 @@ uitgebreide velden.
 Node-check dat alle 12 `EventKind`s precies één keer in `TIMELINE_LANES` voorkomen
 (de runtime-`throw`-check zelf kan pas bij het daadwerkelijk opstarten van de app
 gecontroleerd worden, dat is nog niet gebeurd op een toestel).
+
+## Update 2026-09-21 — terminologie afgestemd op het werkveld (NL ergotherapie/gedragstherapie)
+
+Op verzoek: alle klinisch-relevante tekst (event-opties, ABC-/Sensory-Profile-velden)
+nagelopen op vakjargon i.p.v. spreektaal. Onderzocht wat de daadwerkelijke Nederlandse
+praktijktermen zijn (ergotherapie/sensorische-informatieverwerking, ABC-
+gedragsobservatie) i.p.v. zelf iets te verzinnen:
+
+- **Stemmingsschaal**: "Erg naar/Naar/Neutraal/Goed/Erg goed" (spreektaal) →
+  **"Zeer negatief/Negatief/Neutraal/Positief/Zeer positief"** — standaard
+  psychometrisch-neutrale valentie-schaal.
+- **Ernstschaal**: "Heftig" → **"Ernstig"** (gedrag én zelfverwonding, delen dezelfde
+  Dictionary-sleutel) — sluit aan bij hoe klinische ernstschalen dit benoemen
+  (licht/matig/ernstig).
+- **Sensory Profile-veld "Gevoeligheid"** → **"Prikkeldrempel"** — dit is letterlijk de
+  Nederlandse vakterm uit Winnie Dunn's sensorisch-profiel-model, bevestigd via
+  ergotherapie-bronnen (Sensonate, Buromare). De pil-knoppen zelf zijn kort/klinisch
+  ("Lage drempel"/"Hoge drempel"), met een aparte uitlegregel eronder voor ouders die de
+  term nog niet kennen.
+- **Sensory Profile-veld "Reactie"**: "Zocht het juist op" → **"Actief opzoekend"**/
+  "Vermeed het" → **"Actief vermijdend"** — volgt Dunn's eigen terminologie voor
+  "actieve zelfregulatiestrategie" (opzoeken vs. vermijden), i.p.v. losse eigen
+  formulering.
+- **ABC-veld "Plek"** → **"Locatie"** — zelfde veldnaam als in professionele
+  gedragsobservatie-formulieren (bv. UMCG's eigen ABC-schema-document).
+
+**Bewust ongewijzigd gelaten, met onderbouwing**: "Zindelijkheid"-optie "Ongelukje" (in
+pediatrische zindelijkheidstraining is juist zachte, niet-beschamende taal een bewust
+klinisch principe, geen te casual woordkeuze); "Stimmen" (in de hedendaagse NL-
+autismegemeenschap en -praktijk een geaccepteerde, neutrale term — het formelere
+alternatief "zelfstimulerend gedrag" is stijver, niet per se "beter"); "Positief moment"
+(duidelijk en niet onprofessioneel, geen sterkere vakterm nodig voor een korte
+knoplabel).
+
+**Verificatie**: `npx tsc --noEmit` en `npx eslint . --no-cache` schoon.

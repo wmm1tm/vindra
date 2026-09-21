@@ -207,6 +207,7 @@ export interface Dictionary {
     saveErrorTitle: string;
     saveErrorMessage: string;
     sensoryThresholdLabel: string;
+    sensoryThresholdHint: string;
     sensoryThresholdLow: string;
     sensoryThresholdHigh: string;
     sensoryResponseLabel: string;
@@ -288,18 +289,22 @@ export const nl: Dictionary = {
     zindelijkheid: 'Zindelijkheid',
   },
   eventOptions: {
+    // Ernstschaal: "Ernstig" i.p.v. het informelere "Heftig" — sluit aan bij hoe
+    // klinische ernstschalen dit doorgaans benoemen (licht/matig/ernstig).
     gedragLicht: 'Licht',
     gedragMatig: 'Matig',
-    gedragHeftig: 'Heftig',
+    gedragHeftig: 'Ernstig',
     prikkelGeluid: 'Geluid',
     prikkelLicht: 'Licht',
     prikkelAanraking: 'Aanraking',
     prikkelGeur: 'Geur',
-    stemming1: 'Erg naar',
-    stemming2: 'Naar',
+    // Neutrale valentie-schaal i.p.v. spreektaal ("naar"/"erg naar") — zelfde
+    // register als een psychometrische 5-punts-stemmingsschaal.
+    stemming1: 'Zeer negatief',
+    stemming2: 'Negatief',
     stemming3: 'Neutraal',
-    stemming4: 'Goed',
-    stemming5: 'Erg goed',
+    stemming4: 'Positief',
+    stemming5: 'Zeer positief',
     stimmenFladderen: 'Handen fladderen',
     stimmenGeluiden: 'Geluiden maken',
     stimmenWiegen: 'Wiegen',
@@ -457,18 +462,27 @@ export const nl: Dictionary = {
     nextDaySuffix: '(volgende dag)',
     antecedentLabel: 'Aanleiding',
     antecedentPlaceholder: 'Wat ging eraan vooraf? (optioneel)',
-    locationLabel: 'Plek',
+    // "Locatie" i.p.v. het informelere "Plek" — zelfde ABC-schema-veldnaam als in
+    // professionele gedragsobservatie-formulieren (bv. UMCG's ABC-schema).
+    locationLabel: 'Locatie',
     locationPlaceholder: 'Waar gebeurde dit? (optioneel)',
     whatHelpedLabel: 'Wat hielp',
     whatHelpedPlaceholder: 'Wat hielp om te kalmeren? (optioneel)',
     saveErrorTitle: 'Opslaan mislukt',
     saveErrorMessage: 'De wijziging kon niet worden opgeslagen. Probeer het nog eens.',
-    sensoryThresholdLabel: 'Gevoeligheid',
-    sensoryThresholdLow: 'Merkte het meteen',
-    sensoryThresholdHigh: 'Had er veel voor nodig',
+    // "Prikkeldrempel" is de vakterm uit de Nederlandse ergotherapie/sensorische-
+    // informatieverwerking-praktijk (Winnie Dunn's model) — "Gevoeligheid" was een
+    // eigen, minder herkenbare woordkeuze.
+    sensoryThresholdLabel: 'Prikkeldrempel',
+    sensoryThresholdHint: 'Een lage drempel merkt een prikkel snel op; bij een hoge drempel is er meer nodig voordat het opvalt.',
+    sensoryThresholdLow: 'Lage drempel',
+    sensoryThresholdHigh: 'Hoge drempel',
+    // "Reactie" blijft als veldlabel, maar de twee opties volgen nu Dunn's eigen
+    // terminologie voor actieve zelfregulatiestrategie (opzoeken vs. vermijden) i.p.v.
+    // de losser geformuleerde "Zocht het juist op".
     sensoryResponseLabel: 'Reactie',
-    sensoryResponseSeeking: 'Zocht het juist op',
-    sensoryResponseAvoiding: 'Vermeed het',
+    sensoryResponseSeeking: 'Actief opzoekend',
+    sensoryResponseAvoiding: 'Actief vermijdend',
   },
   timeline: {
     laneBehavior: 'Gedrag/Prikkels',

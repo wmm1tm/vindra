@@ -332,6 +332,7 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
               {showSensoryFields && (
                 <>
                   <Text style={styles.fieldLabel}>{t.eventDetail.sensoryThresholdLabel}</Text>
+                  <Text style={styles.detail}>{t.eventDetail.sensoryThresholdHint}</Text>
                   <View style={styles.pillRow}>
                     <Pressable
                       onPress={() => setSensoryThresholdValue(sensoryThresholdValue === 'laag' ? null : 'laag')}
