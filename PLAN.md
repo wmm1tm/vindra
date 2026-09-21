@@ -510,3 +510,44 @@ verwerkt:
 
 **Verificatie**: `npx tsc --noEmit` en `npx eslint . --no-cache` staan na alle
 bovenstaande wijzigingen nog steeds volledig schoon.
+
+## Update 2026-09-21 — backup naar GitHub + code-review-ronde
+
+**Backup**: beide repo's (Nuvo en Vindra) stonden tot nu toe alleen lokaal — geen
+git-remote, Vindra had zelfs nog geen eerste commit. Opgelost: eerste commit (`866d3fb`)
+gemaakt, beide repo's als **private** GitHub-repo's aangemaakt onder `wmm1tm` en
+gepusht (`github.com/wmm1tm/nuvo`, `github.com/wmm1tm/vindra`, branch hernoemd van
+`master` naar `main`). Op een andere computer: gewoon clonen + `npm install`, geen
+losse `.env`/geheimen buiten de repo. Expo/EAS-login en Apple-account blijven
+handmatige stappen (accountsessies, geen bestanden).
+
+**Code-review** (volledige codebase, want nog geen eerdere commit om tegen te diffen):
+10 bevindingen, allemaal apart geverifieerd. Gefixt:
+- `db/events.ts`: `importEventRow`/`applyRemoteEvent` misten `?? null` op de nieuwe
+  ABC-velden — een oude back-up/sync-payload zonder die velden (`undefined` i.p.v.
+  `null`) zou de hele rij stil laten falen bij elke poging.
+- `lib/event-summary.ts`: `formatGroupBadge` liet het aantal Positief-momenten
+  verdwijnen zodra er ook slaap-minuten in dezelfde ("Overig"-)baan zaten — Nuvo's
+  gegroepeerde banen mixen nooit duur- met momentopname-typen, Vindra's "Overig" wel.
+  Nu tonen beide (bv. "35m · 2×").
+- `components/paywall/paywall-screen.tsx`: linkte per ongeluk naar **Nuvo's**
+  privacybeleid (copy-pastefout uit de bucket-2-overname) — nu `null` + een duidelijke
+  "nog niet beschikbaar"-melding i.p.v. de verkeerde app te tonen aan een betalende
+  gebruiker.
+- `components/timeline/event-detail-sheet.tsx`: `handleSave` had geen `.catch()` — een
+  mislukte schrijfactie liet de modal stil openstaan, leek dan geen wijziging opgeslagen.
+- `app/_layout.tsx`: verouderde comment beweerde "alleen slapen is gratis" (klopte voor
+  Nuvo, niet voor Vindra — hier is "gedrag" het gratis type).
+
+**Bewust niet gefixt, besproken en besloten**:
+- Paywall valt terug op "volledig ontgrendeld" zonder RevenueCat-API-key — bewuste
+  Nuvo-conventie, geen bug.
+- Partner-sync checkt entitlement niet op het ontvangende toestel (zit al zo in Nuvo)
+  — gebruiker koos "laten zoals het is", verdedigbaar als gezinsfunctie.
+- Een premium duur-event (Slaap) kan niet via het wiel gestopt worden als het
+  abonnement er middenin afloopt — kan in Nuvo niet gebeuren (daar is slaap het enige
+  duur-type én gratis), hier wel doordat Slaap premium is. Gebruiker koos "later" —
+  werkt al via het bewerkscherm als omweg, randgeval, niet blokkerend.
+
+**Verificatie**: `npx tsc --noEmit` en `npx eslint . --no-cache` weer volledig schoon
+na deze ronde fixes.

@@ -113,19 +113,27 @@ export function formatKindBadge(total: KindTotal | undefined, isDuration: boolea
   return isDuration ? formatDurationMinutes(total.minutes, t) : String(total.count);
 }
 
+/** Nuvo's versie van deze functie liet het aantal stilzwijgend vallen zodra één lid een
+ * duur-type was ("anyDuration ? duur : aantal") — onschuldig daar, want geen van Nuvo's
+ * gegroepeerde banen mixt duur- en momentopname-typen. Vindra's "Overig"-baan doet dat
+ * wél (slaap + positief moment), dus hier duur én aantal apart bijhouden en allebei
+ * tonen i.p.v. het aantal te laten verdwijnen. */
 export function formatGroupBadge(totals: Map<EventKind, KindTotal>, memberKinds: EventKind[], t: Dictionary): string | null {
-  let count = 0;
-  let minutes = 0;
-  let anyDuration = false;
+  let durationMinutes = 0;
+  let hasDuration = false;
+  let nonDurationCount = 0;
   for (const kind of memberKinds) {
     const total = totals.get(kind);
     if (!total) continue;
-    count += total.count;
     if (EVENT_TYPES[kind].isDuration) {
-      anyDuration = true;
-      minutes += total.minutes;
+      hasDuration = true;
+      durationMinutes += total.minutes;
+    } else {
+      nonDurationCount += total.count;
     }
   }
-  if (count === 0) return null;
-  return anyDuration ? formatDurationMinutes(minutes, t) : String(count);
+  const parts: string[] = [];
+  if (hasDuration) parts.push(formatDurationMinutes(durationMinutes, t));
+  if (nonDurationCount > 0) parts.push(`${nonDurationCount}×`);
+  return parts.length > 0 ? parts.join(' · ') : null;
 }

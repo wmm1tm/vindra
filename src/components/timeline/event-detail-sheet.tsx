@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { EVENT_TYPES, SECOND_LEVEL_OPTIONS } from '@/constants/event-types';
@@ -108,22 +108,29 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
       antecedent: showAbcFields ? antecedentValue.trim() || null : event.antecedent,
       location: showAbcFields ? locationValue.trim() || null : event.location,
       whatHelped: showAbcFields ? whatHelpedValue.trim() || null : event.what_helped,
-    }).then((updatedAt) => {
-      onSaved({
-        ...event,
-        start_at: newStartAt.toISOString(),
-        end_at: newEndAt ? newEndAt.toISOString() : null,
-        note: noteValue.trim() || null,
-        amount_ml: showAmount && amountValue.trim() ? Number(amountValue) : null,
-        side: option?.details.side ?? null,
-        variant: option?.details.variant ?? null,
-        antecedent: showAbcFields ? antecedentValue.trim() || null : event.antecedent,
-        location: showAbcFields ? locationValue.trim() || null : event.location,
-        what_helped: showAbcFields ? whatHelpedValue.trim() || null : event.what_helped,
-        updated_at: updatedAt,
+    })
+      .then((updatedAt) => {
+        onSaved({
+          ...event,
+          start_at: newStartAt.toISOString(),
+          end_at: newEndAt ? newEndAt.toISOString() : null,
+          note: noteValue.trim() || null,
+          amount_ml: showAmount && amountValue.trim() ? Number(amountValue) : null,
+          side: option?.details.side ?? null,
+          variant: option?.details.variant ?? null,
+          antecedent: showAbcFields ? antecedentValue.trim() || null : event.antecedent,
+          location: showAbcFields ? locationValue.trim() || null : event.location,
+          what_helped: showAbcFields ? whatHelpedValue.trim() || null : event.what_helped,
+          updated_at: updatedAt,
+        });
+        onClose();
+      })
+      .catch((error) => {
+        // Zonder dit bleef de modal stilzwijgend open bij een mislukte schrijfactie —
+        // de gebruiker kon dan denken dat de wijziging wél was opgeslagen.
+        console.error('[event-detail-sheet] opslaan mislukt', error);
+        Alert.alert(t.eventDetail.saveErrorTitle, t.eventDetail.saveErrorMessage);
       });
-      onClose();
-    });
   };
 
   return (

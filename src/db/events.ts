@@ -104,9 +104,9 @@ export async function importEventRow(db: SQLiteDatabase, childId: string, row: E
       row.variant,
       row.note,
       row.temperature_c,
-      row.antecedent,
-      row.location,
-      row.what_helped,
+      row.antecedent ?? null,
+      row.location ?? null,
+      row.what_helped ?? null,
       row.created_at,
       row.updated_at,
       row.deleted_at,
@@ -143,9 +143,12 @@ export async function applyRemoteEvent(db: SQLiteDatabase, childId: string, row:
       row.variant,
       row.note,
       row.temperature_c,
-      row.antecedent,
-      row.location,
-      row.what_helped,
+      // ?? null (niet alleen row.antecedent): decryptJson/oude back-ups zijn ongetypeerd
+      // JSON en kunnen deze velden missen (undefined) i.p.v. echt null — expo-sqlite's
+      // bind accepteert geen undefined, dat zou de hele sync-/import-rij laten falen.
+      row.antecedent ?? null,
+      row.location ?? null,
+      row.what_helped ?? null,
       row.created_at,
       row.updated_at,
       row.deleted_at,

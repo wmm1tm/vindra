@@ -35,9 +35,10 @@ export default function RootLayout() {
               <I18nProvider>
                 <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                   <PurchasesProvider>
-                    {/* Bewust géén app-brede paywall-gate meer — alleen "slapen" is
-                        gratis, de rest wordt per event-type gegated in WheelArc (zie
-                        constants/event-types.ts se requiresPremium). */}
+                    {/* Bewust géén app-brede paywall-gate — alleen "gedrag" is gratis
+                        (de hook-differentiator, zie PLAN.md sectie 2), de rest wordt
+                        per event-type gegated in WheelArc (zie
+                        constants/event-types.ts requiresPremium). */}
                     <Stack>
                       <Stack.Screen name="index" options={{ headerShown: false }} />
                     </Stack>

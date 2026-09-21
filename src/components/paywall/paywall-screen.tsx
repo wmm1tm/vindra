@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Purchases, { PURCHASES_ERROR_CODE, type PurchasesPackage } from 'react-native-purchases';
 
@@ -10,12 +10,17 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { useI18n } from '@/lib/i18n';
 import { ENTITLEMENT_ID } from '@/lib/purchases';
 
-// Apple's standard EULA — Nuvo has no custom Terms of Use, so this is the one App Store
-// Connect itself falls back to when no custom agreement is configured. Guideline 3.1.2
-// requires a functional link to it (and to the privacy policy) on the purchase screen
-// itself, not just in the App Store listing text.
+// Apple's standard EULA — generic, works for any app with no custom Terms of Use, so
+// this one's correct as-is. Guideline 3.1.2 requires a functional link to it (and to
+// the privacy policy) on the purchase screen itself, not just in the App Store listing
+// text.
 const EULA_URL = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
-const PRIVACY_POLICY_URL = 'https://wmm1tm.github.io/nuvo-privacy/';
+// TODO vóór launch: dit was per ongeluk Nuvo's privacybeleid-URL (copy-pastefout uit de
+// bucket-2-overname, gevonden door code-review 2026-09-21) — Vindra heeft nog geen eigen
+// gehoste privacyverklaring (zie Nuvo's eigen traject: aparte statische GitHub Pages-repo,
+// `reference_app_store_launch_playbook.md`). Bewust `null` i.p.v. een verkeerde/geraden
+// URL, met een duidelijke melding i.p.v. een stille link naar de verkeerde app.
+const PRIVACY_POLICY_URL: string | null = null;
 
 type OfferingsState =
   | { kind: 'loading' }
@@ -242,7 +247,12 @@ export function PaywallScreen({ onClose }: { onClose?: () => void }) {
             <Text style={styles.termsLink}>{t.subscription.termsOfUseLabel}</Text>
           </Pressable>
           <Text style={styles.terms}> · </Text>
-          <Pressable onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+          <Pressable
+            onPress={() =>
+              PRIVACY_POLICY_URL
+                ? Linking.openURL(PRIVACY_POLICY_URL)
+                : Alert.alert(t.subscription.privacyPolicyMissingTitle, t.subscription.privacyPolicyMissingMessage)
+            }>
             <Text style={styles.termsLink}>{t.subscription.privacyPolicyLabel}</Text>
           </Pressable>
         </View>
