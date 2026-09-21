@@ -164,6 +164,12 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
     { id: 'matig', label: (t) => t.eventOptions.gedragMatig, color: '#C97B7B', details: { variant: 'matig' } },
     { id: 'heftig', label: (t) => t.eventOptions.gedragHeftig, color: '#A85C5C', details: { variant: 'heftig' } },
   ],
+  // Elke optie met een icoon krijgt ook een `caption` (tekst onder de wielknop) — zonder
+  // die tekst was niet te zien wát een icoontje precies voorstelde (bv. het verschil
+  // tussen "licht"/"geur" is bij een klein icoon niet vanzelfsprekend), gevonden bij een
+  // echte testrun op toestel (2026-09-21). Nuvo's eigen luier-opties (pee/poo/empty)
+  // hebben om dezelfde reden al een caption; alleen "beide" niet, omdat dat daar de
+  // enige is zonder eigen icoon.
   prikkel: [
     {
       id: 'geluid',
@@ -171,6 +177,7 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
       icon: 'ear-hearing',
       iconSet: 'mci',
       color: '#8C7FC9',
+      caption: (t) => t.eventOptions.prikkelGeluid,
       details: { variant: 'geluid' },
     },
     {
@@ -179,6 +186,7 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
       icon: 'wb-sunny',
       iconSet: 'material',
       color: '#A79BD6',
+      caption: (t) => t.eventOptions.prikkelLicht,
       details: { variant: 'licht' },
     },
     {
@@ -187,6 +195,7 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
       icon: 'hand-back-right',
       iconSet: 'mci',
       color: '#7A6DB5',
+      caption: (t) => t.eventOptions.prikkelAanraking,
       details: { variant: 'aanraking' },
     },
     {
@@ -195,6 +204,7 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
       icon: 'flower',
       iconSet: 'mci',
       color: '#9C8FD1',
+      caption: (t) => t.eventOptions.prikkelGeur,
       details: { variant: 'geur' },
     },
     { id: 'anders', label: (t) => t.eventOptions.other, details: { variant: 'anders' } },
@@ -206,6 +216,7 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
       icon: 'sentiment-very-dissatisfied',
       iconSet: 'material',
       color: '#C97B7B',
+      caption: (t) => t.eventOptions.stemming1,
       details: { variant: '1' },
     },
     {
@@ -214,6 +225,7 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
       icon: 'sentiment-dissatisfied',
       iconSet: 'material',
       color: '#D6A56E',
+      caption: (t) => t.eventOptions.stemming2,
       details: { variant: '2' },
     },
     {
@@ -222,6 +234,7 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
       icon: 'sentiment-neutral',
       iconSet: 'material',
       color: '#E3C077',
+      caption: (t) => t.eventOptions.stemming3,
       details: { variant: '3' },
     },
     {
@@ -230,6 +243,7 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
       icon: 'sentiment-satisfied',
       iconSet: 'material',
       color: '#A9C27F',
+      caption: (t) => t.eventOptions.stemming4,
       details: { variant: '4' },
     },
     {
@@ -238,6 +252,7 @@ export const SECOND_LEVEL_OPTIONS: Partial<Record<EventKind, SecondLevelOption[]
       icon: 'sentiment-very-satisfied',
       iconSet: 'material',
       color: '#7FA37A',
+      caption: (t) => t.eventOptions.stemming5,
       details: { variant: '5' },
     },
   ],
