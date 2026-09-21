@@ -53,6 +53,8 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
   const [antecedentValue, setAntecedentValue] = useState(event.antecedent ?? '');
   const [locationValue, setLocationValue] = useState(event.location ?? '');
   const [whatHelpedValue, setWhatHelpedValue] = useState(event.what_helped ?? '');
+  const [sensoryThresholdValue, setSensoryThresholdValue] = useState(event.sensory_threshold);
+  const [sensoryResponseValue, setSensoryResponseValue] = useState(event.sensory_response);
 
   const type = EVENT_TYPES[event.kind];
   const options = SECOND_LEVEL_OPTIONS[event.kind];
@@ -64,6 +66,9 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
   // ABC-velden (aanleiding/plek/wat hielp) — alleen zinvol bij 'gedrag', zie
   // db/schema.ts CREATE_SCHEMA_V12 en het onderzoek dat hiertoe leidde (PLAN.md).
   const showAbcFields = event.kind === 'gedrag';
+  // Dunn's Sensory Profile-uitbreiding — alleen zinvol bij 'prikkel', zie
+  // db/schema.ts CREATE_SCHEMA_V13 en hetzelfde onderzoek als de ABC-velden.
+  const showSensoryFields = event.kind === 'prikkel';
 
   const startEditing = () => {
     setStartHour(String(start.getHours()));
@@ -76,6 +81,8 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
     setAntecedentValue(event.antecedent ?? '');
     setLocationValue(event.location ?? '');
     setWhatHelpedValue(event.what_helped ?? '');
+    setSensoryThresholdValue(event.sensory_threshold);
+    setSensoryResponseValue(event.sensory_response);
     setEditing(true);
   };
 
@@ -108,6 +115,8 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
       antecedent: showAbcFields ? antecedentValue.trim() || null : event.antecedent,
       location: showAbcFields ? locationValue.trim() || null : event.location,
       whatHelped: showAbcFields ? whatHelpedValue.trim() || null : event.what_helped,
+      sensoryThreshold: showSensoryFields ? sensoryThresholdValue : event.sensory_threshold,
+      sensoryResponse: showSensoryFields ? sensoryResponseValue : event.sensory_response,
     })
       .then((updatedAt) => {
         onSaved({
@@ -121,6 +130,8 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
           antecedent: showAbcFields ? antecedentValue.trim() || null : event.antecedent,
           location: showAbcFields ? locationValue.trim() || null : event.location,
           what_helped: showAbcFields ? whatHelpedValue.trim() || null : event.what_helped,
+          sensory_threshold: showSensoryFields ? sensoryThresholdValue : event.sensory_threshold,
+          sensory_response: showSensoryFields ? sensoryResponseValue : event.sensory_response,
           updated_at: updatedAt,
         });
         onClose();
@@ -168,6 +179,22 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
               {showAbcFields && event.what_helped && (
                 <Text style={styles.note}>
                   {t.eventDetail.whatHelpedLabel}: {event.what_helped}
+                </Text>
+              )}
+              {showSensoryFields && event.sensory_threshold && (
+                <Text style={styles.note}>
+                  {t.eventDetail.sensoryThresholdLabel}:{' '}
+                  {event.sensory_threshold === 'laag'
+                    ? t.eventDetail.sensoryThresholdLow
+                    : t.eventDetail.sensoryThresholdHigh}
+                </Text>
+              )}
+              {showSensoryFields && event.sensory_response && (
+                <Text style={styles.note}>
+                  {t.eventDetail.sensoryResponseLabel}:{' '}
+                  {event.sensory_response === 'opzoekend'
+                    ? t.eventDetail.sensoryResponseSeeking
+                    : t.eventDetail.sensoryResponseAvoiding}
                 </Text>
               )}
 
@@ -298,6 +325,41 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                     placeholder={t.eventDetail.whatHelpedPlaceholder}
                     placeholderTextColor="#8B95A1"
                   />
+                </>
+              )}
+
+              {showSensoryFields && (
+                <>
+                  <Text style={styles.fieldLabel}>{t.eventDetail.sensoryThresholdLabel}</Text>
+                  <View style={styles.pillRow}>
+                    <Pressable
+                      onPress={() => setSensoryThresholdValue(sensoryThresholdValue === 'laag' ? null : 'laag')}
+                      style={[styles.pill, sensoryThresholdValue === 'laag' && { backgroundColor: type.color }]}>
+                      <Text style={styles.pillLabel}>{t.eventDetail.sensoryThresholdLow}</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setSensoryThresholdValue(sensoryThresholdValue === 'hoog' ? null : 'hoog')}
+                      style={[styles.pill, sensoryThresholdValue === 'hoog' && { backgroundColor: type.color }]}>
+                      <Text style={styles.pillLabel}>{t.eventDetail.sensoryThresholdHigh}</Text>
+                    </Pressable>
+                  </View>
+                  <Text style={styles.fieldLabel}>{t.eventDetail.sensoryResponseLabel}</Text>
+                  <View style={styles.pillRow}>
+                    <Pressable
+                      onPress={() =>
+                        setSensoryResponseValue(sensoryResponseValue === 'opzoekend' ? null : 'opzoekend')
+                      }
+                      style={[styles.pill, sensoryResponseValue === 'opzoekend' && { backgroundColor: type.color }]}>
+                      <Text style={styles.pillLabel}>{t.eventDetail.sensoryResponseSeeking}</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() =>
+                        setSensoryResponseValue(sensoryResponseValue === 'vermijdend' ? null : 'vermijdend')
+                      }
+                      style={[styles.pill, sensoryResponseValue === 'vermijdend' && { backgroundColor: type.color }]}>
+                      <Text style={styles.pillLabel}>{t.eventDetail.sensoryResponseAvoiding}</Text>
+                    </Pressable>
+                  </View>
                 </>
               )}
 

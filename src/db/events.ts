@@ -19,6 +19,11 @@ export interface EventRow {
   antecedent: string | null;
   location: string | null;
   what_helped: string | null;
+  /** Dunn's Sensory Profile-uitbreiding voor 'prikkel'-events — 'laag'/'hoog' resp.
+   * 'opzoekend'/'vermijdend', of NULL. Zelfde achteraf-invullen-via-bewerkscherm-
+   * patroon als de ABC-velden hierboven. Ongebruikt voor de overige event-typen. */
+  sensory_threshold: string | null;
+  sensory_response: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -51,6 +56,8 @@ export async function insertMomentEvent(
     antecedent: null,
     location: null,
     what_helped: null,
+    sensory_threshold: null,
+    sensory_response: null,
     created_at: now,
     updated_at: now,
     deleted_at: null,
@@ -91,8 +98,8 @@ export async function importEventRow(db: SQLiteDatabase, childId: string, row: E
     `INSERT OR REPLACE INTO event
        (id, child_id, kind, start_at, end_at, amount_ml,
         side, variant, note, temperature_c, antecedent, location, what_helped,
-        created_at, updated_at, deleted_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        sensory_threshold, sensory_response, created_at, updated_at, deleted_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       row.id,
       childId,
@@ -107,6 +114,8 @@ export async function importEventRow(db: SQLiteDatabase, childId: string, row: E
       row.antecedent ?? null,
       row.location ?? null,
       row.what_helped ?? null,
+      row.sensory_threshold ?? null,
+      row.sensory_response ?? null,
       row.created_at,
       row.updated_at,
       row.deleted_at,
@@ -123,13 +132,14 @@ export async function applyRemoteEvent(db: SQLiteDatabase, childId: string, row:
     `INSERT INTO event
        (id, child_id, kind, start_at, end_at, amount_ml,
         side, variant, note, temperature_c, antecedent, location, what_helped,
-        created_at, updated_at, deleted_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        sensory_threshold, sensory_response, created_at, updated_at, deleted_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT (id) DO UPDATE SET
        kind = excluded.kind, start_at = excluded.start_at, end_at = excluded.end_at,
        amount_ml = excluded.amount_ml, side = excluded.side, variant = excluded.variant,
        note = excluded.note, temperature_c = excluded.temperature_c,
        antecedent = excluded.antecedent, location = excluded.location, what_helped = excluded.what_helped,
+       sensory_threshold = excluded.sensory_threshold, sensory_response = excluded.sensory_response,
        updated_at = excluded.updated_at, deleted_at = excluded.deleted_at
      WHERE excluded.updated_at >= event.updated_at`,
     [
@@ -149,6 +159,8 @@ export async function applyRemoteEvent(db: SQLiteDatabase, childId: string, row:
       row.antecedent ?? null,
       row.location ?? null,
       row.what_helped ?? null,
+      row.sensory_threshold ?? null,
+      row.sensory_response ?? null,
       row.created_at,
       row.updated_at,
       row.deleted_at,
@@ -344,18 +356,33 @@ export interface EventEditUpdate {
   antecedent?: string | null;
   location?: string | null;
   whatHelped?: string | null;
+  /** Sensory Profile-velden, alleen relevant voor 'prikkel'-events — zie EventRow. */
+  sensoryThreshold?: string | null;
+  sensoryResponse?: string | null;
 }
 
 export async function updateEventEdit(
   db: SQLiteDatabase,
   id: string,
-  { startAt, endAt, note, amountMl, details, antecedent, location, whatHelped }: EventEditUpdate
+  {
+    startAt,
+    endAt,
+    note,
+    amountMl,
+    details,
+    antecedent,
+    location,
+    whatHelped,
+    sensoryThreshold,
+    sensoryResponse,
+  }: EventEditUpdate
 ): Promise<string> {
   const updatedAt = new Date().toISOString();
   await db.runAsync(
     `UPDATE event
      SET start_at = ?, end_at = ?, note = ?, amount_ml = ?,
-         side = ?, variant = ?, antecedent = ?, location = ?, what_helped = ?, updated_at = ?
+         side = ?, variant = ?, antecedent = ?, location = ?, what_helped = ?,
+         sensory_threshold = ?, sensory_response = ?, updated_at = ?
      WHERE id = ?`,
     [
       startAt.toISOString(),
@@ -367,6 +394,8 @@ export async function updateEventEdit(
       antecedent ?? null,
       location ?? null,
       whatHelped ?? null,
+      sensoryThreshold ?? null,
+      sensoryResponse ?? null,
       updatedAt,
       id,
     ]

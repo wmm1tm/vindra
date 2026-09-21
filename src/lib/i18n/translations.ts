@@ -190,6 +190,12 @@ export interface Dictionary {
     whatHelpedPlaceholder: string;
     saveErrorTitle: string;
     saveErrorMessage: string;
+    sensoryThresholdLabel: string;
+    sensoryThresholdLow: string;
+    sensoryThresholdHigh: string;
+    sensoryResponseLabel: string;
+    sensoryResponseSeeking: string;
+    sensoryResponseAvoiding: string;
   };
   timeline: {
     laneBehavior: string;
@@ -425,6 +431,12 @@ export const nl: Dictionary = {
     whatHelpedPlaceholder: 'Wat hielp om te kalmeren? (optioneel)',
     saveErrorTitle: 'Opslaan mislukt',
     saveErrorMessage: 'De wijziging kon niet worden opgeslagen. Probeer het nog eens.',
+    sensoryThresholdLabel: 'Gevoeligheid',
+    sensoryThresholdLow: 'Merkte het meteen',
+    sensoryThresholdHigh: 'Had er veel voor nodig',
+    sensoryResponseLabel: 'Reactie',
+    sensoryResponseSeeking: 'Zocht het juist op',
+    sensoryResponseAvoiding: 'Vermeed het',
   },
   timeline: {
     laneBehavior: 'Gedrag/Prikkels',

@@ -1,6 +1,6 @@
 export const DATABASE_NAME = 'babytracker.db';
 
-export const DATABASE_VERSION = 12;
+export const DATABASE_VERSION = 13;
 
 export const CREATE_SCHEMA_V1 = `
 CREATE TABLE child (
@@ -113,4 +113,16 @@ export const CREATE_SCHEMA_V12 = `
 ALTER TABLE event ADD COLUMN antecedent TEXT;
 ALTER TABLE event ADD COLUMN location TEXT;
 ALTER TABLE event ADD COLUMN what_helped TEXT;
+`;
+
+/** Vindra-specifiek (2026-09-21, zelfde onderzoek als V12): optionele uitbreiding van
+ * "Prikkel" met Dunn's Sensory Profile-model — twee onafhankelijke assen, niet één
+ * veld: hoe snel/veel prikkel nodig was vóór het opviel (`sensory_threshold`:
+ * 'laag'/'hoog'), en of de reactie erop actief opzoekend of vermijdend was
+ * (`sensory_response`: 'opzoekend'/'vermijdend'). Zelfde reden als V12 om dit niet in
+ * het snel-log-wiel te zetten: bewust optioneel, achteraf in te vullen via
+ * event-detail-sheet.tsx, alleen zinvol bij kind = 'prikkel'. */
+export const CREATE_SCHEMA_V13 = `
+ALTER TABLE event ADD COLUMN sensory_threshold TEXT;
+ALTER TABLE event ADD COLUMN sensory_response TEXT;
 `;

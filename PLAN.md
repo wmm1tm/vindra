@@ -551,3 +551,24 @@ handmatige stappen (accountsessies, geen bestanden).
 
 **Verificatie**: `npx tsc --noEmit` en `npx eslint . --no-cache` weer volledig schoon
 na deze ronde fixes.
+
+## Update 2026-09-21 — Dunn's Sensory Profile-uitbreiding voor "Prikkel" alsnog gebouwd
+
+Het eerder als "optioneel, niet essentieel voor v1" bestempelde punt uit het look-and-
+feel-/tracking-onderzoek: op verzoek alsnog gebouwd, zelfde patroon als de ABC-velden
+bij Gedrag (sectie hierboven) — twee onafhankelijke, optionele classificaties, **niet**
+in het snel-log-wiel maar achteraf in te vullen via `event-detail-sheet.tsx`, alleen
+zichtbaar bij `event.kind === 'prikkel'`:
+
+- **Gevoeligheid/drempel** (`sensory_threshold`): "Merkte het meteen" (laag) vs. "Had
+  er veel voor nodig" (hoog).
+- **Reactie** (`sensory_response`): "Zocht het juist op" (opzoekend) vs. "Vermeed het"
+  (vermijdend).
+
+Technisch identiek stramien als V12: nieuwe migratie `CREATE_SCHEMA_V13` (2 nullable
+TEXT-kolommen op `event`), `db/events.ts` (`EventRow`, `insertMomentEvent`,
+`importEventRow`, `applyRemoteEvent` mét `?? null`-fallback, `updateEventEdit`) en de
+UI in `event-detail-sheet.tsx` (pill-selectors, toggle aan/uit per keuze i.p.v. verplicht
+één optie). `DATABASE_VERSION` nu 13.
+
+**Verificatie**: `npx tsc --noEmit` en `npx eslint . --no-cache` volledig schoon.

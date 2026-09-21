@@ -13,6 +13,7 @@ import {
   CREATE_SCHEMA_V10,
   CREATE_SCHEMA_V11,
   CREATE_SCHEMA_V12,
+  CREATE_SCHEMA_V13,
   DATABASE_VERSION,
 } from '@/db/schema';
 
@@ -98,6 +99,11 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
       currentVersion = 12;
     }
 
+    if (currentVersion === 12) {
+      await db.execAsync(CREATE_SCHEMA_V13);
+      currentVersion = 13;
+    }
+
     await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
   }
 
@@ -143,4 +149,6 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
   await ensureColumn(db, 'event', 'antecedent', 'ALTER TABLE event ADD COLUMN antecedent TEXT;');
   await ensureColumn(db, 'event', 'location', 'ALTER TABLE event ADD COLUMN location TEXT;');
   await ensureColumn(db, 'event', 'what_helped', 'ALTER TABLE event ADD COLUMN what_helped TEXT;');
+  await ensureColumn(db, 'event', 'sensory_threshold', 'ALTER TABLE event ADD COLUMN sensory_threshold TEXT;');
+  await ensureColumn(db, 'event', 'sensory_response', 'ALTER TABLE event ADD COLUMN sensory_response TEXT;');
 }
