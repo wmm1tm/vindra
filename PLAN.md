@@ -572,3 +572,56 @@ UI in `event-detail-sheet.tsx` (pill-selectors, toggle aan/uit per keuze i.p.v. 
 één optie). `DATABASE_VERSION` nu 13.
 
 **Verificatie**: `npx tsc --noEmit` en `npx eslint . --no-cache` volledig schoon.
+
+## Update 2026-09-21 — event-typen uitgebreid naar Nuvo's eigen wielomvang (8), catalogus nu 12
+
+Op verzoek: onderzoek naar wat professionals/andere apps in dit vakgebied loggen
+(ABA-metrics: frequentie/duur/latentie/intensiteit — grotendeels al gedekt — plus
+specifieke gedragscategorieën die Guiding Growth/ClarityDTX apart bijhouden), Nuvo's
+eigen wiel als ijkpunt genomen (8 knoppen na groepering: feeding, solid_food, diaper,
+sleep, spit_up, vitamin_d, bath, **custom**), en het ontbrekende "Overig"-vangnet-type
+alsnog toegevoegd.
+
+**Nieuw `defaultEnabled`-mechanisme** op `WheelEntry` (`constants/event-types.ts`):
+staat een type standaard aan op een vers wiel, of moet het via "Wiel aanpassen"
+handmatig aangezet worden? `resolveWheelOrder(null)` filtert er nu op i.p.v. altijd de
+volledige `DEFAULT_WHEEL_ORDER` terug te geven. Nieuwe `MAX_ACTIVE_WHEEL_ENTRIES = 8`
+(Nuvo's eigen plafond — de boog-geometrie in `lib/wheel-geometry.ts` is nooit met meer
+getest) wordt hard afgedwongen, zowel in `resolveWheelOrder` (kapt een te lange
+opgeslagen lijst af) als in `wheel-settings-sheet.tsx` (blokkeert het aanvinken van een
+9e knop met een duidelijke melding).
+
+**6 nieuwe event-typen** (`EVENT_TYPES`), waarvan er 1 standaard aan staat en 5 standaard uit:
+- **Overig** (`defaultEnabled` ontbreekt = standaard aan) — het ontbrekende vangnet-type,
+  1-op-1 Nuvo's `custom`: direct loggen, geen tweede keuzelaag.
+- **Zelfverwonding** (uit) — ernst licht/matig/heftig, hergebruikt dezelfde variant-
+  id's/labels als Gedrag. Krijgt ook de ABC-velden (aanleiding/plek/wat hielp) in
+  `event-detail-sheet.tsx`, zelfde klinische relevantie als Gedrag.
+- **Weglopen** (uit) — momentopname, geen tweede keuzelaag, krijgt ook de ABC-velden.
+- **Stimmen** (uit) — handen fladderen/geluiden maken/wiegen/anders. Bewust neutrale
+  framing (geen "probleem"-toon) — stimmen is vaak zelfregulerend, niet per se negatief.
+- **Eten** (uit) — geweigerd/nieuw geprobeerd/gegeten, voor eetselectiviteit.
+- **Zindelijkheid** (uit) — geslaagd/ongelukje.
+
+Alle iconen vooraf geverifieerd tegen de echte glyph-map (zelfde discipline als eerder).
+**Tijdlijn-kolommen** (`timeline-lanes.ts`) uitgebreid: de drie behavior-achtige nieuwe
+typen bij "Gedrag/Prikkels", de drie overige bij "Overig" — een lane moet elk `EventKind`
+dekken, ook als het wiel het (nog) niet toont, anders gooit de runtime-check in
+`timeline-lanes.ts` een `Error` bij het opstarten.
+
+**Volgorde op het wiel** (array-volgorde = positie op de boog, zie
+`lib/wheel-geometry.ts`): gedrag (gratis anker) → prikkel → zelfverwonding/weglopen/
+stimmen (gedrag-cluster) → stemming → medicatie → slaap → eten/zindelijkheid
+("overige"-cluster) → positief → **overig laatst** (zelfde afsluitende positie als
+Nuvo's `custom`).
+
+**Wat bewust niet is gedaan**: `Weglopen` en de andere momentopname-typen kregen geen
+Sensory-Profile- of ABC-velden waar dat niet evident zinvol is (bv. Stimmen/Eten/
+Zindelijkheid) — alleen Gedrag/Zelfverwonding/Weglopen (allemaal "iets ging mis, wat
+ging eraan vooraf"-achtige gebeurtenissen) en Prikkel (Sensory Profile) kregen de
+uitgebreide velden.
+
+**Verificatie**: `npx tsc --noEmit`, `npx eslint . --no-cache` schoon, en een losse
+Node-check dat alle 12 `EventKind`s precies één keer in `TIMELINE_LANES` voorkomen
+(de runtime-`throw`-check zelf kan pas bij het daadwerkelijk opstarten van de app
+gecontroleerd worden, dat is nog niet gebeurd op een toestel).

@@ -25,6 +25,12 @@ export interface Dictionary {
     medicatie: string;
     slaap: string;
     positief: string;
+    overig: string;
+    zelfverwonding: string;
+    weglopen: string;
+    stimmen: string;
+    eten: string;
+    zindelijkheid: string;
   };
   eventOptions: {
     gedragLicht: string;
@@ -39,6 +45,14 @@ export interface Dictionary {
     stemming3: string;
     stemming4: string;
     stemming5: string;
+    stimmenFladderen: string;
+    stimmenGeluiden: string;
+    stimmenWiegen: string;
+    etenGeweigerd: string;
+    etenNieuw: string;
+    etenGegeten: string;
+    zindelijkheidGeslaagd: string;
+    zindelijkheidOngelukje: string;
     other: string;
   };
   wheel: {
@@ -113,6 +127,8 @@ export interface Dictionary {
   wheelSettings: {
     title: string;
     hint: string;
+    maxReachedTitle: string;
+    maxReachedMessage: (max: number) => string;
   };
   children: {
     title: string;
@@ -264,6 +280,12 @@ export const nl: Dictionary = {
     medicatie: 'Medicatie',
     slaap: 'Slaap',
     positief: 'Positief moment',
+    overig: 'Overig',
+    zelfverwonding: 'Zelfverwonding',
+    weglopen: 'Weglopen',
+    stimmen: 'Stimmen',
+    eten: 'Eten',
+    zindelijkheid: 'Zindelijkheid',
   },
   eventOptions: {
     gedragLicht: 'Licht',
@@ -278,6 +300,14 @@ export const nl: Dictionary = {
     stemming3: 'Neutraal',
     stemming4: 'Goed',
     stemming5: 'Erg goed',
+    stimmenFladderen: 'Handen fladderen',
+    stimmenGeluiden: 'Geluiden maken',
+    stimmenWiegen: 'Wiegen',
+    etenGeweigerd: 'Geweigerd',
+    etenNieuw: 'Nieuw geprobeerd',
+    etenGegeten: 'Gegeten',
+    zindelijkheidGeslaagd: 'Geslaagd',
+    zindelijkheidOngelukje: 'Ongelukje',
     other: 'Anders',
   },
   wheel: {
@@ -351,7 +381,9 @@ export const nl: Dictionary = {
   },
   wheelSettings: {
     title: 'Wiel aanpassen',
-    hint: 'Vink aan/uit welke knoppen in het wiel staan, en versleep het handvat rechts om de volgorde aan te passen.',
+    hint: 'Vink aan/uit welke knoppen in het wiel staan (ook minder gangbare, bv. bij een specifieke situatie), en versleep het handvat rechts om de volgorde aan te passen.',
+    maxReachedTitle: 'Maximum bereikt',
+    maxReachedMessage: (max) => `Het wiel toont maximaal ${max} knoppen tegelijk. Vink er eerst één uit voordat je deze aanzet.`,
   },
   children: {
     title: 'Kinderen',

@@ -17,9 +17,12 @@ export const TIMELINE_LANES: TimelineLane[] = [
   {
     id: 'behavior',
     label: (t) => t.timeline.laneBehavior,
-    kinds: ['gedrag', 'prikkel'],
-    // Eigen tint i.p.v. één van de twee leden hergebruiken — zelfde reden als Nuvo's
-    // "Voeding"-pil: deze kolom groepeert twee types, dus reusen van bv. het rode
+    // Uitgebreid 2026-09-21 met de conditie-specifieke typen die qua aard bij gedrag/
+    // prikkels horen (ook als ze via "Wiel aanpassen" uitstaan — een lane moet elk
+    // EventKind dekken, ongeacht of het wiel het toont).
+    kinds: ['gedrag', 'prikkel', 'zelfverwonding', 'weglopen', 'stimmen'],
+    // Eigen tint i.p.v. één van de leden hergebruiken — zelfde reden als Nuvo's
+    // "Voeding"-pil: deze kolom groepeert meerdere types, dus reusen van bv. het rode
     // gedrag-icoon zou de pil laten lijken alsof-ie alleen over gedrag gaat.
     color: '#B98C8C',
   },
@@ -28,7 +31,7 @@ export const TIMELINE_LANES: TimelineLane[] = [
   {
     id: 'other',
     label: (t) => t.timeline.laneOther,
-    kinds: ['slaap', 'positief'],
+    kinds: ['slaap', 'positief', 'overig', 'eten', 'zindelijkheid'],
     color: '#8C99B9',
   },
 ];

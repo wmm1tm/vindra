@@ -21,6 +21,12 @@ export function formatVolume(ml: number, unit: VolumeUnit): string {
 }
 export const AMOUNT_KINDS = new Set<EventKind>([]);
 
+// Let op, bestaande beperking (niet nieuw): deze lookup is plat op de variant-string
+// zelf, niet op (kind, variant) samen — 'licht' betekent bij gedrag/zelfverwonding
+// "lichte ernst" en bij prikkel "lichtprikkel", die toevallig hetzelfde Nederlandse
+// woord zijn. Geen van de hieronder toegevoegde nieuwe variant-strings botst met een
+// bestaande op die manier; als dat ooit wel gebeurt, moet dit een echte (kind,variant)-
+// key worden.
 function variantLabels(t: Dictionary): Record<string, string> {
   return {
     licht: t.eventOptions.gedragLicht,
@@ -35,6 +41,14 @@ function variantLabels(t: Dictionary): Record<string, string> {
     '3': t.eventOptions.stemming3,
     '4': t.eventOptions.stemming4,
     '5': t.eventOptions.stemming5,
+    fladderen: t.eventOptions.stimmenFladderen,
+    geluiden: t.eventOptions.stimmenGeluiden,
+    wiegen: t.eventOptions.stimmenWiegen,
+    geweigerd: t.eventOptions.etenGeweigerd,
+    nieuw: t.eventOptions.etenNieuw,
+    gegeten: t.eventOptions.etenGegeten,
+    geslaagd: t.eventOptions.zindelijkheidGeslaagd,
+    ongelukje: t.eventOptions.zindelijkheidOngelukje,
   };
 }
 

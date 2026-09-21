@@ -63,9 +63,10 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
 
   const detail = formatEventDetailLine(event, t);
   const timeLabel = formatEventTimeLabel(event, timeFormat, t);
-  // ABC-velden (aanleiding/plek/wat hielp) — alleen zinvol bij 'gedrag', zie
-  // db/schema.ts CREATE_SCHEMA_V12 en het onderzoek dat hiertoe leidde (PLAN.md).
-  const showAbcFields = event.kind === 'gedrag';
+  // ABC-velden (aanleiding/plek/wat hielp) — bij 'gedrag' en de twee veiligheidskritische
+  // conditie-specifieke typen die dezelfde klinische vraag oproepen ("wat ging eraan
+  // vooraf, wat hielp?"), zie db/schema.ts CREATE_SCHEMA_V12 en PLAN.md.
+  const showAbcFields = event.kind === 'gedrag' || event.kind === 'zelfverwonding' || event.kind === 'weglopen';
   // Dunn's Sensory Profile-uitbreiding — alleen zinvol bij 'prikkel', zie
   // db/schema.ts CREATE_SCHEMA_V13 en hetzelfde onderzoek als de ABC-velden.
   const showSensoryFields = event.kind === 'prikkel';

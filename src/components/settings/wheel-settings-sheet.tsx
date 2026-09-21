@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -13,7 +13,7 @@ import Animated, {
 import { SettingsSheetShell } from '@/components/settings/settings-sheet-shell';
 import { EventIcon } from '@/components/ui/event-icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
-import { DEFAULT_WHEEL_ORDER, type WheelEntry } from '@/constants/event-types';
+import { DEFAULT_WHEEL_ORDER, MAX_ACTIVE_WHEEL_ENTRIES, type WheelEntry } from '@/constants/event-types';
 import type { Dictionary } from '@/lib/i18n/translations';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/preferences-context';
@@ -31,7 +31,9 @@ const ROW_HEIGHT = 52;
 
 function buildInitialRows(config: string[] | null): Row[] {
   if (!config) {
-    return DEFAULT_WHEEL_ORDER.map((entry) => ({ entry, enabled: true }));
+    // Alleen de kern-typen staan standaard aan — de conditie-specifieke (defaultEnabled:
+    // false) staan wél in de lijst hieronder (aan te vinken), maar beginnen uit.
+    return DEFAULT_WHEEL_ORDER.map((entry) => ({ entry, enabled: entry.defaultEnabled !== false }));
   }
   const enabled = config
     .map((id) => DEFAULT_WHEEL_ORDER.find((entry) => entry.id === id))
@@ -148,7 +150,16 @@ export function WheelSettingsSheet({ onClose }: WheelSettingsSheetProps) {
   const dragY = useSharedValue(0);
 
   const toggleRow = (index: number) => {
-    setRows((current) => current.map((row, i) => (i === index ? { ...row, enabled: !row.enabled } : row)));
+    setRows((current) => {
+      const target = current[index];
+      // Nuvo's eigen boog-geometrie is nooit met meer dan MAX_ACTIVE_WHEEL_ENTRIES
+      // knoppen getest — hard tegenhouden i.p.v. een overvol/overlappend wiel riskeren.
+      if (!target.enabled && current.filter((row) => row.enabled).length >= MAX_ACTIVE_WHEEL_ENTRIES) {
+        Alert.alert(t.wheelSettings.maxReachedTitle, t.wheelSettings.maxReachedMessage(MAX_ACTIVE_WHEEL_ENTRIES));
+        return current;
+      }
+      return current.map((row, i) => (i === index ? { ...row, enabled: !row.enabled } : row));
+    });
     setSaved(false);
   };
 
