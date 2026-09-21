@@ -9,6 +9,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { DayPickerSheet } from '@/components/day/day-picker-sheet';
 import { DayRatingSheet } from '@/components/day/day-rating-sheet';
 import { DayReportSheet } from '@/components/day/day-report-sheet';
+import { HelpSheet } from '@/components/help/help-sheet';
 import { ChildSwitcherSheet } from '@/components/settings/child-switcher-sheet';
 import { SettingsSheet } from '@/components/settings/settings-sheet';
 import { CAPSULE_WIDTH, COLUMN_GAP, EventCapsule } from '@/components/timeline/event-capsule';
@@ -207,6 +208,7 @@ export default function TimelineScreen() {
   const [dayRating, setDayRatingState] = useState<number | null>(null);
   const [showRatingSheet, setShowRatingSheet] = useState(false);
   const [showReportSheet, setShowReportSheet] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
@@ -596,6 +598,9 @@ export default function TimelineScreen() {
           </Pressable>
         </View>
         <View style={styles.headerButtons}>
+          <IconButton onPress={() => setShowHelp(true)} hitSlop={8}>
+            <MaterialCommunityIcons name="help-circle-outline" size={20} color="#ECEDEE" />
+          </IconButton>
           <IconButton onPress={() => setShowRatingSheet(true)} hitSlop={8}>
             <MaterialCommunityIcons name={dayRating !== null ? 'star' : 'star-outline'} size={20} color="#ECEDEE" />
           </IconButton>
@@ -692,6 +697,7 @@ export default function TimelineScreen() {
           onSaved={handleLogged}
         />
       )}
+      {showHelp && <HelpSheet onClose={() => setShowHelp(false)} />}
       {showRatingSheet && (
         <DayRatingSheet
           currentRating={dayRating}

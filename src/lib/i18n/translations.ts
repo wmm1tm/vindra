@@ -231,6 +231,20 @@ export interface Dictionary {
   onboarding: {
     nameBannerTitle: string;
   };
+  help: {
+    title: string;
+    intro: string;
+    wheelTitle: string;
+    wheelBody: string;
+    customizeTitle: string;
+    customizeBody: string;
+    reportTitle: string;
+    reportBody: string;
+    shareTitle: string;
+    shareBody: string;
+    privacyTitle: string;
+    privacyBody: string;
+  };
   subscription: {
     title: string;
     benefitIntro: string;
@@ -503,6 +517,26 @@ export const nl: Dictionary = {
     // maar Vindra's doelgroep omvat ook oudere kinderen/tieners (zie sessienotitie
     // 2026-09-21, feedback op een echte testrun).
     nameBannerTitle: 'Hoe heet je kind?',
+  },
+  help: {
+    title: 'Wat kan Vindra?',
+    intro:
+      'Een logboek voor ouders van een neurodivergent kind — snel vastleggen tijdens een moment, met een bruikbaar rapport voor school of behandelaar.',
+    wheelTitle: 'Snel loggen',
+    wheelBody:
+      'Tik op een knop in het wiel om direct te loggen. Sommige types vragen daarna nog om een korte keuze (bv. de ernst) — dat is alles, geen extra stappen tijdens het moment zelf.',
+    customizeTitle: 'Wiel aanpassen',
+    customizeBody:
+      'Via Instellingen → Wiel aanpassen zet je knoppen aan of uit en verander je de volgorde. Niet elk kind heeft dezelfde types nodig — Zelfverwonding, Weglopen, Stimmen, Eten en Zindelijkheid staan daarom standaard uit, maar zijn met één tik toe te voegen (maximaal 8 tegelijk).',
+    reportTitle: 'Rapport voor school of behandelaar',
+    reportBody:
+      'Via het klembord-icoon bekijk je een dag- of weekoverzicht en exporteer je een PDF — inclusief de aanleiding/locatie/wat-hielp-velden die je achteraf bij een event kunt invullen.',
+    shareTitle: 'Delen met een andere ouder of begeleider',
+    shareBody:
+      'Via Instellingen → Kinderen beheren kun je een kind versleuteld delen — de ander ziet dezelfde tijdlijn, zonder dat er een account nodig is.',
+    privacyTitle: 'Privacy',
+    privacyBody:
+      'Alles blijft standaard alleen op je eigen toestel. Delen gebeurt end-to-end versleuteld, en er wordt niets bijgehouden buiten wat jij zelf logt.',
   },
   subscription: {
     title: 'Vindra Premium',

@@ -660,3 +660,20 @@ alternatief "zelfstimulerend gedrag" is stijver, niet per se "beter"); "Positief
 knoplabel).
 
 **Verificatie**: `npx tsc --noEmit` en `npx eslint . --no-cache` schoon.
+
+## Update 2026-09-21 — help-scherm toegevoegd (?-icoon in de header)
+
+Nieuw, Vindra-specifiek (geen Nuvo-equivalent — Nuvo's feature-set is kleiner/
+vanzelfsprekender): een `?`-icoon naast de ster in de header opent `HelpSheet`
+(`components/help/help-sheet.tsx`), met vijf korte secties — snel loggen, wiel
+aanpassen (incl. de max-8/conditie-specifieke-typen-uitleg), rapport-export,
+delen met een andere ouder/begeleider, en privacy. Vooral bedoeld om het "Wiel
+aanpassen"-concept (typen die je zelf aan/uit zet) vindbaar te maken — dat is minder
+vanzelfsprekend te ontdekken dan de rest van de app.
+
+Header telt nu 6 knoppen i.p.v. 5 (?, ster, klembord, wissel, nacht, instellingen) —
+zelfde overflow-mechanisme (`headerTitleShrink`) vangt dit op zoals het al voor 5 deed,
+maar de titelkolom wordt wel krapper. Nog niet op een toestel bevestigd of dit visueel
+prettig blijft.
+
+**Verificatie**: `npx tsc --noEmit` en `npx eslint . --no-cache` schoon.
