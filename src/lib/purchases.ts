@@ -15,7 +15,7 @@ export const isPurchasesConfigured = Boolean(apiKey);
 
 /** Entitlement-identifier zoals ingesteld in het RevenueCat-dashboard — moet daar
  * exact zo heten (RevenueCat staat wijzigen achteraf niet toe). */
-export const ENTITLEMENT_ID = 'nuvo_premium';
+export const ENTITLEMENT_ID = 'vindra_premium';
 
 export function configurePurchases() {
   if (!isPurchasesConfigured) return;

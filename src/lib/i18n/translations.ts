@@ -274,8 +274,6 @@ export interface Dictionary {
     termsDisclosure: string;
     termsOfUseLabel: string;
     privacyPolicyLabel: string;
-    privacyPolicyMissingTitle: string;
-    privacyPolicyMissingMessage: string;
   };
 }
 
@@ -568,8 +566,6 @@ export const nl: Dictionary = {
       'Abonnementen verlengen automatisch tenzij je minstens 24 uur vóór het einde van de lopende periode opzegt, via je Apple-ID-instellingen.',
     termsOfUseLabel: 'Gebruiksvoorwaarden',
     privacyPolicyLabel: 'Privacybeleid',
-    privacyPolicyMissingTitle: 'Nog niet beschikbaar',
-    privacyPolicyMissingMessage: 'Het privacybeleid van Vindra is nog niet gepubliceerd.',
   },
 };
 

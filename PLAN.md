@@ -677,3 +677,106 @@ maar de titelkolom wordt wel krapper. Nog niet op een toestel bevestigd of dit v
 prettig blijft.
 
 **Verificatie**: `npx tsc --noEmit` en `npx eslint . --no-cache` schoon.
+
+## Update 2026-09-22 — App Store-compliance zelfverwonding, privacybeleid gepubliceerd, branding afgerond
+
+**Vraag**: is het `zelfverwonding`-event-type (sectie hierboven, uitbreidingsronde
+2026-09-21) een probleem voor Apple's App Store-richtlijnen? Onderzocht (live
+richtlijnen opgezocht, niet uit trainingsdata): **nee**, de betreffende richtlijnen
+(1.1.2, 1.4) richten zich op content die zelfbeschadiging **aanmoedigt/portretteert**,
+niet op een privé-registratie-instrument voor een ouder achteraf. Wel drie reële,
+gerelateerde eisen bevestigd:
+1. Verplicht privacybeleid + expliciete consent vóór dataverzameling (5.1.1) — met
+   name relevant omdat het om gevoelige gezondheids-/gedragsdata van een kind gaat.
+2. Nooit gebruiken voor marketing/advertising/data-mining (5.1.2/5.1.3) — al zo,
+   geen analytics-SDK anders dan RevenueCat's eigen aankoopstatistieken.
+3. Nieuwe (2026) age-rating-vragenlijst heeft een expliciete "medical or wellness
+   topics"-vraag — eerlijk invullen bij indiening, verwacht een hogere rating dan 4+,
+   geen afwijzingsreden.
+
+**Privacybeleid gebouwd en gepubliceerd**, zelfde traject als Nuvo (zie
+`reference_app_store_launch_playbook.md`): losse statische repo
+`github.com/wmm1tm/vindra-privacy` (lokaal naast deze repo op
+`C:\Users\Wouter\Documents\vindra-privacy`), 1-op-1 dezelfde pagina-stijl als
+`nuvo-privacy` maar met Vindra's eigen datamodel (alle 12 event-typen, ABC-/Sensory
+Profile-velden, een expliciete regel dat de app geen diagnose stelt of automatisch
+patronen herkent). Contact-e-mail hergebruikt (`wmtmbu@proton.me`, zelfde als Nuvo).
+Gepubliceerd via GitHub Pages (Deploy from branch → main → /root), live op
+`https://wmm1tm.github.io/vindra-privacy/`. **`gh` (GitHub CLI) staat niet
+geïnstalleerd** op deze machine — de gebruiker heeft de lege repo zelf via de
+GitHub-website aangemaakt en Pages zelf aangezet, ik heb gepusht (git-credentials
+via credential manager werken al, geen `gh` voor nodig).
+
+`paywall-screen.tsx`: `PRIVACY_POLICY_URL` wijst nu naar de echte URL (was `null` met
+een "nog niet beschikbaar"-Alert-fallback sinds de code-review-fix van 2026-09-21).
+Die fallback + de nu ongebruikte i18n-sleutels (`privacyPolicyMissingTitle/Message`)
+en de `Alert`-import zijn verwijderd.
+
+**Branding afgerond** (sectie 11, was bewust nog open): gebruiker koos "zelfde
+kleurenschema als Nuvo" (`#12161c` donker + `#E3A857` amber) en een **kompas**-
+beeldconcept (verwijst naar "Vindra" = Oudnoors voor "vinden"). Geen tool voor
+beeldgeneratie beschikbaar in deze sessie, dus zelf een SVG-kompasglyph ontworpen
+(ring + kite-vormige naald + spil, evenzo vlakke stijl als Nuvo's baby-silhouet) en
+gerenderd met `sharp` (geïnstalleerd in de scratchpad, niet in het project zelf —
+op deze machine staat geen ImageMagick/Inkscape/Python voor SVG-rasterisatie).
+Vervangen: `icon.png`, `splash-icon.png`, `android-icon-{foreground,background,
+monochrome}.png`, `favicon.png` (allemaal nog Expo-scaffold-default). `ios.icon`-
+verwijzing naar de ongebruikte Icon Composer-map (`assets/expo.icon`) verwijderd —
+Vindra gebruikt nu, net als Nuvo, gewoon de vlakke `icon.png` overal. Adaptive-icon-
+achtergrond en splash-config in `app.json` van Expo-scaffold-blauw naar `#12161c`.
+**Bundle-ID/package**: `com.woutertm.vindra` (iOS + Android), zelfde
+`com.woutertm.<appnaam>`-conventie als Nuvo.
+
+**Nog niet bevestigd op een toestel/simulator** — gebruiker was bezig met
+`npx expo start` + Expo Go toen deze sessie werd afgesloten ("alles lijkt te doen").
+Geen bekende problemen, gewoon nog niet expliciet geverifieerd dat het nieuwe icoon
+er in Expo Go/op een build goed uitziet (Expo Go toont sowieso zijn eigen icoon, niet
+het custom icoon — dat is pas zichtbaar in een development build of TestFlight).
+
+**Verificatie**: `npx expo-doctor` (21/21), `npx tsc --noEmit` en
+`npx eslint . --no-cache` alle drie schoon.
+
+### Wat nog open staat (ongewijzigd/aangevuld t.o.v. eerdere logs)
+- Icoon/branding echt op een toestel bekijken (development build of TestFlight,
+  niet Expo Go).
+- EN/DE/ES/FR/PT blijven NL-aliassen, geen echte vertaling.
+- Nog geen EAS-build of App Store-indiening gedaan voor Vindra.
+
+## Update 2026-09-22 (later dezelfde sessie) — eigen Supabase-project + RevenueCat-entitlement
+
+**Supabase**: eigen project aangemaakt (`bcgwcfaszlmxveaqwzrh`, regio London, los van
+Nuvo), `supabase/schema.sql` gedraaid (header-comment ook meteen van "BabyTracker" naar
+"Vindra" gecorrigeerd — copy-pasteartefact). `app.json` `extra.supabaseUrl`/
+`extra.supabaseAnonKey` ingevuld → `isSyncConfigured` in `lib/supabase.ts` staat aan.
+**Bijvangst**: `expo-camera` stond wel als dependency (voor de QR-scan bij partner-delen)
+maar had geen config-plugin-entry in `app.json` — geen permissietekst, zou bij een
+native build stuklopen of Apple's generieke fallback tonen. Toegevoegd, zelfde
+Nederlandse omschrijving als Nuvo.
+
+**RevenueCat**: nieuw, eigen project `Vindra` (project-ID `projfde1932e`), entitlement
+`vindra_premium`, offering met Monthly + Yearly packages (Lifetime-suggestie van de
+wizard bewust overgeslagen — `paywall-screen.tsx` kent alleen `monthly`/`annual` uit een
+offering, een Lifetime-package zou stilzwijgend genegeerd worden). Nog geen App Store
+Connect/Play Console-app gekoppeld, dus voorlopig draait alles op de gedeelde
+**Test Store**-key (`test_...`) voor zowel iOS als Android in `app.json`
+`extra.revenuecatIosApiKey`/`revenuecatAndroidApiKey` — zelfde tussenstap als Nuvo ooit
+had, iOS wordt later geüpgraded naar een echte `appl_`-key zodra er App Store Connect-
+IAP-producten bestaan.
+
+**Twee losse, echte bugs gevonden en gefixt tijdens het opruimen rond dit werk**:
+- `lib/purchases.ts`: `ENTITLEMENT_ID` was nog letterlijk `'nuvo_premium'` (copy-paste-
+  artefact) — moest vóór het aanmaken in RevenueCat gecorrigeerd worden naar
+  `'vindra_premium'`, want de entitlement-identifier kan daarna niet meer wijzigen.
+- `lib/backup.ts`: geëxporteerde back-up-/CSV-bestanden heetten nog `nuvo-events-*.csv`/
+  `nuvo-backup-*.json` — gebruiker zou dus Nuvo-benoemde bestanden krijgen bij het
+  exporteren vanuit Vindra. Hernoemd naar `vindra-events-*`/`vindra-backup-*`.
+
+**Verificatie**: `npx expo-doctor` (21/21) en `npx tsc --noEmit` schoon na elke stap.
+
+### Wat nog open staat
+- RevenueCat upgraden naar echte App Store/Play Store-apps zodra er App Store Connect-
+  IAP-producten bestaan (Monthly/Yearly, prijzen/proefperiode instellen).
+- Icoon/branding echt op een toestel bekijken (development build of TestFlight,
+  niet Expo Go).
+- EN/DE/ES/FR/PT blijven NL-aliassen, geen echte vertaling.
+- Nog geen EAS-build of App Store-indiening gedaan voor Vindra.

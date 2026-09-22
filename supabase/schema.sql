@@ -1,9 +1,9 @@
--- BabyTracker partner-sync schema.
+-- Vindra partner-sync schema.
 -- Eenmalig plakken in het Supabase SQL Editor van het project uit app.json
 -- (expo.extra.supabaseUrl). Zie lib/sync.ts en lib/crypto.ts voor hoe de app
--- dit gebruikt, en het gesprek van 2026-09-03 voor het volledige ontwerp
--- (versleuteld, geen accounts, geen directe tabeltoegang — alleen via de
--- onderstaande RPC-functies die een sync_id verplicht stellen).
+-- dit gebruikt (versleuteld, geen accounts, geen directe tabeltoegang — alleen via de
+-- onderstaande RPC-functies die een sync_id verplicht stellen). Origineel ontwerp
+-- 1-op-1 overgenomen van Nuvo's eigen sync-architectuur.
 
 create table sync_events (
   sync_id uuid not null,

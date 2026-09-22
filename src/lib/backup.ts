@@ -67,7 +67,7 @@ async function shareTextFile(filename: string, content: string, mimeType: string
 export async function exportEventsCsv(db: SQLiteDatabase, childId: string): Promise<void> {
   const events = await getAllEvents(db, childId);
   const csv = buildEventsCsv(events);
-  await shareTextFile(`nuvo-events-${dateKey(new Date())}.csv`, csv, 'text/csv');
+  await shareTextFile(`vindra-events-${dateKey(new Date())}.csv`, csv, 'text/csv');
 }
 
 /** JSON is de volledige back-up: alle kinderen (ook gearchiveerde), inclusief hun eigen
@@ -89,7 +89,7 @@ export async function exportBackupJson(db: SQLiteDatabase): Promise<void> {
     ),
   };
   await shareTextFile(
-    `nuvo-backup-${dateKey(new Date())}.json`,
+    `vindra-backup-${dateKey(new Date())}.json`,
     JSON.stringify(payload, null, 2),
     'application/json'
   );

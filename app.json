@@ -8,11 +8,12 @@
     "scheme": "vindra",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.woutertm.vindra"
     },
     "android": {
+      "package": "com.woutertm.vindra",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#12161c",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -28,18 +29,36 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#12161c",
+          "dark": {
+            "backgroundColor": "#12161c"
+          }
         }
       ],
       "expo-sqlite",
       "expo-sharing",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Toegang tot de camera is nodig om de koppel-code van je partner te scannen.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "supabaseUrl": "https://bcgwcfaszlmxveaqwzrh.supabase.co",
+      "supabaseAnonKey": "sb_publishable_-weaUEygDX4z9oNhKVQqCA_RPGvNlU1",
+      "revenuecatIosApiKey": "test_LniOVHomAMQOawlqMGAGsINALxU",
+      "revenuecatAndroidApiKey": "test_LniOVHomAMQOawlqMGAGsINALxU"
     }
   }
 }
