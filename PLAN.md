@@ -1,5 +1,10 @@
 # Vindra — gedrags-/prikkellogboek voor neurodivergente kinderen
 
+> **Noot 2026-09-22:** de hieronder genoemde `reference_app_store_launch_playbook.md` en
+> `reference_tracker_app_discovery_framework.md` zijn samengevoegd in
+> `C:\Users\Wouter\Documents\App Launch Playbook\` (`App Store Launch Playbook.md`,
+> `Nieuwe App Framework.md`, `Website en Landingspagina.md`). Verwijzingen hieronder zijn historisch.
+
 Ingevulde versie van `reference_tracker_app_discovery_framework.md` (geheugen van dit
 project) voor de niche die na marktonderzoek werd gekozen als sterkste kandidaat voor
 de volgende Nuvo-engine-app — zie `MULTI_APP_STRATEGY.md` voor de onderbouwing/cijfers
