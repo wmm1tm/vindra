@@ -71,7 +71,7 @@ export function SubscriptionSheet({ onClose }: SubscriptionSheetProps) {
 
 const styles = StyleSheet.create({
   status: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
     fontWeight: '600',
     marginTop: 4,
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   hint: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 12,
     marginTop: 8,
   },

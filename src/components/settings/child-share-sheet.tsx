@@ -51,7 +51,7 @@ function ShareView({ child }: { child: Child }) {
     qrRef.current.toDataURL(async (base64) => {
       try {
         const html = `<html><head><meta charset="utf-8" /></head>
-          <body style="font-family: -apple-system, sans-serif; padding: 32px; color: #12161c; text-align: center;">
+          <body style="font-family: -apple-system, sans-serif; padding: 32px; color: #12171C; text-align: center;">
             <h1>${child.name}</h1>
             <p style="color:#555;">${t.childShare.backupHint}</p>
             <img src="data:image/png;base64,${base64}" width="240" height="240" />
@@ -94,7 +94,7 @@ function ShareView({ child }: { child: Child }) {
       <Text style={styles.hint}>{t.childShare.shareHint}</Text>
       {qrValue ? (
         <View style={styles.qrWrapper}>
-          <QRCode value={qrValue} size={200} backgroundColor="#ECEDEE" getRef={(ref) => (qrRef.current = ref)} />
+          <QRCode value={qrValue} size={200} backgroundColor="#F1EEE7" getRef={(ref) => (qrRef.current = ref)} />
         </View>
       ) : (
         <View style={styles.qrPlaceholder} />
@@ -248,13 +248,13 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 300,
-    backgroundColor: '#1c222b',
+    backgroundColor: '#1C252A',
     borderRadius: 16,
     padding: 18,
     gap: 10,
   },
   title: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 18,
     fontWeight: '700',
   },
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   hint: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 12,
   },
   content: {
@@ -272,14 +272,14 @@ const styles = StyleSheet.create({
   },
   qrWrapper: {
     padding: 12,
-    backgroundColor: '#ECEDEE',
+    backgroundColor: '#F1EEE7',
     borderRadius: 12,
   },
   qrPlaceholder: {
     width: 200,
     height: 200,
     borderRadius: 12,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
   },
   permissionBox: {
     alignItems: 'center',
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   closeLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 14,
   },
 });

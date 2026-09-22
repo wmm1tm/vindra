@@ -44,13 +44,13 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 300,
-    backgroundColor: '#1c222b',
+    backgroundColor: '#1C252A',
     borderRadius: 16,
     padding: 20,
     gap: 14,
   },
   title: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 17,
     fontWeight: '600',
     textAlign: 'center',
@@ -65,19 +65,19 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     alignItems: 'center',
     justifyContent: 'center',
   },
   ratingButtonActive: {
-    backgroundColor: '#E3A857',
+    backgroundColor: '#D6A866',
   },
   ratingLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 16,
     fontWeight: '600',
   },
   ratingLabelActive: {
-    color: '#12161c',
+    color: '#12171C',
   },
 });

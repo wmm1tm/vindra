@@ -54,13 +54,13 @@ export function OnboardingNameBanner({ childId, onSaved }: OnboardingNameBannerP
   return (
     <LinearGradient colors={['#3a2f1a', '#241c10']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
       <Pressable style={styles.headerRow} onPress={() => setExpanded((value) => !value)}>
-        <MaterialCommunityIcons name="baby-face-outline" size={18} color="#E3A857" />
+        <MaterialCommunityIcons name="baby-face-outline" size={18} color="#91B39B" />
         <Text style={styles.title} numberOfLines={1}>
           {t.onboarding.nameBannerTitle}
         </Text>
-        <MaterialCommunityIcons name={expanded ? 'chevron-up' : 'chevron-down'} size={18} color="#8B95A1" />
+        <MaterialCommunityIcons name={expanded ? 'chevron-up' : 'chevron-down'} size={18} color="#AAB4B6" />
         <Pressable onPress={handleDismiss} hitSlop={8} style={styles.dismissButton}>
-          <MaterialCommunityIcons name="close" size={16} color="#8B95A1" />
+          <MaterialCommunityIcons name="close" size={16} color="#AAB4B6" />
         </Pressable>
       </Pressable>
 
@@ -71,7 +71,7 @@ export function OnboardingNameBanner({ childId, onSaved }: OnboardingNameBannerP
             value={name}
             onChangeText={setName}
             placeholder={t.children.namePlaceholder}
-            placeholderTextColor="#8B95A1"
+            placeholderTextColor="#AAB4B6"
             autoFocus
           />
           <Text style={styles.fieldLabel}>{t.children.birthDateLabel}</Text>
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(227,168,87,0.25)',
-    shadowColor: '#E3A857',
+    shadowColor: '#D6A866',
     shadowOpacity: 0.12,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 13,
     fontWeight: '600',
   },
@@ -131,15 +131,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   nameInput: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 10,
   },
   fieldLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 12,
   },
   saveButton: {

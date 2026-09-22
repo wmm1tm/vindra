@@ -12,8 +12,8 @@ interface PrimaryButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
-const ACCENT_COLORS = ['#F0C077', '#E3A857'] as const;
-const NEUTRAL_COLORS = ['#1c222c', '#12161c'] as const;
+const ACCENT_COLORS = ['#E5BE87', '#D6A866'] as const;
+const NEUTRAL_COLORS = ['#1c222c', '#12171C'] as const;
 
 /** Shared "soft depth" button: the same gradient-fill Opslaan/Exporteren/Importeren
  * button used to be copy-pasted with a flat background across settings-sheet.tsx,
@@ -28,7 +28,7 @@ export function PrimaryButton({ label, onPress, disabled = false, loading = fals
         end={{ x: 1, y: 1 }}
         style={[styles.button, isAccent ? styles.accentShadow : styles.neutralBorder]}>
         {loading ? (
-          <ActivityIndicator size="small" color={isAccent ? '#12161c' : '#ECEDEE'} />
+          <ActivityIndicator size="small" color={isAccent ? '#12171C' : '#F1EEE7'} />
         ) : (
           <Text style={isAccent ? styles.accentLabel : styles.neutralLabel}>{label}</Text>
         )}
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   accentShadow: {
-    shadowColor: '#E3A857',
+    shadowColor: '#D6A866',
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -60,12 +60,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   accentLabel: {
-    color: '#12161c',
+    color: '#12171C',
     fontWeight: '600',
     fontSize: 13,
   },
   neutralLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontWeight: '600',
     fontSize: 13,
   },

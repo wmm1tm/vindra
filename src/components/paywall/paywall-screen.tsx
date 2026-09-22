@@ -70,7 +70,7 @@ function PlanOption({
   return (
     <Pressable onPress={onPress} style={styles.planOptionWrapper}>
       <LinearGradient
-        colors={active ? ['#F0C077', '#E3A857'] : ['#1b212a', '#12161c']}
+        colors={active ? ['#E5BE87', '#D6A866'] : ['#1b212a', '#12171C']}
         start={{ x: 0.15, y: 0 }}
         end={{ x: 0.85, y: 1 }}
         style={[styles.planOption, active && styles.planOptionActive]}>
@@ -141,11 +141,11 @@ export function PaywallScreen({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <LinearGradient colors={['#212832', '#171b21']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.screen}>
+    <LinearGradient colors={['#242E33', '#1C252A']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.screen}>
       {onClose && (
         <View style={[styles.closeRow, { paddingTop: insets.top + 8 }]}>
           <IconButton onPress={onClose}>
-            <EventIcon name="close" set="mci" size={18} color="#ECEDEE" />
+            <EventIcon name="close" set="mci" size={18} color="#F1EEE7" />
           </IconButton>
         </View>
       )}
@@ -160,7 +160,7 @@ export function PaywallScreen({ onClose }: { onClose?: () => void }) {
 
         {state.kind === 'loading' && (
           <View style={styles.statusBlock}>
-            <ActivityIndicator color="#E3A857" />
+            <ActivityIndicator color="#D6A866" />
             <Text style={styles.statusText}>{t.subscription.loadingOfferings}</Text>
           </View>
         )}
@@ -267,14 +267,14 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   title: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 24,
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 8,
   },
   benefitIntro: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 4,
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   benefit: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 13,
   },
   statusBlock: {
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   statusText: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 13,
     textAlign: 'center',
   },
@@ -320,33 +320,33 @@ const styles = StyleSheet.create({
   },
   planOptionActive: {
     borderColor: 'rgba(255,255,255,0.25)',
-    shadowColor: '#E3A857',
+    shadowColor: '#D6A866',
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   planLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 13,
     fontWeight: '600',
   },
   planLabelActive: {
-    color: '#12161c',
+    color: '#12171C',
   },
   planPrice: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 15,
     fontWeight: '700',
   },
   planTrial: {
-    color: '#E3A857',
+    color: '#D6A866',
     fontSize: 11,
     fontWeight: '600',
     marginTop: 2,
   },
   trialIntro: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 13,
     textAlign: 'center',
     marginBottom: 10,
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   terms: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 11,
     textAlign: 'center',
     marginTop: 12,

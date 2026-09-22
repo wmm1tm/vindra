@@ -231,7 +231,7 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                   maxLength={2}
                   selectTextOnFocus
                   placeholder={t.wheel.hourPlaceholder}
-                  placeholderTextColor="#8B95A1"
+                  placeholderTextColor="#AAB4B6"
                 />
                 <TextInput
                   ref={startMinuteRef}
@@ -242,7 +242,7 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                   maxLength={2}
                   selectTextOnFocus
                   placeholder={t.wheel.minutePlaceholder}
-                  placeholderTextColor="#8B95A1"
+                  placeholderTextColor="#AAB4B6"
                 />
               </View>
 
@@ -260,7 +260,7 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                     maxLength={2}
                     selectTextOnFocus
                     placeholder={t.wheel.hourPlaceholder}
-                    placeholderTextColor="#8B95A1"
+                    placeholderTextColor="#AAB4B6"
                   />
                   <TextInput
                     ref={endMinuteRef}
@@ -271,7 +271,7 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                     maxLength={2}
                     selectTextOnFocus
                     placeholder={t.wheel.minutePlaceholder}
-                    placeholderTextColor="#8B95A1"
+                    placeholderTextColor="#AAB4B6"
                   />
                 </View>
               )}
@@ -298,7 +298,7 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                     onChangeText={setAmountValue}
                     keyboardType="number-pad"
                     placeholder="—"
-                    placeholderTextColor="#8B95A1"
+                    placeholderTextColor="#AAB4B6"
                   />
                 </View>
               )}
@@ -310,21 +310,21 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                     value={antecedentValue}
                     onChangeText={setAntecedentValue}
                     placeholder={t.eventDetail.antecedentPlaceholder}
-                    placeholderTextColor="#8B95A1"
+                    placeholderTextColor="#AAB4B6"
                   />
                   <TextInput
                     style={styles.noteInput}
                     value={locationValue}
                     onChangeText={setLocationValue}
                     placeholder={t.eventDetail.locationPlaceholder}
-                    placeholderTextColor="#8B95A1"
+                    placeholderTextColor="#AAB4B6"
                   />
                   <TextInput
                     style={styles.noteInput}
                     value={whatHelpedValue}
                     onChangeText={setWhatHelpedValue}
                     placeholder={t.eventDetail.whatHelpedPlaceholder}
-                    placeholderTextColor="#8B95A1"
+                    placeholderTextColor="#AAB4B6"
                   />
                 </>
               )}
@@ -370,7 +370,7 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                 value={noteValue}
                 onChangeText={setNoteValue}
                 placeholder={t.common.note}
-                placeholderTextColor="#8B95A1"
+                placeholderTextColor="#AAB4B6"
               />
 
               <View style={styles.actionsRow}>
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 280,
-    backgroundColor: '#1c222b',
+    backgroundColor: '#1C252A',
     borderRadius: 16,
     padding: 18,
     gap: 8,
@@ -410,22 +410,22 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   badgeLabel: {
-    color: '#12161c',
+    color: '#12171C',
     fontWeight: '600',
     fontSize: 13,
   },
   time: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 18,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
   },
   detail: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 14,
   },
   note: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
     marginTop: 4,
   },
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   editLabel: {
-    color: '#E3A857',
+    color: '#D6A866',
     fontSize: 14,
   },
   deleteLabel: {
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   deleteConfirmLabel: {
-    color: '#12161c',
+    color: '#12171C',
     fontWeight: '600',
     fontSize: 14,
   },
@@ -460,15 +460,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   fieldLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 13,
     width: 32,
   },
   timeInput: {
     width: 44,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
@@ -476,17 +476,17 @@ const styles = StyleSheet.create({
   },
   amountInput: {
     flex: 1,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
   },
   noteInput: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 8,
@@ -497,27 +497,27 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   pill: {
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
   pillLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 12,
   },
   cancelLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 14,
   },
   saveButton: {
-    backgroundColor: '#E3A857',
+    backgroundColor: '#D6A866',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 6,
   },
   saveLabel: {
-    color: '#12161c',
+    color: '#12171C',
     fontWeight: '600',
     fontSize: 14,
   },

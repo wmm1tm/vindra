@@ -16,7 +16,7 @@ interface NowLineProps {
 // shift puts the centered line exactly on time.
 const ROW_HEIGHT = 16;
 
-export function NowLine({ pixelsPerHour, color = '#E3A857' }: NowLineProps) {
+export function NowLine({ pixelsPerHour, color = '#D6A866' }: NowLineProps) {
   const { timeFormat } = usePreferences();
   const [now, setNow] = useState(() => new Date());
 
@@ -49,16 +49,16 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#E3A857',
+    backgroundColor: '#D6A866',
     marginRight: -3,
   },
   line: {
     flex: 1,
     height: 1.5,
-    backgroundColor: '#E3A857',
+    backgroundColor: '#D6A866',
   },
   label: {
-    color: '#E3A857',
+    color: '#D6A866',
     fontSize: 12,
     fontVariant: ['tabular-nums'],
     marginLeft: 6,

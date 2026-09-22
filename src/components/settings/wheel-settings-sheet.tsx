@@ -122,17 +122,17 @@ function DraggableWheelRow({
         style={[styles.checkbox, row.enabled && { backgroundColor: row.entry.color }]}
         onPress={onToggle}
         hitSlop={6}>
-        {row.enabled && <MaterialCommunityIcons name="check" size={14} color="#12161c" />}
+        {row.enabled && <MaterialCommunityIcons name="check" size={14} color="#12171C" />}
       </Pressable>
       <View style={[styles.icon, { backgroundColor: row.entry.color }]}>
-        <EventIcon name={row.entry.icon} set={row.entry.iconSet} size={16} color="#12161c" />
+        <EventIcon name={row.entry.icon} set={row.entry.iconSet} size={16} color="#12171C" />
       </View>
       <Text style={[styles.rowLabel, !row.enabled && styles.rowLabelDisabled]} numberOfLines={1}>
         {row.entry.label(t)}
       </Text>
       <GestureDetector gesture={pan}>
         <View style={styles.dragHandle} hitSlop={6}>
-          <MaterialCommunityIcons name="drag-horizontal-variant" size={22} color="#8B95A1" />
+          <MaterialCommunityIcons name="drag-horizontal-variant" size={22} color="#AAB4B6" />
         </View>
       </GestureDetector>
     </Animated.View>
@@ -218,7 +218,7 @@ export function WheelSettingsSheet({ onClose }: WheelSettingsSheetProps) {
 
 const styles = StyleSheet.create({
   hint: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 12,
     marginBottom: 8,
   },
@@ -252,12 +252,12 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     flex: 1,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
     fontWeight: '600',
   },
   rowLabelDisabled: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
   },
   dragHandle: {
     width: 32,
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   closeLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 14,
   },
 });

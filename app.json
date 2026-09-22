@@ -8,7 +8,10 @@
     "scheme": "vindra",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.woutertm.vindra"
+      "bundleIdentifier": "com.woutertm.vindra",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.woutertm.vindra",
@@ -18,7 +21,10 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "output": "static",
@@ -58,7 +64,11 @@
       "supabaseUrl": "https://bcgwcfaszlmxveaqwzrh.supabase.co",
       "supabaseAnonKey": "sb_publishable_-weaUEygDX4z9oNhKVQqCA_RPGvNlU1",
       "revenuecatIosApiKey": "test_LniOVHomAMQOawlqMGAGsINALxU",
-      "revenuecatAndroidApiKey": "test_LniOVHomAMQOawlqMGAGsINALxU"
+      "revenuecatAndroidApiKey": "test_LniOVHomAMQOawlqMGAGsINALxU",
+      "router": {},
+      "eas": {
+        "projectId": "94d817ec-3474-46ec-ba91-8b53c26134a3"
+      }
     }
   }
 }

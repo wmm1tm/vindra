@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { HelpSheet } from '@/components/help/help-sheet';
 import { PaywallScreen } from '@/components/paywall/paywall-screen';
 import { ChildrenSettingsSheet } from '@/components/settings/children-settings-sheet';
 import { SectionLabel, SwipeActionRow, SwitchRow, ToggleRow } from '@/components/settings/settings-rows';
@@ -58,6 +59,7 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
   const [importBusy, setImportBusy] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [showChildrenSettings, setShowChildrenSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [showSubscription, setShowSubscription] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const { status: purchasesStatus } = usePurchases();
@@ -151,6 +153,7 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
       }
       overlay={
         <>
+          {showHelp && <HelpSheet onClose={() => setShowHelp(false)} />}
           {showWheelSettings && <WheelSettingsSheet onClose={() => setShowWheelSettings(false)} />}
           {showChildrenSettings && <ChildrenSettingsSheet onClose={() => setShowChildrenSettings(false)} />}
           {showSubscription && <SubscriptionSheet onClose={() => setShowSubscription(false)} />}
@@ -230,7 +233,7 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
             maxLength={2}
             selectTextOnFocus
             placeholder="0-23"
-            placeholderTextColor="#8B95A1"
+            placeholderTextColor="#AAB4B6"
           />
         </View>
 
@@ -252,6 +255,12 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
           hint={t.settings.swipeToOpenHint}
           icon="star-outline"
           onTrigger={() => setShowSubscription(true)}
+        />
+        <SwipeActionRow
+          label={t.settings.helpButton}
+          hint={t.settings.swipeToOpenHint}
+          icon="help-circle-outline"
+          onTrigger={() => setShowHelp(true)}
         />
 
         <SectionLabel label={t.settings.sectionBackup} />
@@ -335,19 +344,19 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   fieldLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
     fontWeight: '600',
   },
   hint: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 12,
     marginBottom: 4,
   },
   input: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 8,
@@ -363,7 +372,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   closeLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 14,
   },
 });

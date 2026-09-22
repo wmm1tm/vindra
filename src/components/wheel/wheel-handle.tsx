@@ -54,7 +54,7 @@ export function WheelHandle({ mirrored, y, expanded, onSetExpanded }: WheelHandl
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[styles.handle, cornerStyle]}>
-          <MaterialCommunityIcons name={pointsRight ? 'chevron-right' : 'chevron-left'} size={16} color="#ECEDEE" />
+          <MaterialCommunityIcons name={pointsRight ? 'chevron-right' : 'chevron-left'} size={16} color="#F1EEE7" />
         </LinearGradient>
       </Pressable>
     </GestureDetector>

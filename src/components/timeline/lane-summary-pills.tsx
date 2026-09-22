@@ -21,9 +21,9 @@ interface LaneSummaryPillsProps {
 
 const SUMMARY_FORMATTERS: Record<LaneId, (t: Dictionary) => (value: string) => string> = {
   behavior: (t) => t.timeline.summaryBehavior,
+  sensory: (t) => t.timeline.summarySensory,
   mood: (t) => t.timeline.summaryMood,
-  medication: (t) => t.timeline.summaryMedication,
-  other: (t) => t.timeline.summaryOther,
+  care: (t) => t.timeline.summaryCare,
 };
 
 /** Samenvattingsrij bovenaan de tijdlijn ("4u22 slaap · 4 voeding · 3 luiers"), naast
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   pillText: {
-    color: '#12161c',
+    color: '#12171C',
     fontSize: 12,
     fontWeight: '700',
   },

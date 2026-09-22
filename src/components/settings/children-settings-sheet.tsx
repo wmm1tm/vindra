@@ -160,18 +160,18 @@ export function ChildrenSettingsSheet({ onClose }: ChildrenSettingsSheetProps) {
       <View style={styles.row}>
         <Pressable style={styles.rowMain} onPress={() => handleSelect(child.id)} disabled={!child.isActive}>
           <LinearGradient
-            colors={child.id === childId ? ['#F0C077', '#E3A857'] : ['#454e5c', '#333c4a']}
+            colors={child.id === childId ? ['#E5BE87', '#D6A866'] : ['#454e5c', '#333c4a']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.avatar}>
-            <MaterialCommunityIcons name="baby-face-outline" size={16} color="#12161c" />
+            <MaterialCommunityIcons name="baby-face-outline" size={16} color="#12171C" />
           </LinearGradient>
           <Text style={styles.rowLabel} numberOfLines={1}>
             {child.name}
           </Text>
           {child.id === childId && <Text style={styles.activeLabel}>{t.children.active}</Text>}
         </Pressable>
-        <MaterialCommunityIcons name="gesture-swipe-left" size={16} color="#8B95A1" />
+        <MaterialCommunityIcons name="gesture-swipe-left" size={16} color="#AAB4B6" />
       </View>
     </SwipeToReveal>
   );
@@ -206,7 +206,7 @@ export function ChildrenSettingsSheet({ onClose }: ChildrenSettingsSheetProps) {
               value={editingName}
               onChangeText={setEditingName}
               placeholder={t.children.namePlaceholder}
-              placeholderTextColor="#8B95A1"
+              placeholderTextColor="#AAB4B6"
               autoFocus
               selectTextOnFocus
             />
@@ -241,7 +241,7 @@ export function ChildrenSettingsSheet({ onClose }: ChildrenSettingsSheetProps) {
                 value={newName}
                 onChangeText={setNewName}
                 placeholder={t.children.namePlaceholder}
-                placeholderTextColor="#8B95A1"
+                placeholderTextColor="#AAB4B6"
                 selectTextOnFocus
               />
               <Text style={styles.dateLabel}>{t.children.birthDateLabel}</Text>
@@ -259,8 +259,8 @@ export function ChildrenSettingsSheet({ onClose }: ChildrenSettingsSheetProps) {
             </View>
 
             <Pressable onPress={() => setShowLinkSheet(true)}>
-              <LinearGradient colors={['#1c222c', '#12161c']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.linkButton}>
-                <MaterialCommunityIcons name="qrcode-scan" size={14} color="#ECEDEE" />
+              <LinearGradient colors={['#1c222c', '#12171C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.linkButton}>
+                <MaterialCommunityIcons name="qrcode-scan" size={14} color="#F1EEE7" />
                 <Text style={styles.linkButtonLabel}>{t.childShare.linkTab}</Text>
               </LinearGradient>
             </Pressable>
@@ -287,7 +287,7 @@ export function ChildrenSettingsSheet({ onClose }: ChildrenSettingsSheetProps) {
 
 const styles = StyleSheet.create({
   hint: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 12,
     marginBottom: 8,
   },
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dateLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 12,
     marginTop: 6,
   },
@@ -320,12 +320,12 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     flex: 1,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
     fontWeight: '600',
   },
   activeLabel: {
-    color: '#E3A857',
+    color: '#D6A866',
     fontSize: 11,
     fontWeight: '700',
   },
@@ -333,9 +333,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   input: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 10,
@@ -355,12 +355,12 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.06)',
   },
   linkButtonLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 13,
     fontWeight: '600',
   },
   closeLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 14,
   },
 });

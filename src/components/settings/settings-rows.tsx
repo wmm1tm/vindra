@@ -29,7 +29,7 @@ export function ToggleRow<T extends string>({
           return (
             <Pressable key={option.value} onPress={() => onChange(option.value)}>
               <LinearGradient
-                colors={active ? ['#F0C077', '#E3A857'] : ['#1b212a', '#12161c']}
+                colors={active ? ['#E5BE87', '#D6A866'] : ['#1b212a', '#12171C']}
                 start={{ x: 0.15, y: 0 }}
                 end={{ x: 0.85, y: 1 }}
                 style={[styles.toggleOption, active && styles.toggleOptionActive]}>
@@ -62,7 +62,7 @@ export function SwitchRow({
       </View>
       <Pressable onPress={() => onChange(!value)}>
         <LinearGradient
-          colors={value ? ['#F0C077', '#E3A857'] : ['#1b212a', '#12161c']}
+          colors={value ? ['#E5BE87', '#D6A866'] : ['#1b212a', '#12171C']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[styles.switchTrack, value && styles.switchTrackActive]}>
@@ -128,7 +128,7 @@ export function SwipeToReveal({
       <Animated.View
         pointerEvents="none"
         style={[styles.swipeReveal, danger && styles.swipeRevealDanger, revealStyle]}>
-        <MaterialCommunityIcons name={revealIcon} size={18} color="#ECEDEE" />
+        <MaterialCommunityIcons name={revealIcon} size={18} color="#F1EEE7" />
       </Animated.View>
       <GestureDetector gesture={pan}>
         <Animated.View style={rowStyle}>{children}</Animated.View>
@@ -160,13 +160,13 @@ export function SwipeActionRow({
         end={{ x: 1, y: 1 }}
         style={[styles.navRow, styles.swipeRow]}>
         <LinearGradient colors={['#333c4a', '#242b35']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.navIcon}>
-          <MaterialCommunityIcons name={icon as IconName} size={18} color="#ECEDEE" />
+          <MaterialCommunityIcons name={icon as IconName} size={18} color="#F1EEE7" />
         </LinearGradient>
         <View style={styles.swipeTextColumn}>
           <Text style={styles.navLabel}>{label}</Text>
           {hint && <Text style={styles.swipeHint}>{hint}</Text>}
         </View>
-        <MaterialCommunityIcons name="gesture-swipe-left" size={18} color="#8B95A1" />
+        <MaterialCommunityIcons name="gesture-swipe-left" size={18} color="#AAB4B6" />
       </LinearGradient>
     </SwipeToReveal>
   );
@@ -174,12 +174,12 @@ export function SwipeActionRow({
 
 const styles = StyleSheet.create({
   fieldLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
     fontWeight: '600',
   },
   hint: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 12,
     marginTop: 2,
   },
@@ -211,19 +211,19 @@ const styles = StyleSheet.create({
   },
   toggleOptionActive: {
     borderColor: 'rgba(255,255,255,0.25)',
-    shadowColor: '#E3A857',
+    shadowColor: '#D6A866',
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   toggleLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 13,
     fontWeight: '600',
   },
   toggleLabelActive: {
-    color: '#12161c',
+    color: '#12171C',
   },
   switchRow: {
     marginTop: 12,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   switchTrackActive: {
     borderColor: 'rgba(255,255,255,0.2)',
-    shadowColor: '#E3A857',
+    shadowColor: '#D6A866',
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 0 },
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#8B95A1',
+    backgroundColor: '#AAB4B6',
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 2,
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   },
   navLabel: {
     flex: 1,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -328,11 +328,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   swipeHint: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 11,
   },
   sectionLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',

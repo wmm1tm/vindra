@@ -64,7 +64,7 @@ export function EventDot({
       <Pressable
         style={[styles.dot, { top, backgroundColor: visual.color }, sideStyle, isDragging && styles.dragging]}
         onPress={onPress}>
-        <EventIcon name={visual.icon} set={visual.iconSet} size={15} color="#12161c" />
+        <EventIcon name={visual.icon} set={visual.iconSet} size={15} color="#12171C" />
       </Pressable>
       {detail && !isDragging && (
         <Text

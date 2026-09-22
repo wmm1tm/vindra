@@ -51,12 +51,17 @@ export function HelpSheet({ onClose }: HelpSheetProps) {
 
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={styles.card} onPress={() => {}}>
+      <View style={styles.backdrop}>
+        {/* Full-bleed dismiss layer, behind the card — the card is a plain View, not a
+         * Pressable wrapping the ScrollView, because a ScrollView nested inside a
+         * Pressable's tap-swallowing wrapper never became scrollable in practice —
+         * same structural approach as SettingsSheetShell's own dismissArea. */}
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <View style={styles.card}>
           <View style={styles.header}>
             <Text style={styles.title}>{t.help.title}</Text>
             <Pressable onPress={onClose} hitSlop={8}>
-              <MaterialCommunityIcons name="close" size={20} color="#8B95A1" />
+              <MaterialCommunityIcons name="close" size={20} color="#AAB4B6" />
             </Pressable>
           </View>
           <Text style={styles.intro}>{t.help.intro}</Text>
@@ -64,7 +69,7 @@ export function HelpSheet({ onClose }: HelpSheetProps) {
             {SECTIONS.map((section) => (
               <View key={section.title(t)} style={styles.section}>
                 <View style={styles.sectionIcon}>
-                  <MaterialCommunityIcons name={section.icon as never} size={16} color="#E3A857" />
+                  <MaterialCommunityIcons name={section.icon as never} size={16} color="#91B39B" />
                 </View>
                 <View style={styles.sectionText}>
                   <Text style={styles.sectionTitle}>{section.title(t)}</Text>
@@ -76,8 +81,8 @@ export function HelpSheet({ onClose }: HelpSheetProps) {
           <Pressable style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeLabel}>{t.common.close}</Text>
           </Pressable>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -92,7 +97,7 @@ const styles = StyleSheet.create({
   card: {
     width: 320,
     maxHeight: '82%',
-    backgroundColor: '#1c222b',
+    backgroundColor: '#1C252A',
     borderRadius: 16,
     padding: 18,
     gap: 4,
@@ -103,16 +108,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 18,
     fontWeight: '700',
   },
   intro: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 13,
     marginBottom: 8,
   },
   list: {
+    maxHeight: 360,
     marginBottom: 4,
   },
   section: {
@@ -126,7 +132,7 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: 'rgba(227,168,87,0.12)',
+    backgroundColor: 'rgba(145,179,155,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -134,13 +140,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 2,
   },
   sectionBody: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 13,
     lineHeight: 18,
   },
@@ -151,7 +157,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   closeLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 14,
   },
 });

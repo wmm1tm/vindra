@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',

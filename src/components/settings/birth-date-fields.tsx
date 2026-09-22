@@ -60,7 +60,7 @@ export function BirthDateFields({
         maxLength={2}
         selectTextOnFocus
         placeholder={t.children.dayPlaceholder}
-        placeholderTextColor="#8B95A1"
+        placeholderTextColor="#AAB4B6"
       />
       <TextInput
         ref={monthRef}
@@ -74,7 +74,7 @@ export function BirthDateFields({
         maxLength={2}
         selectTextOnFocus
         placeholder={t.children.monthPlaceholder}
-        placeholderTextColor="#8B95A1"
+        placeholderTextColor="#AAB4B6"
       />
       <TextInput
         ref={yearRef}
@@ -85,7 +85,7 @@ export function BirthDateFields({
         maxLength={4}
         selectTextOnFocus
         placeholder={t.children.yearPlaceholder}
-        placeholderTextColor="#8B95A1"
+        placeholderTextColor="#AAB4B6"
         onSubmitEditing={onSubmit}
       />
     </View>
@@ -99,9 +99,9 @@ const styles = StyleSheet.create({
   },
   dateInput: {
     width: 52,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 10,
@@ -109,9 +109,9 @@ const styles = StyleSheet.create({
   },
   dateInputYear: {
     width: 72,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 10,

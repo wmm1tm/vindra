@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     height: BADGE_HEIGHT,
     borderRadius: BADGE_HEIGHT / 2,
     borderWidth: 1,
-    borderColor: '#12161c',
+    borderColor: '#12171C',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   text: {
-    color: '#12161c',
+    color: '#12171C',
     fontSize: 10,
     fontWeight: '800',
     lineHeight: BADGE_HEIGHT - 2,

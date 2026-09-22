@@ -38,13 +38,13 @@ export function SettingsSheetShell({ title, onClose, children, footer, nested = 
       style={[styles.backdrop, nested && styles.backdropNested]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Pressable style={styles.dismissArea} onPress={onClose} />
-      <LinearGradient colors={['#212832', '#171b21']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.sheet}>
+      <LinearGradient colors={['#242E33', '#1C252A']} start={{ x: 0.5, y: 0 }} end={{ x: 0.5, y: 1 }} style={styles.sheet}>
         <View style={styles.grabber} />
         <View style={styles.header}>
           <Text style={styles.title}>{title}</Text>
           <Pressable onPress={onClose} hitSlop={10}>
             <LinearGradient colors={['#252c38', '#181d25']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.closeButton}>
-              <MaterialCommunityIcons name="close" size={20} color="#8B95A1" />
+              <MaterialCommunityIcons name="close" size={20} color="#AAB4B6" />
             </LinearGradient>
           </Pressable>
         </View>
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 18,
     fontWeight: '700',
   },

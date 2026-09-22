@@ -9,7 +9,6 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { DayPickerSheet } from '@/components/day/day-picker-sheet';
 import { DayRatingSheet } from '@/components/day/day-rating-sheet';
 import { DayReportSheet } from '@/components/day/day-report-sheet';
-import { HelpSheet } from '@/components/help/help-sheet';
 import { ChildSwitcherSheet } from '@/components/settings/child-switcher-sheet';
 import { SettingsSheet } from '@/components/settings/settings-sheet';
 import { CAPSULE_WIDTH, COLUMN_GAP, EventCapsule } from '@/components/timeline/event-capsule';
@@ -208,7 +207,6 @@ export default function TimelineScreen() {
   const [dayRating, setDayRatingState] = useState<number | null>(null);
   const [showRatingSheet, setShowRatingSheet] = useState(false);
   const [showReportSheet, setShowReportSheet] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
@@ -598,23 +596,20 @@ export default function TimelineScreen() {
           </Pressable>
         </View>
         <View style={styles.headerButtons}>
-          <IconButton onPress={() => setShowHelp(true)} hitSlop={8}>
-            <MaterialCommunityIcons name="help-circle-outline" size={20} color="#ECEDEE" />
-          </IconButton>
           <IconButton onPress={() => setShowRatingSheet(true)} hitSlop={8}>
-            <MaterialCommunityIcons name={dayRating !== null ? 'star' : 'star-outline'} size={20} color="#ECEDEE" />
+            <MaterialCommunityIcons name={dayRating !== null ? 'star' : 'star-outline'} size={20} color="#F1EEE7" />
           </IconButton>
           <IconButton onPress={() => setShowReportSheet(true)} hitSlop={8}>
-            <MaterialCommunityIcons name="clipboard-text-outline" size={20} color="#ECEDEE" />
+            <MaterialCommunityIcons name="clipboard-text-outline" size={20} color="#F1EEE7" />
           </IconButton>
           <IconButton onPress={() => preferences.save({ leftHanded: !preferences.leftHanded })} hitSlop={8}>
-            <MaterialCommunityIcons name="swap-horizontal" size={20} color="#ECEDEE" />
+            <MaterialCommunityIcons name="swap-horizontal" size={20} color="#F1EEE7" />
           </IconButton>
           <IconButton onPress={() => setManualNightMode(!isNightMode)} hitSlop={8} active={isNightMode}>
-            <MaterialCommunityIcons name="weather-night" size={20} color={isNightMode ? '#E0673A' : '#ECEDEE'} />
+            <MaterialCommunityIcons name="weather-night" size={20} color={isNightMode ? '#E0673A' : '#F1EEE7'} />
           </IconButton>
           <IconButton onPress={() => setShowSettings(true)} hitSlop={8}>
-            <MaterialCommunityIcons name="cog-outline" size={20} color="#ECEDEE" />
+            <MaterialCommunityIcons name="cog-outline" size={20} color="#F1EEE7" />
           </IconButton>
         </View>
       </View>
@@ -697,7 +692,6 @@ export default function TimelineScreen() {
           onSaved={handleLogged}
         />
       )}
-      {showHelp && <HelpSheet onClose={() => setShowHelp(false)} />}
       {showRatingSheet && (
         <DayRatingSheet
           currentRating={dayRating}
@@ -742,7 +736,7 @@ export default function TimelineScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
   },
   screenNight: {
     backgroundColor: '#05060a',
@@ -778,13 +772,13 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   headerTitle: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 22,
     fontWeight: '600',
   },
   headerChildBadge: {
-    color: '#12161c',
-    backgroundColor: '#E3A857',
+    color: '#12171C',
+    backgroundColor: '#D6A866',
     fontSize: 11,
     fontWeight: '700',
     borderRadius: 8,
@@ -793,7 +787,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   headerDate: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 14,
     marginTop: 2,
   },

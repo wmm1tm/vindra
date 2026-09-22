@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   },
   hourSlot: {},
   hourLabel: {
-    color: '#8B95A1',
+    color: '#AAB4B6',
     fontSize: 12,
     fontVariant: ['tabular-nums'],
   },

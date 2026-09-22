@@ -30,12 +30,12 @@ export function ChildSwitcherSheet({ childList, onClose }: ChildSwitcherSheetPro
             {childList.map((child) => (
               <Pressable key={child.id} style={styles.row} onPress={() => handleSelect(child.id)}>
                 <View style={[styles.avatar, child.id === childId && styles.avatarActive]}>
-                  <MaterialCommunityIcons name="baby-face-outline" size={16} color="#12161c" />
+                  <MaterialCommunityIcons name="baby-face-outline" size={16} color="#12171C" />
                 </View>
                 <Text style={styles.rowLabel} numberOfLines={1}>
                   {child.name}
                 </Text>
-                {child.id === childId && <MaterialCommunityIcons name="check" size={18} color="#E3A857" />}
+                {child.id === childId && <MaterialCommunityIcons name="check" size={18} color="#D6A866" />}
               </Pressable>
             ))}
           </ScrollView>
@@ -55,13 +55,13 @@ const styles = StyleSheet.create({
   card: {
     width: 260,
     maxHeight: '60%',
-    backgroundColor: '#1c222b',
+    backgroundColor: '#1C252A',
     borderRadius: 16,
     padding: 16,
     gap: 8,
   },
   title: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 2,
@@ -84,11 +84,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarActive: {
-    backgroundColor: '#E3A857',
+    backgroundColor: '#D6A866',
   },
   rowLabel: {
     flex: 1,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
     fontWeight: '600',
   },

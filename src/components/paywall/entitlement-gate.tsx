@@ -22,6 +22,6 @@ export function EntitlementGate({ children }: { children: ReactNode }) {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
   },
 });

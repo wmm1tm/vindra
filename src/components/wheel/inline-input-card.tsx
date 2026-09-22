@@ -52,7 +52,7 @@ export function InlineInputCard({
         style={[styles.confirm, isFinal && styles.confirmFinal]}
         onPress={handleConfirm}
         hitSlop={8}>
-        <MaterialCommunityIcons name={isFinal ? 'check' : 'arrow-right'} size={24} color="#12161c" />
+        <MaterialCommunityIcons name={isFinal ? 'check' : 'arrow-right'} size={24} color="#12171C" />
       </Pressable>
     </View>
   );
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   card: {
     position: 'absolute',
     minHeight: CARD_HEIGHT,
-    backgroundColor: '#1c222b',
+    backgroundColor: '#1C252A',
     borderRadius: 14,
     padding: 8,
     flexDirection: 'row',
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#E3A857',
+    backgroundColor: '#D6A866',
     alignItems: 'center',
     justifyContent: 'center',
   },

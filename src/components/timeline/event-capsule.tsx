@@ -131,18 +131,18 @@ export function EventCapsule({
         <View style={[styles.bar, { backgroundColor: type.color + 'A0' }]} />
         <View style={[styles.marker, styles.startMarker, { backgroundColor: type.color }]}>
           {continuesBefore ? (
-            <MaterialCommunityIcons name="chevron-up" size={15} color="#12161c" />
+            <MaterialCommunityIcons name="chevron-up" size={15} color="#12171C" />
           ) : (
-            <EventIcon name={type.icon} set={type.iconSet} size={15} color="#12161c" />
+            <EventIcon name={type.icon} set={type.iconSet} size={15} color="#12171C" />
           )}
         </View>
         {continuesAfter ? (
           <View style={[styles.marker, styles.endMarker, styles.endMarkerRing, { backgroundColor: type.color }]}>
-            <MaterialCommunityIcons name="chevron-down" size={15} color="#12161c" />
+            <MaterialCommunityIcons name="chevron-down" size={15} color="#12171C" />
           </View>
         ) : event.end_at ? (
           <View style={[styles.marker, styles.endMarker, styles.endMarkerRing, { backgroundColor: type.color }]}>
-            <EventIcon name={type.endIcon ?? type.icon} set={type.endIconSet ?? type.iconSet} size={15} color="#12161c" />
+            <EventIcon name={type.endIcon ?? type.icon} set={type.endIconSet ?? type.iconSet} size={15} color="#12171C" />
           </View>
         ) : (
           type.isDuration && (
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     borderRadius: 7.5,
     backgroundColor: '#D9534F',
     borderWidth: 1.5,
-    borderColor: '#12161c',
+    borderColor: '#12171C',
     alignItems: 'center',
     justifyContent: 'center',
   },

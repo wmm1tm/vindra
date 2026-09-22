@@ -33,7 +33,7 @@ export function TargetTimeLine({ time, pixelsPerHour, onClear }: TargetTimeLineP
       </View>
       {onClear && (
         <Pressable style={styles.clearButton} onPress={onClear} hitSlop={10}>
-          <MaterialCommunityIcons name="close" size={13} color="#12161c" />
+          <MaterialCommunityIcons name="close" size={13} color="#12171C" />
         </Pressable>
       )}
     </View>
@@ -55,17 +55,17 @@ const styles = StyleSheet.create({
     height: 0,
     borderTopWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: '#ECEDEE',
+    borderColor: '#F1EEE7',
   },
   labelPill: {
-    backgroundColor: '#ECEDEE',
+    backgroundColor: '#F1EEE7',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 3,
     marginLeft: 6,
   },
   label: {
-    color: '#12161c',
+    color: '#12171C',
     fontSize: 14,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#ECEDEE',
+    backgroundColor: '#F1EEE7',
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 6,

@@ -82,7 +82,7 @@ export function WheelButton({
             style={styles.glossCap}
           />
           {icon ? (
-            <EventIcon name={icon} set={iconSet} size={32} color="#12161c" />
+            <EventIcon name={icon} set={iconSet} size={32} color="#12171C" />
           ) : (
             <Text style={styles.label} numberOfLines={2}>
               {label}
@@ -91,7 +91,7 @@ export function WheelButton({
         </LinearGradient>
         {locked && (
           <View style={styles.lockBadge}>
-            <EventIcon name="lock" set="material" size={11} color="#ECEDEE" />
+            <EventIcon name="lock" set="material" size={11} color="#F1EEE7" />
           </View>
         )}
       </Pressable>
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   },
   selected: {
     borderWidth: 3,
-    borderColor: '#ECEDEE',
+    borderColor: '#F1EEE7',
   },
   lockBadge: {
     position: 'absolute',
@@ -144,14 +144,14 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(255,255,255,0.15)',
   },
   label: {
-    color: '#12161c',
+    color: '#12171C',
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',

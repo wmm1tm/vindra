@@ -70,13 +70,13 @@ const styles = StyleSheet.create({
   card: {
     width: 300,
     maxHeight: '70%',
-    backgroundColor: '#1c222b',
+    backgroundColor: '#1C252A',
     borderRadius: 16,
     padding: 18,
     gap: 10,
   },
   title: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 17,
     fontWeight: '600',
   },
@@ -93,11 +93,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(227, 168, 87, 0.15)',
   },
   rowLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
   },
   rowLabelSelected: {
-    color: '#E3A857',
+    color: '#D6A866',
     fontWeight: '600',
   },
 });

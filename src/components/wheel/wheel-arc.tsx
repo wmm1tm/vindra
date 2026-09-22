@@ -49,7 +49,7 @@ const CONFIRM_CANCEL_SPAN_DEG = 40;
 // event zelf is dan al weggeschreven, dus bewust amber+pijl, niet groen+vinkje (dat is
 // gereserveerd voor de knop die het event daadwerkelijk logt, zie InlineInputCard se
 // variant="final" bij handmatige tijd-invoer hieronder).
-const NEXT_COLOR = '#E3A857';
+const NEXT_COLOR = '#D6A866';
 const CANCEL_COLOR = '#C97B7B';
 
 // Ver genoeg om de hele boog (straal + knopgrootte) buiten beeld te schuiven.
@@ -689,7 +689,7 @@ export function WheelArc({
             autoFocus
             selectTextOnFocus
             placeholder={t.wheel.hourPlaceholder}
-            placeholderTextColor="#8B95A1"
+            placeholderTextColor="#AAB4B6"
           />
           <TextInput
             ref={manualMinuteRef}
@@ -700,7 +700,7 @@ export function WheelArc({
             maxLength={2}
             selectTextOnFocus
             placeholder={t.wheel.minutePlaceholder}
-            placeholderTextColor="#8B95A1"
+            placeholderTextColor="#AAB4B6"
           />
         </InlineInputCard>
       )}
@@ -728,7 +728,7 @@ export function WheelArc({
             keyboardType="number-pad"
             autoFocus
             placeholder={t.wheel.amountPlaceholder(volumeUnit)}
-            placeholderTextColor="#8B95A1"
+            placeholderTextColor="#AAB4B6"
           />
         </InlineInputCard>
       )}
@@ -742,7 +742,7 @@ export function WheelArc({
             keyboardType="decimal-pad"
             autoFocus
             placeholder={tempUnit === 'fahrenheit' ? '101.3' : '38.5'}
-            placeholderTextColor="#8B95A1"
+            placeholderTextColor="#AAB4B6"
           />
         </InlineInputCard>
       )}
@@ -757,7 +757,7 @@ export function WheelArc({
             maxLength={2}
             autoFocus
             placeholder={t.wheel.hourPlaceholder}
-            placeholderTextColor="#8B95A1"
+            placeholderTextColor="#AAB4B6"
           />
           <TextInput
             style={styles.timeInput}
@@ -766,7 +766,7 @@ export function WheelArc({
             keyboardType="number-pad"
             maxLength={2}
             placeholder={t.wheel.minutePlaceholder}
-            placeholderTextColor="#8B95A1"
+            placeholderTextColor="#AAB4B6"
           />
         </InlineInputCard>
       )}
@@ -795,7 +795,7 @@ export function WheelArc({
               onChangeText={setNoteValue}
               autoFocus={quickNotes.length === 0}
               placeholder={t.common.note}
-              placeholderTextColor="#8B95A1"
+              placeholderTextColor="#AAB4B6"
             />
           </View>
         </InlineInputCard>
@@ -843,9 +843,9 @@ const styles = StyleSheet.create({
   },
   timeInput: {
     width: 44,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 16,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
@@ -853,18 +853,18 @@ const styles = StyleSheet.create({
   },
   amountInput: {
     flex: 1,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 15,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
   },
   noteInput: {
     flex: 1,
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 14,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
@@ -880,13 +880,13 @@ const styles = StyleSheet.create({
   },
   quickNoteChip: {
     maxWidth: 120,
-    backgroundColor: '#12161c',
+    backgroundColor: '#12171C',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 5,
   },
   quickNoteLabel: {
-    color: '#ECEDEE',
+    color: '#F1EEE7',
     fontSize: 12,
     fontWeight: '600',
   },
