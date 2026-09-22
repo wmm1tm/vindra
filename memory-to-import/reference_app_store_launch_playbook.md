@@ -1,11 +1,11 @@
 ---
 name: reference-app-store-launch-playbook
-description: "Stap-voor-stap draaiboek + valkuilen voor het lanceren van een betaalde/abonnement-iOS-app via Expo/EAS + RevenueCat + App Store Connect — geleerd tijdens de Nuvo-lancering, herbruikbaar voor toekomstige apps"
+description: "Stap-voor-stap draaiboek + valkuilen voor het lanceren van een betaalde/abonnement-iOS-app via Expo/EAS + RevenueCat + App Store Connect — geleerd tijdens de Nuvo-lancering (2026-09-18) en bevestigd/aangevuld bij Vindra's eerste indiening (2026-09-22), herbruikbaar voor toekomstige apps"
 metadata: 
   node_type: memory
   type: reference
   originSessionId: ff0ed0a6-8ee2-4d30-85e5-23a374b48fa3
-  modified: 2026-09-20T13:32:48.731Z
+  modified: 2026-09-22T00:00:00.000Z
 ---
 
 Dit is een destillaat van de eerste echte App Store-lancering (Nuvo, 2026-09-18) — bedoeld
@@ -320,3 +320,77 @@ pakken/kopiëren, want het laadt niet automatisch mee naar een ander project.
   cyclus kost een build, dus bij meerdere afwijzingsrondes in dezelfde maand kan dit gaan
   meetellen (bron: [Expo billing-docs](https://docs.expo.dev/billing/plans/), controleer bij
   twijfel het actuele verbruik op expo.dev → account → Billing/Usage).
+
+## Update 2026-09-22 — tweede lancering (Vindra), nieuwe/bevestigde lessen
+
+Meeste van bovenstaand draaiboek klopte 1-op-1 bij een tweede, onafhankelijke app onder
+hetzelfde Apple-account (certificaat/provisioning-hergebruik werkte precies zoals
+verwacht, zie hieronder). Dit zijn de écht nieuwe punten:
+
+- **RevenueCat: een package houdt één product per store tegelijk aan** — je hoeft de
+  bestaande **Test Store**-koppeling in een package niet te verwijderen om er ook de
+  echte **App Store**-koppeling aan toe te voegen. Beide staan gewoon naast elkaar in
+  dezelfde package (`$rc_monthly`/`$rc_annual`), en RevenueCat kiest zelf de juiste
+  op basis van welke SDK/build er draait. Handig: zo blijft Test Store-testen mogelijk
+  ook nadat de app live staat.
+- **Subscription review-screenshot vs. het "Image (Optional)"-veld zijn twee aparte,
+  gelijk-ogende upload-vakken** op dezelfde subscription-pagina — de eerste (verplicht
+  voor het eerste abonnement in een groep, "Review Information → Screenshot") is voor
+  Apple's reviewers, de tweede (1024×1024, "Image (Optional)") is voor win-back-
+  aanbiedingen/App Store-promotie. Een bestand kan per ongeluk in de verkeerde landen —
+  controleer expliciet welk vak het bestand toont.
+  - Dat "Review Information → Screenshot"-veld **weigert een PNG met alphakanaal**
+    ("Images can't contain alpha channels or transparencies"), ook al is de afbeelding
+    zelf ondoorzichtig. Los op door als **JPEG** te exporteren (nooit alpha) i.p.v. PNG,
+    of expliciet te flattenen tegen een achtergrondkleur vóór het opslaan. Een telefoon-
+    screenshot omzetten naar het vereiste 1024×1024-vierkant + geen alpha lukt in één
+    stap met Node + `sharp` (`.flatten({background}).resize(1024,1024,{fit:'contain',
+    background}).jpeg()`), sneller/preciezer dan een PowerShell/System.Drawing-scriptje.
+- **Age Ratings-vragenlijst is september 2026 volledig herbouwd** (categorieën nu:
+  In-App Controls, Capabilities, Mature Themes, Medical or Wellness, Sexuality or
+  Nudity, Violence, Chance-Based Activities) — voor een simpele logboek-/trackerapp
+  zonder social/UGC/advertenties: overal "No"/"None", behalve wat feitelijk van
+  toepassing is. Voor een app die gevoelige gezondheids-/gedragsonderwerpen bevat maar
+  zelf geen diagnose/behandeladvies geeft: "Medical or Treatment Information" = **None**
+  (geeft geen diagnoses/behandeling), "Health or Wellness Topics" = **No** als de app
+  ook geen zelfzorg-/leefstijladvíezen geeft (puur registratie, geen aanbevelingen) —
+  scheelt een hogere rating als dat onderscheid daadwerkelijk klopt voor de app.
+  Resultaat kan alsnog prima 4+ zijn voor een tool die vólwassenen gebruiken (ouders/
+  verzorgers), ook als de onderwerpen zelf gevoelig zijn — de rating gaat over getoonde
+  content, niet over het onderwerp van een instellingenlabel dat een kind nooit ziet.
+- **"Content Rights Information" (App Information-pagina) is een verplicht,
+  makkelijk-over-het-hoofd-te-zien blokje** dat nergens in de hoofd-checklist stond —
+  Apple blokkeert "Add for Review" hierop als het nog niet expliciet ingevuld is
+  ("No, does not contain, show, or access third-party content" voor een app zonder
+  licenties van derden).
+- **"Add for Review" geeft bij ontbrekende velden eerst een vage generieke foutmelding**
+  ("An unexpected error was encountered..."); gewoon nog een keer klikken laat Apple
+  daarna de échte, specifieke checklist tonen (Content Rights, Privacy Policy URL,
+  category, etc.) — niet meteen paniekeren bij die eerste vage melding, gewoon
+  opnieuw proberen.
+- **EU-herroepingsrecht bij App Store-abonnementen is Apple's verantwoordelijkheid, niet
+  de developer's** (uitgezocht via webonderzoek, niet aangenomen) — Apple is de
+  contractuele verkopende partij bij een In-App Purchase-transactie, een gebruiker
+  herroept bij Apple, niet bij de app-ontwikkelaar. Voldoende gedekt door de bestaande
+  EULA-link (zie 3.1.2(c) hierboven), geen aparte "14/7 dagen herroepbaar"-tekst nodig
+  in de eigen listing/paywall.
+- **`eas build`/`eas submit` kunnen tijdelijke, niet-code-gerelateerde storingen geven**:
+  een `503 Service Unavailable` bij het indienen van een build-verzoek (na succesvolle
+  upload) loste vanzelf op door hetzelfde commando gewoon opnieuw te draaien. En
+  `eas submit` kan lang (tot 30+ min) in een **"Free Tier Queue"** blijven staan — geen
+  storing, gewoon een gedeelde, niet-geprioriteerde wachtrij voor het gratis plan; geen
+  actie nodig, gewoon afwachten (of eventueel het account naar een betaald plan
+  upgraden als wachttijden een terugkerend probleem worden).
+- **App Store Server Notifications instellen loont**: RevenueCat's eigen webhook-URL
+  (te vinden in de RevenueCat-app-instellingen, "Apple Server Notification URL") plakken
+  bij zowel **Production Server URL** als **Sandbox Server URL** op de App Information-
+  pagina — zorgt dat RevenueCat direct van verlengingen/opzeggingen/restituties hoort
+  i.p.v. alleen te wachten tot de app zelf weer opent. Kost een paar seconden, geen
+  reden om over te slaan.
+- **ASO-keywordonderzoek loont als échte research, niet als brainstorm/letterlijke
+  vertaling** — een fork die daadwerkelijk webzoekopdrachten deed naar waar de
+  doelgroep zelf naar zoekt (forums, concurrerende app-listings, vakterminologie van
+  professionals in het veld) vond woorden die een eigen aanname gemist had (bv. het
+  woord dat ouders zelf gebruiken i.p.v. een net iets te klinische/eigen formulering,
+  en een specifieke vakterm die een directe concurrent-app al zichtbaar gebruikt in
+  zijn eigen listing — sterk signaal dat het een levende zoekterm is).
