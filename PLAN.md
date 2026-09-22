@@ -875,3 +875,87 @@ wizard had dat zelf teruggeschreven na de interactieve vraag. `app.json`'s eigen
 `backgroundColor`-velden (adaptive icon/splash) stonden nog wél op de oude `#12161c`
 i.p.v. `#12171C` — de kleur-fork was gescoped tot `src/`, dit was blijven liggen, nu
 ook gefixt.)
+
+## Update 2026-09-22 (weer later dezelfde sessie) — App Store Connect volledig doorlopen, eerste indiening staat op "Waiting for Review"
+
+**RevenueCat omgezet van Test Store naar de echte App Store-producten**: App Store
+Connect API-key + In-App Purchase Key + vendor-nummer aangemaakt (App Store Connect →
+Users and Access → Integrations), gekoppeld in RevenueCat's app-instellingen, de
+`vindra_premium`-entitlement en de Monthly/Yearly-packages gekoppeld aan
+`com.woutertm.vindra.premium.{monthly,yearly}` naast de bestaande Test Store-koppeling
+(een package kan één product per store bevatten, dus de Test Store-koppeling hoefde niet
+weg). `app.json` `extra.revenuecatIosApiKey` nu de echte `appl_...`-key. Prijzen tonen
+zich pas correct zodra Apple de producten na indiening daadwerkelijk verwerkt heeft
+("Missing Metadata" tot die tijd, normaal/verwacht).
+
+**App Store Connect, stap voor stap doorlopen**:
+- App geregistreerd (`com.woutertm.vindra`), subscription-groep + Monthly/Yearly-
+  abonnementen aangemaakt, prijs **€5,99/€49,99** (zelfde punt als Nuvo, al gevalideerd
+  in dezelfde productcategorie).
+- Review-screenshot voor de subscriptions: een telefoon-screenshot bleek een vierkant
+  1024×1024-beeld te moeten zijn zonder alphakanaal — gegenereerd met `sharp`
+  (scratchpad, zelfde patroon als het app-icoon eerder) via `fit: 'contain'` +
+  achtergrondkleur-opvulling, en als JPEG (niet PNG) om het alphakanaal-probleem te
+  omzeilen. **Bijvangst-fout**: het bestand landde eerst per ongeluk in het "Image
+  (Optional)"-veld (win-back/promotie) i.p.v. "Review Information → Screenshot" — apart,
+  gelijk-ogend veld, opgelost door het ook in het juiste veld te uploaden.
+- 5 app-screenshots (dagverslag, tijdlijn druk, tijdlijn rustig, instellingen, wiel
+  aanpassen) uit echte telefoon-schermafbeeldingen omgezet naar het vereiste
+  1284×2778-formaat, zelfde `sharp`-aanpak.
+- **App Store-listing** (`APP_STORE_LISTING.md`, nieuw bestand — NL+EN, zelfde opzet als
+  Nuvo's eigen bestand in de BabyTracker-repo): subtitle, promotietekst, beschrijving,
+  categorie (Health & Fitness), support-URL (privacybeleid hergebruikt). **Keywords apart
+  onderzocht** (fork, webonderzoek i.p.v. aanname) — "overprikkeld" (het woord dat
+  ouders zelf gebruiken, ipv "prikkel" dat al in de subtitle zit), "abc schema"
+  (herkenbare UMCG-term), "begeleider" (Vindra's eigen woordkeuze), "meltdown"
+  (bevestigd als levende term via de sterkste concurrent-app "Behavior Tracker ABC").
+- **Age Ratings**: alles op "No"/"None" behalve wat feitelijk van toepassing is —
+  resultaat 4+, met de kanttekening dat dit een tool vóór ouders is, geen content die
+  aan een kind getoond wordt (zelfverwonding is een label in een instellingenmenu, geen
+  weergegeven content).
+- **Regulated Medical Device**: Nee, gedeclareerd.
+- **App Privacy-vragenlijst**: alleen "User ID" en "Purchases" aangevinkt (RevenueCat),
+  beide met purpose "Analytics" + "App Functionality" (RevenueCat's eigen vereiste
+  combinatie, ongeacht SDK-gebruik), beide "niet gekoppeld aan identiteit" (geen accounts
+  in Vindra) en "niet voor tracking". Geen enkel ander datatype aangevinkt — de
+  versleutelde partner-sync-data via Supabase is voor ons/Supabase onleesbare ciphertext,
+  gekoppeld aan een willekeurige `sync_id` zonder accountkoppeling, dus inhoudelijk geen
+  "verzamelde data" in de zin die Apple's vragenlijst bedoelt.
+- **Pricing and Availability**: bleek, exact zoals `reference_app_store_launch_playbook.md`
+  al waarschuwde, **niet automatisch goed te staan** — Tier 0/Free moest expliciet
+  gekozen worden, Apple Silicon Mac-beschikbaarheid stond aan en is uitgezet (niet
+  getest op macOS).
+- **Herroepingsrecht (EU) uitgezocht** (webonderzoek, niet uit aanname): bij App
+  Store-abonnementen is **Apple zelf de contractuele verkopende partij**, niet de
+  developer — een gebruiker herroept bij Apple, niet bij Vindra. Al gedekt door de
+  bestaande EULA-link, geen aparte disclosure nodig in onze eigen listing.
+- **Eerste "Add for Review"-poging mislukte** met een generieke foutmelding, gevolgd door
+  een duidelijkere lijst ontbrekende items: Content Rights Information (op App
+  Information: "bevat geen content van derden"), een apart **Privacy Policy URL-veld**
+  op de App Privacy-pagina zelf (ander veld dan de Support URL, zelfde valkuil als Nuvo
+  destijds bij Guideline 3.1.2(c) — zie `BabyTracker/APP_STORE_LISTING.md`), de App
+  Privacy-vragenlijst die nog niet echt gepubliceerd bleek, en een niet-opgeslagen
+  primary category. Na het afwerken van die vier: indiening gelukt.
+
+**Productie-build**: `eas build --profile production --platform ios` (nieuw Apple
+Distribution-certificaat/provisioning profile, App Store-type i.p.v. het ad-hoc
+development-profiel), eerste poging liep tegen een tijdelijke 503 van Expo's
+build-service aan (niet ons probleem, gewoon opnieuw geprobeerd, werkte meteen).
+`eas submit --profile production --platform ios --latest` daarna geüpload naar App
+Store Connect — stond een tijd lang in Expo's gratis-tier-wachtrij (geen storing, gewoon
+een gedeelde, niet-geprioriteerde rij).
+
+**Eindstatus van deze sessie**: **Vindra – Gedragslogboek staat op "iOS 1.0 Waiting for
+Review"** bij Apple. Verificatie (`tsc`/`eslint`/`expo-doctor`) bleef doorlopend schoon,
+alle app.json-/db-wijzigingen (echte RevenueCat-key, `DEFAULT_CHILD_NAME` 'Baby'→'Kind'-
+fix, `APP_STORE_LISTING.md`) staan gecommit.
+
+### Wat nog open staat
+- Wachten op Apple's beoordeling (meestal een paar uur tot 1-2 dagen) — mogelijk
+  Guideline 2.1 "Information Needed" als Apple toch meer info wil, ook al heeft dit
+  account al Nuvo-reviewgeschiedenis; antwoord-sjabloon staat klaar in
+  `APP_STORE_LISTING.md`.
+- DE/ES/FR/PT App Store-metadata (los van de al-complete in-app-vertalingen) — pas doen
+  zodra NL/EN aantoonbaar iets trekt.
+- Duitse Sensory-Profile-termen en Spaans/Portugese "Fuga" (weglopen) nog niet door een
+  moedertaalspreker bevestigd.
