@@ -6,7 +6,7 @@ export const DEFAULT_CHILD_ID = 'default-child';
 /** Naam waarmee een gloednieuwe installatie start (zie ensureAtLeastOneChild) — ook het
  * signaal dat de naam/geboortedatum-onboardingbanner op de tijdlijn gebruikt om te weten
  * of dit kind nog nooit een echte naam gekregen heeft. */
-export const DEFAULT_CHILD_NAME = 'Baby';
+export const DEFAULT_CHILD_NAME = 'Kind';
 const ACTIVE_CHILD_KEY = 'active_child_id';
 
 export type TimeFormat = '24h' | '12h';
