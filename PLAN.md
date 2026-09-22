@@ -776,7 +776,102 @@ IAP-producten bestaan.
 ### Wat nog open staat
 - RevenueCat upgraden naar echte App Store/Play Store-apps zodra er App Store Connect-
   IAP-producten bestaan (Monthly/Yearly, prijzen/proefperiode instellen).
-- Icoon/branding echt op een toestel bekijken (development build of TestFlight,
-  niet Expo Go).
-- EN/DE/ES/FR/PT blijven NL-aliassen, geen echte vertaling.
-- Nog geen EAS-build of App Store-indiening gedaan voor Vindra.
+- Nog geen App Store-indiening gedaan voor Vindra.
+
+## Update 2026-09-22 (weer later dezelfde sessie) — echte vertalingen, nieuw kleurenpalet, EAS development build, banen-herindeling
+
+**Vertalingen**: alle 6 talen (`nl`/`en`/`de`/`es`/`fr`/`pt`) zijn nu echte, onafhankelijke
+vertalingen i.p.v. NL-aliassen (was bewust uitgesteld, zie sectie 9 — gebruiker besloot
+dit nu toch te doen, voor alle 5 talen tegelijk, niet alleen EN). `pt` is Braziliaans
+Portugees (`pt-BR`, matcht `lib/i18n/index.tsx`'s bestaande locale-tag). De Sensory
+Profile-velden gebruiken in het Engels Winnie Dunn's eigen bronterminologie ("sensory
+threshold", "sensory seeking/avoiding") i.p.v. een letterlijke terugvertaling van het
+Nederlands. Twee losse grammaticabugs gevonden en gefixt tijdens het vertalen zelf
+(Spaans `1 día restante` i.p.v. `restantes`, Portugees `Falta 1 dia` i.p.v. `Faltam`).
+Nog te verifiëren door een moedertaalspreker: Duitse Sensory-Profile-termen
+("Reizschwelle"/"reizsuchend"/"reizvermeidend") en het Spaans/Portugese "Fuga" voor
+`weglopen` (dekt de lading maar korter dan de volledige klinische term uit de
+vakliteratuur).
+
+**Kleurenpalet**: gebruiker liet buiten deze sessie om (Canva AI, met screenshots van de
+app als referentie) een nieuwe stijlrichting uitwerken — "Schemering met saliegroen":
+achtergrond `#12171C`, kaarten `#1C252A`/`#242E33`, amber-accent `#D6A866` (was
+`#E3A857`), saliegroen `#91B39B` en gedempt blauw `#879BC2` als ondersteunende kleuren,
+warm wit `#F1EEE7` als primaire tekstkleur. UI-principe: amber blijft voorbehouden aan
+actieve staten/primaire acties/de nu-lijn; de rest wordt zachter. Toegepast in 32
+bestanden. Saliegroen kreeg een concrete rol op de twee zuiver decoratieve iconen
+(help-bolletjes, onboarding-babygezicht); saliegroen en het gedempt blauw kregen later
+óók een functionele rol als tijdlijn-baankleur (zie hieronder) — geen losstaande
+kleuren meer, maar hergebruikt. `assets/images/icon.png` en de overige app-icoonbestanden
+zijn bewust **niet** meegenomen in deze paswerkronde (apart, al eerder afgerond).
+
+**EAS development build**: nodig omdat het toevoegen van de echte RevenueCat-key (vorige
+sessie-update) `isPurchasesConfigured` op `true` zette — daarvoor viel de app terug op
+"alles ontgrendeld" zonder key, dus was dit nooit eerder zichtbaar. `react-native-
+purchases` heeft native code die Expo Go niet kan draaien (zie `AGENTS.md`), dus zonder
+development build bleef de paywall permanent op "niet ontgrendeld" hangen, zonder manier
+om ooit te kunnen kopen. Opgezet: `eas login` (bestaand account, ook gebruikt voor Nuvo —
+projecten zijn volledig los via hun eigen `projectId`/bundle-ID), `eas build:configure`
+(nieuw EAS-project `@wmm1/Vindra`, `eas.json` aangemaakt), toestel geregistreerd via de
+"Website"-optie (geen Mac beschikbaar), eerste `eas build --profile development --
+platform ios` gedraaid (voegde vanzelf `expo-dev-client` toe, standaard-encryptie-
+verklaring `Y`/exempt beantwoord — zelfde als Nuvo's `ITSAppUsesNonExemptEncryption:
+false`, nog niet expliciet in `app.json` gezet), distributiecertificaat hergebruikt
+(gedeeld met Nuvo, certificaten horen bij het Apple-account/team, niet bij één app).
+**Geverifieerd op toestel**: paywall laadt aanbiedingen (in USD — verwacht, RevenueCat's
+Test Store kent geen App Store Connect-regioprijzen), test-aankoop via Test Store
+voltooid, entitlement herkend, app ontgrendeld.
+
+**Tijdlijn-banen herzien** (`constants/timeline-lanes.ts`): de oude indeling (4 banen,
+"Gedrag/Prikkels" en "Overig" elk met 5 event-typen) werd onoverzichtelijk zodra meerdere
+van die typen kort na elkaar gelogd worden — precies wat er gebeurt tijdens een echte
+crisis (gedrag+prikkel+zelfverwonding+weglopen+stimmen realistisch allemaal binnen
+enkele minuten). Blijft op 4 kolommen (een 5e zou op het kleinste ondersteunde toestel,
+iPhone SE, niet meer zonder horizontaal scrollen passen — `eventsAreaWidth`/
+`MIN_LANE_WIDTH` laat dat niet toe), maar herverdeeld op betekenis:
+- **Gedrag** (`behavior`): gedrag, zelfverwonding, weglopen — exact dezelfde groep die al
+  de ABC-velden deelt in `event-detail-sheet.tsx`.
+- **Prikkel** (`sensory`, nieuwe lane-id): prikkel, stimmen — de sensorische familie.
+- **Stemming** (`mood`): stemming, positief — het emotioneel-welzijn-signaal.
+- **Verzorging** (`care`, vervangt de oude `medication`+`other`): medicatie, slaap, eten,
+  zindelijkheid, overig — grootste groep (5), maar bewust de typen met het laagste
+  risico dat ze allemaal binnen enkele minuten samen gelogd worden.
+
+Saliegroen en het gedempt blauw uit het nieuwe kleurenpalet werden hergebruikt als
+baankleur voor Stemming resp. Prikkel — geen losse eenmalige kleurkeuze meer.
+
+**Dagrapport/weekrapport meegenomen in dezelfde herziening** (`day-report-sheet.tsx`):
+- De prominente uitsplitsing bovenaan (was alleen gedrag, per ernst) geldt nu voor de
+  hele Gedrag-baan: gedrag én zelfverwonding delen dezelfde ernstschaal en krijgen beide
+  een rij (onderscheiden via `getEventVisual`'s eigen icoon/kleur per type, geen aparte
+  subkopjes — bespaart verticale ruimte in de 320px-brede kaart), weglopen krijgt een
+  plat totaal (geen ernst-variant).
+- De resterende, niet-prominente cijfer-chips volgen nu de volgorde van de tijdlijn-lanes
+  (`TIMELINE_LANES`) i.p.v. willekeurige volgorde.
+- Weekmodus toont nu dag-per-dag-koppen in de app zelf (`groupEventsByDay`), zoals de
+  PDF-export dat via `buildReportHtml`'s `grouped`-modus al langer deed — was voorheen een
+  platte lijst van 7 dagen door elkaar met alleen een weekdag-achtervoegsel per rij.
+
+**Overig**: help-scherm-scroll-bug gefixt (`list`-style had `flex: 1` nodig i.p.v.
+niets, en de kaart zelf mocht geen `Pressable` meer zijn — een ScrollView binnen een
+tap-swallowing Pressable-wrapper werd nooit scrollbaar; zelfde structuur als
+`SettingsSheetShell`'s `dismissArea`-aanpak toegepast). Help verplaatst van een
+header-icoon naar een rij in Instellingen → Beheer (gebruiker vond het header-icoon
+de bovenste banner vervuilen). Acht ongebruikte Expo-scaffold-restjes opgeruimd
+(`react-logo*`, `expo-badge*`, `logo-glow.png`, `tutorial-web.png`, `tabIcons/`).
+
+**Verificatie**: `npx tsc --noEmit`, `npx eslint . --no-cache` en `npx expo-doctor`
+(21/21) alle drie schoon na elke stap.
+
+### Wat nog open staat
+- RevenueCat upgraden naar echte App Store/Play Store-apps zodra er App Store Connect-
+  IAP-producten bestaan (Monthly/Yearly, prijzen/proefperiode instellen).
+- Duitse Sensory-Profile-termen en Spaans/Portugese "Fuga" (weglopen) nog niet door een
+  moedertaalspreker bevestigd.
+- Nog geen App Store-indiening gedaan voor Vindra.
+
+(`ITSAppUsesNonExemptEncryption: false` bleek al in `app.json` te staan — de EAS-build-
+wizard had dat zelf teruggeschreven na de interactieve vraag. `app.json`'s eigen
+`backgroundColor`-velden (adaptive icon/splash) stonden nog wél op de oude `#12161c`
+i.p.v. `#12171C` — de kleur-fork was gescoped tot `src/`, dit was blijven liggen, nu
+ook gefixt.)
