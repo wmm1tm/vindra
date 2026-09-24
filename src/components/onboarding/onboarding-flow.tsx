@@ -14,19 +14,23 @@ import { PaywallScreen } from '@/components/paywall/paywall-screen';
 import { parseBirthDate } from '@/components/settings/birth-date-fields';
 import { EventIcon } from '@/components/ui/event-icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { Design, GLOW, glowStyle } from '@/constants/design';
 import { EVENT_TYPES } from '@/constants/event-types';
 import { DEFAULT_CHILD_NAME, getChildWithSettings, renameChild, updateChildBirthDate } from '@/db/child';
 import { useActiveChild } from '@/lib/active-child-context';
-import { darken, lighten, withAlpha } from '@/lib/color';
+import { withAlpha } from '@/lib/color';
 import { useI18n } from '@/lib/i18n';
 import { selectionFromWheelConfig, wheelFromSelection } from '@/lib/onboarding-wheel';
 import { usePreferences } from '@/lib/preferences-context';
 import { usePurchases } from '@/lib/purchases-context';
 
-const ACCENT = '#D6A866';
-const STEP_COUNT = 5;
+const ACCENT = Design.accent;
+const STEP_COUNT = 6;
 const CHILD_STEP = 1;
 const ROLES_STEP = 2;
+const WIDGET_STEP = 4;
+/** Voorbeeldknoppen in de widget-stap: wat een abonnee op het beginscherm ziet. */
+const WIDGET_DEMO_KINDS = ['gedrag', 'prikkel', 'stemming', 'slaap'] as const;
 const DEMO_KINDS = ['gedrag', 'prikkel', 'stemming'] as const;
 const EMPTY_DRAFT: ChildDraft = { name: '', day: '', month: '', year: '' };
 
@@ -41,9 +45,9 @@ interface OnboardingFlowProps {
   onChildUpdated: () => void;
 }
 
-/** Intro bij de eerste start (gevraagd 2026-09-24, zie PLAN.md). Vijf korte stappen, elk
+/** Intro bij de eerste start (gevraagd 2026-09-24, zie PLAN.md). Zes korte stappen, elk
  * over te slaan: welkom, het kind, wat er speelt (zet optionele typen op het wiel), hoe
- * loggen werkt, en delen/privacy. Daarna, zonder abonnement, de bestaande paywall met een
+ * loggen werkt, de widget, en delen/privacy. Daarna, zonder abonnement, de bestaande paywall met een
  * sluitknop. Alleen wat met "Volgende" bevestigd is, wordt opgeslagen; "Overslaan" sluit
  * zonder verdere wijzigingen. Daarna komt hij niet meer terug, behalve via Instellingen →
  * "Intro opnieuw bekijken". */
@@ -158,14 +162,14 @@ export function OnboardingFlow({ onDone, onChildUpdated }: OnboardingFlowProps) 
             return (
               <View key={kind} style={styles.demoItem}>
                 <LinearGradient
-                  colors={[lighten(type.color, 0.12), type.color, darken(type.color, 0.08)]}
-                  locations={[0, 0.55, 1]}
-                  start={{ x: 0.25, y: 0.12 }}
+                  colors={Design.coreGradient}
+                  locations={[0, 0.6, 1]}
+                  start={{ x: 0.3, y: 0.15 }}
                   end={{ x: 0.8, y: 0.95 }}
-                  style={[styles.demoButton, { shadowColor: type.color }]}>
-                  <EventIcon name={type.icon} set={type.iconSet} size={26} color="#12171C" />
+                  style={[styles.demoButton, { borderColor: type.color }, glowStyle(type.color, GLOW, 0.55, 10)]}>
+                  <EventIcon name={type.icon} set={type.iconSet} size={26} color={type.color} />
                 </LinearGradient>
-                <Text style={[styles.demoLabel, { color: type.color }]}>{type.label(t)}</Text>
+                <Text style={styles.demoLabel}>{type.label(t)}</Text>
               </View>
             );
           })}
@@ -180,6 +184,33 @@ export function OnboardingFlow({ onDone, onChildUpdated }: OnboardingFlowProps) 
         <OnboardingTip icon="pencil-outline" text={t.onboarding.logDetails} />
         <OnboardingTip icon="gesture-tap-hold" text={t.onboarding.logMove} />
         <OnboardingTip icon="tune-variant" text={t.onboarding.logHub} />
+      </View>
+    );
+  } else if (step === WIDGET_STEP) {
+    content = (
+      <View style={styles.page}>
+        <Text style={styles.title}>{t.onboarding.widgetTitle}</Text>
+        <Text style={styles.body}>{t.onboarding.widgetBody}</Text>
+        <View style={styles.widgetMock}>
+          <Text style={styles.widgetBrand}>Vindra</Text>
+          <View style={styles.widgetGrid}>
+            {WIDGET_DEMO_KINDS.map((kind) => {
+              const type = EVENT_TYPES[kind];
+              return (
+                <View key={kind} style={[styles.widgetCell, { backgroundColor: withAlpha(type.color, 0.18) }]}>
+                  <EventIcon name={type.icon} set={type.iconSet} size={20} color={type.color} />
+                  <Text style={[styles.widgetLabel, { color: type.color }]} numberOfLines={1}>
+                    {type.label(t)}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+        <OnboardingTip icon="numeric-1-circle-outline" text={t.onboarding.widgetStep1} />
+        <OnboardingTip icon="numeric-2-circle-outline" text={t.onboarding.widgetStep2} />
+        <OnboardingTip icon="numeric-3-circle-outline" text={t.onboarding.widgetStep3} />
+        <Text style={styles.footnote}>{t.onboarding.widgetFootnote}</Text>
       </View>
     );
   } else {
@@ -304,10 +335,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#1C252A',
-    shadowColor: ACCENT,
-    shadowOpacity: 0.35,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 0 },
+    ...glowStyle(ACCENT, GLOW, 0.6, 24),
     marginBottom: 8,
   },
   bigTitle: {
@@ -347,15 +375,14 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
   },
   demoLabel: {
+    color: Design.text,
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   demoHub: {
     width: 44,
@@ -363,9 +390,53 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 2,
     borderColor: ACCENT,
-    backgroundColor: withAlpha('#181d25', 0.95),
+    backgroundColor: Design.coreGradient[1],
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  widgetMock: {
+    alignSelf: 'center',
+    width: 170,
+    height: 170,
+    borderRadius: 26,
+    backgroundColor: Design.ground,
+    borderWidth: 1,
+    borderColor: withAlpha(Design.text, 0.12),
+    padding: 12,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  widgetBrand: {
+    color: ACCENT,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  widgetGrid: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  widgetCell: {
+    width: '47%',
+    flexGrow: 1,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    paddingHorizontal: 4,
+  },
+  widgetLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  footnote: {
+    color: '#7F898C',
+    fontSize: 13,
+    lineHeight: 18,
   },
   bottomBar: {
     flexDirection: 'row',

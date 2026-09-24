@@ -4,7 +4,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EventIcon } from '@/components/ui/event-icon';
 import { MAX_ACTIVE_WHEEL_ENTRIES } from '@/constants/event-types';
-import { withAlpha } from '@/lib/color';
+import { Design, GLOW, glowStyle } from '@/constants/design';
+import { mixOver, withAlpha } from '@/lib/color';
 import { useI18n } from '@/lib/i18n';
 import { OPTIONAL_WHEEL_ENTRIES, wheelFromSelection } from '@/lib/onboarding-wheel';
 
@@ -44,11 +45,12 @@ export function OnboardingRolesStep({ selected, onToggle }: OnboardingRolesStepP
                 styles.card,
                 {
                   borderColor: active ? entry.color : withAlpha(entry.color, 0.25),
-                  backgroundColor: active ? withAlpha(entry.color, 0.16) : '#1C252A',
+                  backgroundColor: active ? mixOver(entry.color, Design.surface, 0.22) : Design.surface,
+                  ...glowStyle(entry.color, active ? GLOW : 0, 0.45, 12),
                 },
               ]}>
-              <View style={[styles.icon, { backgroundColor: entry.color }]}>
-                <EventIcon name={entry.icon} set={entry.iconSet} size={20} color="#12171C" />
+              <View style={[styles.icon, { borderColor: entry.color, backgroundColor: withAlpha(entry.color, 0.16) }]}>
+                <EventIcon name={entry.icon} set={entry.iconSet} size={20} color={entry.color} />
               </View>
               <View style={styles.texts}>
                 <Text style={styles.label}>{label}</Text>
@@ -102,6 +104,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -269,6 +269,12 @@ export interface Dictionary {
     logDetails: string;
     logMove: string;
     logHub: string;
+    widgetTitle: string;
+    widgetBody: string;
+    widgetStep1: string;
+    widgetStep2: string;
+    widgetStep3: string;
+    widgetFootnote: string;
     shareTitle: string;
     shareReport: string;
     sharePartner: string;
@@ -592,6 +598,12 @@ export const nl: Dictionary = {
     logDetails: 'Later rustig aanvullen? Tik op het event in de tijdlijn en vul de aanleiding, locatie en wat hielp in.',
     logMove: 'Klopt de tijd niet? Houd een event in de tijdlijn ingedrukt en versleep het.',
     logHub: 'Tik op de knop in het midden om het wiel weg te klappen. Houd hem ingedrukt om het wiel aan te passen.',
+    widgetTitle: 'Loggen vanaf je beginscherm',
+    widgetBody: 'Met de widget log je in één tik, zonder de app te openen. Handig als je je handen vol hebt.',
+    widgetStep1: 'Houd een lege plek op je beginscherm ingedrukt.',
+    widgetStep2: 'Tik op Wijzig (of + bovenin) en dan op Voeg widget toe.',
+    widgetStep3: 'Zoek Vindra en kies een formaat.',
+    widgetFootnote: 'Gedrag loggen kan altijd. De andere knoppen, en slaap starten en stoppen, horen bij het abonnement.',
     shareTitle: 'Delen, en je privacy',
     shareReport: 'Via het klembord-icoon maak je een dag- of weekoverzicht en exporteer je een PDF voor school of behandelaar.',
     sharePartner: 'Deel een kind met een andere ouder of begeleider via een QR-code. Jullie zien dezelfde tijdlijn, zonder account.',
@@ -906,6 +918,12 @@ export const en: Dictionary = {
     logDetails: 'Want to add more later, when things are calm? Tap the event on the timeline to fill in the antecedent, location and what helped.',
     logMove: 'Wrong time? Press and hold an event on the timeline and drag it.',
     logHub: 'Tap the button in the middle to fold the wheel away. Hold it to customize the wheel.',
+    widgetTitle: 'Log from your home screen',
+    widgetBody: 'The widget logs in one tap, without opening the app. Handy when your hands are full.',
+    widgetStep1: 'Touch and hold an empty spot on your home screen.',
+    widgetStep2: 'Tap Edit (or + at the top), then Add Widget.',
+    widgetStep3: 'Search for Vindra and pick a size.',
+    widgetFootnote: 'Logging behavior is always free. The other buttons, and starting and stopping sleep, come with the subscription.',
     shareTitle: 'Sharing, and your privacy',
     shareReport: 'Tap the clipboard icon for a day or week overview, and export a PDF for school or a care provider.',
     sharePartner: 'Share a child with another parent or caregiver using a QR code. You both see the same timeline, no account needed.',
@@ -1218,6 +1236,12 @@ export const de: Dictionary = {
     logDetails: 'Später in Ruhe ergänzen? Tippe in der Zeitleiste auf das Ereignis und trage Auslöser, Ort und Was geholfen hat ein.',
     logMove: 'Uhrzeit stimmt nicht? Halte ein Ereignis in der Zeitleiste gedrückt und verschiebe es.',
     logHub: 'Tippe auf den Button in der Mitte, um das Rad einzuklappen. Halte ihn gedrückt, um das Rad anzupassen.',
+    widgetTitle: 'Erfassen vom Home-Bildschirm',
+    widgetBody: 'Das Widget erfasst mit einem Tipp, ohne die App zu öffnen. Praktisch, wenn du die Hände voll hast.',
+    widgetStep1: 'Halte eine freie Stelle auf deinem Home-Bildschirm gedrückt.',
+    widgetStep2: 'Tippe auf Bearbeiten (oder + oben) und dann auf Widget hinzufügen.',
+    widgetStep3: 'Suche nach Vindra und wähle eine Größe.',
+    widgetFootnote: 'Verhalten erfassen ist immer kostenlos. Die anderen Tasten sowie Schlaf starten und beenden gehören zum Abo.',
     shareTitle: 'Teilen, und deine Privatsphäre',
     shareReport: 'Über das Klemmbrett-Symbol erstellst du eine Tages- oder Wochenübersicht und exportierst ein PDF für Schule oder Therapeut.',
     sharePartner: 'Teile ein Kind per QR-Code mit einem anderen Elternteil oder Betreuer. Ihr seht dieselbe Zeitleiste, ganz ohne Konto.',
@@ -1530,6 +1554,12 @@ export const es: Dictionary = {
     logDetails: '¿Quieres completarlo más tarde, con calma? Toca el evento en la línea de tiempo y añade el antecedente, la ubicación y qué ayudó.',
     logMove: '¿La hora no es correcta? Mantén pulsado un evento en la línea de tiempo y arrástralo.',
     logHub: 'Toca el botón del centro para plegar la rueda. Mantenlo pulsado para personalizarla.',
+    widgetTitle: 'Registra desde tu pantalla de inicio',
+    widgetBody: 'El widget registra con un toque, sin abrir la app. Práctico cuando tienes las manos ocupadas.',
+    widgetStep1: 'Mantén pulsado un espacio vacío de tu pantalla de inicio.',
+    widgetStep2: 'Toca Editar (o + arriba) y luego Añadir widget.',
+    widgetStep3: 'Busca Vindra y elige un tamaño.',
+    widgetFootnote: 'Registrar conductas siempre es gratis. Los demás botones, e iniciar y detener el sueño, forman parte de la suscripción.',
     shareTitle: 'Compartir, y tu privacidad',
     shareReport: 'Con el icono del portapapeles creas un resumen diario o semanal y exportas un PDF para el colegio o el terapeuta.',
     sharePartner: 'Comparte un niño con otro padre, madre o cuidador mediante un código QR. La otra persona ve la misma línea de tiempo, sin necesidad de cuenta.',
@@ -1842,6 +1872,12 @@ export const fr: Dictionary = {
     logDetails: "Compléter plus tard, au calme ? Appuie sur l'événement dans la chronologie et renseigne l'antécédent, le lieu et ce qui a aidé.",
     logMove: "L'heure n'est pas la bonne ? Maintiens un événement dans la chronologie et fais-le glisser.",
     logHub: 'Appuie sur le bouton au centre pour replier la roue. Maintiens-le pour personnaliser la roue.',
+    widgetTitle: 'Noter depuis l’écran d’accueil',
+    widgetBody: 'Le widget enregistre d’un toucher, sans ouvrir l’app. Pratique quand vous avez les mains prises.',
+    widgetStep1: 'Maintenez le doigt sur un espace vide de l’écran d’accueil.',
+    widgetStep2: 'Touchez Modifier (ou + en haut), puis Ajouter un widget.',
+    widgetStep3: 'Cherchez Vindra et choisissez une taille.',
+    widgetFootnote: 'Noter un comportement est toujours gratuit. Les autres boutons, ainsi que démarrer et arrêter le sommeil, font partie de l’abonnement.',
     shareTitle: 'Partage et confidentialité',
     shareReport: "L'icône presse-papiers crée un aperçu journalier ou hebdomadaire et exporte un PDF pour l'école ou le thérapeute.",
     sharePartner: 'Partage un enfant avec un autre parent ou accompagnant grâce à un code QR. Vous voyez la même chronologie, sans compte.',
@@ -2154,6 +2190,12 @@ export const pt: Dictionary = {
     logDetails: 'Quer completar depois, com calma? Toque no evento na linha do tempo e preencha o antecedente, o local e o que ajudou.',
     logMove: 'Horário errado? Mantenha pressionado um evento na linha do tempo e arraste.',
     logHub: 'Toque no botão do centro para recolher a roda. Mantenha pressionado para personalizá-la.',
+    widgetTitle: 'Registre pela tela de início',
+    widgetBody: 'O widget registra com um toque, sem abrir o app. Prático quando você está com as mãos ocupadas.',
+    widgetStep1: 'Toque e segure um espaço vazio na tela de início.',
+    widgetStep2: 'Toque em Editar (ou + no topo) e depois em Adicionar widget.',
+    widgetStep3: 'Procure Vindra e escolha um tamanho.',
+    widgetFootnote: 'Registrar comportamentos é sempre grátis. Os outros botões, e iniciar e parar o sono, fazem parte da assinatura.',
     shareTitle: 'Compartilhar, e a sua privacidade',
     shareReport: 'No ícone de prancheta você cria um resumo diário ou semanal e exporta um PDF para a escola ou o terapeuta.',
     sharePartner: 'Compartilhe uma criança com outro pai, mãe ou cuidador por meio de um QR code. Vocês veem a mesma linha do tempo, sem conta.',
