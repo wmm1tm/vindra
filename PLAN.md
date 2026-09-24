@@ -964,3 +964,51 @@ fix, `APP_STORE_LISTING.md`) staan gecommit.
   zodra NL/EN aantoonbaar iets trekt.
 - Duitse Sensory-Profile-termen en Spaans/Portugese "Fuga" (weglopen) nog niet door een
   moedertaalspreker bevestigd.
+
+## Update 2026-09-24: intro bij de eerste start + wielknop in het midden (voor een toekomstige update, op branch `feature/onboarding-wheel-hub`)
+
+**Niet in 1.0** (die ligt bij Apple): alles hieronder staat alleen op de branch
+`feature/onboarding-wheel-hub`, niet gemerged, niet gepusht. Overgenomen uit Ebbly (dat
+van Vindra is afgeleid), in Vindra's eigen kleuren en toon. Nog niet op een toestel getest.
+
+**Wielknop in het midden** (`components/wheel/wheel-hub.tsx`, vervangt het smalle
+randhandvat `wheel-handle.tsx`): ronde knop op de hoogte van het draaipunt, donker met
+amber rand en een neutraal regelaar-icoon (`tune-variant`). Tik = wiel in/uitklappen,
+horizontaal vegen werkt zoals het oude handvat, lang drukken (380 ms) = stevige tik, knop
+veert, het wiel wiebelt kort en "Wiel aanpassen" opent als eigen Modal
+(`WheelSettingsSheet nested={false}`). VoiceOver-hint in alle 6 talen. De Help-tekst bij
+"Wiel aanpassen" noemt het lang drukken nu ook.
+
+**Intro** (`components/onboarding/`): volledig scherm, 5 stappen met stipjes,
+Overslaan/Terug/Volgende. (1) welkom, (2) naam + optionele geboortedatum van het kind (zelfde
+`renameChild`/`updateChildBirthDate` als de naambanner; de banner blijft als vangnet als deze
+stap overgeslagen wordt), (3) "wat speelt er bij je kind?": de 5 typen met
+`defaultEnabled: false` (zelfverwonding, weglopen, stimmen, eten, zindelijkheid) aan te
+vinken, met een korte neutrale omschrijving (zelfverwonding: "momenten waarop je kind
+zichzelf pijn doet", bewust niet beschrijvend). Past het niet onder
+`MAX_ACTIVE_WHEEL_ENTRIES` (8, basis is al 7), dan maken basisknoppen plaats in de volgorde
+Overig → Positief moment → Slaap → Medicatie, en de stap zegt letterlijk welke
+(`lib/onboarding-wheel.ts`). Gedrag/Prikkel/Stemming blijven altijd. (4) hoe loggen werkt
+(tik, tweede keuze, achteraf aanleiding/locatie/wat hielp, lang drukken om te verslepen, de
+wielknop), (5) rapport, versleuteld delen, privacy en "Vindra stelt geen diagnose" (zelfde
+MDR-grens als sectie 1). Daarna, zonder abonnement, de bestaande `PaywallScreen` met
+sluitknop (3.1.2-links ongewijzigd). Alleen wat met "Volgende" bevestigd is wordt opgeslagen;
+bij opnieuw bekijken wordt het wiel alleen herschreven als je de keuze in stap 3 wijzigt.
+
+**Opslag, afwijking van Ebbly**: de vlag staat als `onboarding_done` in de bestaande
+`app_state`-tabel (toestelniveau), niet als kolom op `child`. Instellingen zijn in Vindra
+per kind, dus een kolom zou de intro opnieuw tonen bij elk nieuw, via QR gekoppeld of uit
+back-up teruggezet kind. Geen schemawijziging nodig. **Bestaande gebruikers** (al events, of
+een kind met een eigen naam) zien de intro na de update niet: `db/onboarding.ts` legt de
+vlag dan bij de eerste keer lezen stil vast. `PreferencesProvider` heeft nu een
+`loaded`-vlag, zodat de intro niet even opflitst.
+
+**Instellingen**: nieuwe veegrij "Intro opnieuw bekijken" (sluit eerst Instellingen, zet de
+vlag na 350 ms terug: twee native Modals tegelijk faalt op iOS stil).
+
+**Verificatie**: `npx tsc --noEmit` en `npm run lint` schoon (na het wissen van een
+verouderde lint-cache in `.expo/cache/eslint`, die ook op `main` een vals
+`import/no-unresolved` gaf). `npx expo-doctor`: 20/21, alleen 6 patch-versies achter
+(`expo`, `expo-router`, `@expo/ui`, `expo-glass-effect`, `expo-linking`, `expo-sharing`),
+al zo op `main`. Bewust niet in deze branch bijgewerkt; doe `npx expo install --fix` als
+losse commit bij de volgende build.
