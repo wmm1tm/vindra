@@ -1012,3 +1012,52 @@ verouderde lint-cache in `.expo/cache/eslint`, die ook op `main` een vals
 (`expo`, `expo-router`, `@expo/ui`, `expo-glass-effect`, `expo-linking`, `expo-sharing`),
 al zo op `main`. Bewust niet in deze branch bijgewerkt; doe `npx expo install --fix` als
 losse commit bij de volgende build.
+
+## Update 2026-09-24 (avond): design 2.0, widget en gelijktrekken met Nuvo, versie 1.1.0 (branch `feature/design-2`)
+
+Afgetakt van `feature/onboarding-wheel-hub` (bevat dus ook de intro en de wielhub). Niet
+naar `main` zolang 1.0 in review is; builden kan vanaf deze branch.
+
+**Design 2.0** (voorstel goedgekeurd door gebruiker, canvas
+https://claude.ai/artifact/Ayu8zuwdMtrWzPLZbK2aKh): Ebbly's design 2.0 overgenomen in
+Vindra's eigen kleuren, Material-iconen en systeemfont. Wielknoppen met donkere kern,
+gekleurde ring en naam eronder; teller als rondje in de hoek; bredere boog vanaf 7 knoppen;
+tegels op de tijdlijn met pulsringen bij vasthouden; kolomkoppen als getinte pillen die
+krimpen tot ze passen (NL "Verzorging" → "Zorg", ES "Ánimo", FR "Conduite", PT "Conduta");
+nu-lijn als pil onder de events; banner onder de kolomkoppen zolang je een event vasthoudt.
+Eén knop voor de gloed in `src/constants/design.ts`: `GLOW = 0.35`, `SHINE = false`
+(gedempter dan Ebbly: je opent Vindra vaak midden in een moeilijk moment). In nachtmodus
+gaat de gloed uit (`GlowProvider` in `src/lib/glow-context.tsx`). Geen Ebbly-iconen,
+mijlpalen, tellers of weekkaart.
+
+**Intro**: in de 2.0-stijl (ringknoppen, gloed op de gekozen rollen) en een nieuwe stap over
+de widget, nu 6 stappen.
+
+**Widget** (`src/widgets/quick-log-widget.tsx`, `src/lib/widget-sync.ts`, plugin
+`expo-widgets` in `app.json`): de eerste knoppen van je wiel die je mag loggen. Momenten
+met één tik; de slaapknop start een slaap ("sinds 21:40") en stopt hem met een tweede tik.
+De app verwerkt de tikken op volgorde bij openen/terugkomen, slaat een start over als er al
+een slaap loopt en een stop zonder lopende slaap, synct de nieuwe rijen met de partner, en
+zet de echte stand terug in de widget. Zonder abonnement alleen Gedrag (zoals in de app),
+met een regel "Meer knoppen met een abonnement". Werkt niet in Expo Go (lui geladen, dus
+geen crash). Nieuw per event-type: `widgetSymbol` (SF Symbol).
+
+**Gelijkgetrokken met Nuvo**: `isKnownEventKind`-filter in `db/events.ts` (onbekende typen
+van een nieuwere partner-versie crashen de app niet meer); help-scherm in de gedeelde
+Instellingen-shell i.p.v. een eigen Modal, met de onderwerpen tijd markeren, bewerken/
+verslepen en de kopbalk; eigen sectie "Hulp" bovenaan Instellingen (sleutel
+`replayOnboarding`); privacylink op de paywall naar `vindra.nl/nl/privacy/` of
+`/en/privacy/`. Expo-pakketten bijgewerkt (`expo install --fix`).
+
+**Nog open**
+- **`eas.json` mist `submit.production.ios.ascAppId`**: het App Store-ID van Vindra (getal
+  in de App Store Connect-URL) moet de gebruiker nog doorgeven. Zonder dat loopt
+  `eas build --auto-submit` / `eas submit` vast.
+- Proefperiode niet zichtbaar op de paywall: de code is gelijk aan Nuvo, dus het zit in de
+  winkelinstelling (Introductory Offer per abonnement in App Store Connect, en of de
+  RevenueCat-offering naar die producten wijst).
+- Toesteltest (TestFlight) van alles hierboven, vooral de widget: toevoegen aan het
+  beginscherm, moment loggen, slaap starten/stoppen met de app dicht, daarna app openen.
+- De eerste build met de widget maakt een extra target `ExpoWidgetsTarget`
+  (`com.woutertm.vindra.ExpoWidgetsTarget`, App Group `group.com.woutertm.vindra`); EAS
+  vraagt eenmalig om daarvoor een provisioning profile te maken: Y.
