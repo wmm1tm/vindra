@@ -229,10 +229,13 @@ export function OnboardingFlow({ onDone, onChildUpdated }: OnboardingFlowProps) 
 
   return (
     <Modal animationType="fade" presentationStyle="fullScreen" onRequestClose={finish}>
-      <LinearGradient colors={['#242E33', '#12171C']} style={styles.screen}>
-        <KeyboardAvoidingView
-          style={[styles.inner, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 16 }]}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* De ruimte voor statusbalk en home-balk hoort op de gradient, niet op de
+          KeyboardAvoidingView: die overschrijft zijn eigen paddingBottom met de
+          toetsenbordhoogte (0 zonder toetsenbord), waardoor de knoppen tegen de rand kwamen. */}
+      <LinearGradient
+        colors={['#242E33', '#12171C']}
+        style={[styles.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 16 }]}>
+        <KeyboardAvoidingView style={styles.inner} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.topBar}>
             <View style={styles.dots}>
               {Array.from({ length: STEP_COUNT }, (_, i) => (
