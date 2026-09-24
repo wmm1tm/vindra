@@ -262,6 +262,17 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
           icon="help-circle-outline"
           onTrigger={() => setShowHelp(true)}
         />
+        <SwipeActionRow
+          label={t.settings.replayIntroButton}
+          hint={t.settings.swipeToOpenHint}
+          icon="play-circle-outline"
+          onTrigger={() => {
+            // Eerst Instellingen dicht: twee native Modals tegelijk openen faalt op iOS
+            // soms stil (zie SettingsSheetShell). Pas daarna de intro weer aanzetten.
+            onClose();
+            setTimeout(() => preferences.setOnboardingDone(false), 350);
+          }}
+        />
 
         <SectionLabel label={t.settings.sectionBackup} />
         <View style={styles.fieldBlock}>

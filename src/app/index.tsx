@@ -9,8 +9,10 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { DayPickerSheet } from '@/components/day/day-picker-sheet';
 import { DayRatingSheet } from '@/components/day/day-rating-sheet';
 import { DayReportSheet } from '@/components/day/day-report-sheet';
+import { OnboardingFlow } from '@/components/onboarding/onboarding-flow';
 import { ChildSwitcherSheet } from '@/components/settings/child-switcher-sheet';
 import { SettingsSheet } from '@/components/settings/settings-sheet';
+import { WheelSettingsSheet } from '@/components/settings/wheel-settings-sheet';
 import { CAPSULE_WIDTH, COLUMN_GAP, EventCapsule } from '@/components/timeline/event-capsule';
 import { DOT_GAP, DOT_SIZE, EventDot } from '@/components/timeline/event-dot';
 import { EventDetailSheet } from '@/components/timeline/event-detail-sheet';
@@ -209,6 +211,9 @@ export default function TimelineScreen() {
   const [showReportSheet, setShowReportSheet] = useState(false);
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  // Geopend door lang drukken op de wielknop in het midden (zie WheelHub), als eigen
+  // Modal, los van Instellingen.
+  const [showWheelSettings, setShowWheelSettings] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
   const [markedTime, setMarkedTime] = useState<Date | null>(null);
   const [manualNightMode, setManualNightMode] = useState<boolean | null>(null);
@@ -683,7 +688,9 @@ export default function TimelineScreen() {
         targetTime={markedTime}
         onTargetConsumed={() => setMarkedTime(null)}
         badgeRefreshToken={badgeRefreshToken}
+        onCustomizeWheel={() => setShowWheelSettings(true)}
       />
+      {showWheelSettings && <WheelSettingsSheet nested={false} onClose={() => setShowWheelSettings(false)} />}
       {selectedEvent && (
         <EventDetailSheet
           event={selectedEvent}
@@ -728,6 +735,12 @@ export default function TimelineScreen() {
       )}
       {showChildSwitcher && (
         <ChildSwitcherSheet childList={children} onClose={() => setShowChildSwitcher(false)} />
+      )}
+      {/* Pas tonen zodra de instellingen gelezen zijn (preferences.loaded), anders flitst de
+          intro even op bij iemand die hem al gedaan heeft. Bestaande gebruikers met events
+          of een eigen kindnaam slaan hem vanzelf over (zie db/onboarding.ts). */}
+      {preferences.loaded && !preferences.onboardingDone && (
+        <OnboardingFlow onDone={refetchChildren} onChildUpdated={refetchChildren} />
       )}
     </View>
   );
