@@ -73,6 +73,8 @@ export interface Dictionary {
     minutePlaceholder: string;
     expandWheelLabel: string;
     collapseWheelLabel: string;
+    /** VoiceOver-uitleg bij de wielknop in het midden (tik vs. lang drukken). */
+    hubHint: string;
   };
   settings: {
     title: string;
@@ -104,6 +106,7 @@ export interface Dictionary {
     wheelButton: string;
     subscriptionButton: string;
     helpButton: string;
+    replayIntroButton: string;
     swipeToOpenHint: string;
     sectionDanger: string;
     deleteDayButton: string;
@@ -232,6 +235,41 @@ export interface Dictionary {
   };
   onboarding: {
     nameBannerTitle: string;
+    skip: string;
+    back: string;
+    next: string;
+    start: string;
+    finish: string;
+    welcomeTitle: string;
+    welcomeBody: string;
+    welcomeTagline: string;
+    childTitle: string;
+    childBody: string;
+    childFootnote: string;
+    rolesTitle: string;
+    rolesBody: string;
+    /** Getoond als de gekozen extra typen samen met de basis niet op het wiel passen. */
+    rolesRoomNote: (max: number, labels: string) => string;
+    rolesFootnote: string;
+    /** Korte, neutrale omschrijving per conditie-specifiek type (defaultEnabled: false). */
+    roleHints: {
+      zelfverwonding: string;
+      weglopen: string;
+      stimmen: string;
+      eten: string;
+      zindelijkheid: string;
+    };
+    logTitle: string;
+    logTap: string;
+    logSecondLevel: string;
+    logDetails: string;
+    logMove: string;
+    logHub: string;
+    shareTitle: string;
+    shareReport: string;
+    sharePartner: string;
+    sharePrivacy: string;
+    shareNoDiagnosis: string;
   };
   help: {
     title: string;
@@ -344,6 +382,7 @@ export const nl: Dictionary = {
     minutePlaceholder: 'mm',
     expandWheelLabel: 'Wiel tonen',
     collapseWheelLabel: 'Wiel verbergen',
+    hubHint: 'Tik om het wiel te tonen of te verbergen. Houd ingedrukt om het wiel aan te passen.',
   },
   settings: {
     title: 'Instellingen',
@@ -375,6 +414,7 @@ export const nl: Dictionary = {
     wheelButton: 'Wiel aanpassen…',
     subscriptionButton: 'Abonnement',
     helpButton: 'Help',
+    replayIntroButton: 'Intro opnieuw bekijken',
     swipeToOpenHint: 'Veeg naar links om te openen',
     sectionDanger: 'Gevarenzone',
     deleteDayButton: 'Verwijder alle events van deze dag',
@@ -518,6 +558,39 @@ export const nl: Dictionary = {
     // maar Vindra's doelgroep omvat ook oudere kinderen/tieners (zie sessienotitie
     // 2026-09-21, feedback op een echte testrun).
     nameBannerTitle: 'Hoe heet je kind?',
+    skip: 'Overslaan',
+    back: 'Terug',
+    next: 'Volgende',
+    start: 'Beginnen',
+    finish: 'Klaar',
+    welcomeTitle: 'Welkom bij Vindra',
+    welcomeBody: 'Een rustig logboek voor ouders van een neurodivergent kind. Leg gedrag, prikkels en stemming vast op het moment zelf, in een paar tikken.',
+    welcomeTagline: 'En neem een helder overzicht mee naar school of behandelaar.',
+    childTitle: 'Voor wie houd je het bij?',
+    childBody: 'De naam blijft op je eigen toestel en staat alleen in de rapporten die je zelf deelt. De geboortedatum is optioneel.',
+    childFootnote: 'Meer kinderen? Die voeg je later toe via Instellingen → Kinderen beheren.',
+    rolesTitle: 'Wat speelt er bij je kind?',
+    rolesBody: 'Het wiel heeft al een vaste basis, zoals gedrag, prikkels en stemming. Kies wat je daarnaast wilt kunnen bijhouden. Niets is verplicht.',
+    rolesRoomNote: (max, labels) => `Het wiel heeft plek voor ${max} knoppen. Om ruimte te maken, laten we ${labels} voorlopig weg.`,
+    rolesFootnote: 'Je kunt dit altijd aanpassen: houd de knop in het midden van het wiel ingedrukt, of ga naar Instellingen → Wiel aanpassen.',
+    roleHints: {
+      zelfverwonding: 'Momenten waarop je kind zichzelf pijn doet',
+      weglopen: 'Wegrennen of ongemerkt vertrekken',
+      stimmen: 'Fladderen, wiegen, geluiden: vaak zelfregulerend',
+      eten: 'Geweigerd, iets nieuws geprobeerd, gegeten',
+      zindelijkheid: 'Gelukt, of een ongelukje',
+    },
+    logTitle: 'Zo werkt loggen',
+    logTap: 'Tik op een knop in het wiel en het moment staat erin, met de tijd van nu.',
+    logSecondLevel: 'Soms volgt nog één korte keuze, zoals de ernst of het soort prikkel. Meer niet.',
+    logDetails: 'Later rustig aanvullen? Tik op het event in de tijdlijn en vul de aanleiding, locatie en wat hielp in.',
+    logMove: 'Klopt de tijd niet? Houd een event in de tijdlijn ingedrukt en versleep het.',
+    logHub: 'Tik op de knop in het midden om het wiel weg te klappen. Houd hem ingedrukt om het wiel aan te passen.',
+    shareTitle: 'Delen, en je privacy',
+    shareReport: 'Via het klembord-icoon maak je een dag- of weekoverzicht en exporteer je een PDF voor school of behandelaar.',
+    sharePartner: 'Deel een kind met een andere ouder of begeleider via een QR-code. Jullie zien dezelfde tijdlijn, zonder account.',
+    sharePrivacy: 'Alles blijft standaard op je eigen toestel, zonder account. Delen gaat end-to-end versleuteld.',
+    shareNoDiagnosis: 'Vindra legt vast, maar stelt geen diagnose. Conclusies trek je samen met de mensen die je kind kennen.',
   },
   help: {
     title: 'Wat kan Vindra?',
@@ -528,7 +601,7 @@ export const nl: Dictionary = {
       'Tik op een knop in het wiel om direct te loggen. Sommige types vragen daarna nog om een korte keuze (bv. de ernst) — dat is alles, geen extra stappen tijdens het moment zelf.',
     customizeTitle: 'Wiel aanpassen',
     customizeBody:
-      'Via Instellingen → Wiel aanpassen zet je knoppen aan of uit en verander je de volgorde. Niet elk kind heeft dezelfde types nodig — Zelfverwonding, Weglopen, Stimmen, Eten en Zindelijkheid staan daarom standaard uit, maar zijn met één tik toe te voegen (maximaal 8 tegelijk).',
+      'Via Instellingen → Wiel aanpassen zet je knoppen aan of uit en verander je de volgorde. Niet elk kind heeft dezelfde types nodig: Zelfverwonding, Weglopen, Stimmen, Eten en Zindelijkheid staan daarom standaard uit, maar zijn met één tik toe te voegen (maximaal 8 tegelijk). Snelste weg: houd de knop in het midden van het wiel even ingedrukt.',
     reportTitle: 'Rapport voor school of behandelaar',
     reportBody:
       'Via het klembord-icoon bekijk je een dag- of weekoverzicht en exporteer je een PDF — inclusief de aanleiding/locatie/wat-hielp-velden die je achteraf bij een event kunt invullen.',
@@ -634,6 +707,7 @@ export const en: Dictionary = {
     minutePlaceholder: 'mm',
     expandWheelLabel: 'Show wheel',
     collapseWheelLabel: 'Hide wheel',
+    hubHint: 'Tap to show or hide the wheel. Hold to customize the wheel.',
   },
   settings: {
     title: 'Settings',
@@ -664,6 +738,7 @@ export const en: Dictionary = {
     wheelButton: 'Customize wheel…',
     subscriptionButton: 'Subscription',
     helpButton: 'Help',
+    replayIntroButton: 'Replay the intro',
     swipeToOpenHint: 'Swipe left to open',
     sectionDanger: 'Danger zone',
     deleteDayButton: 'Delete all events for this day',
@@ -795,6 +870,39 @@ export const en: Dictionary = {
   },
   onboarding: {
     nameBannerTitle: "What's your child's name?",
+    skip: 'Skip',
+    back: 'Back',
+    next: 'Next',
+    start: "Let's start",
+    finish: 'Done',
+    welcomeTitle: 'Welcome to Vindra',
+    welcomeBody: 'A calm logbook for parents of a neurodivergent child. Capture behavior, sensory input and mood in the moment, in just a few taps.',
+    welcomeTagline: 'And bring a clear overview to school or a care provider.',
+    childTitle: 'Who are you keeping track for?',
+    childBody: 'The name stays on your own device and only appears in reports you choose to share. The birth date is optional.',
+    childFootnote: 'More than one child? Add them later under Settings → Manage children.',
+    rolesTitle: 'What plays a role for your child?',
+    rolesBody: 'The wheel already has a fixed base, such as behavior, sensory input and mood. Choose what else you would like to track. Nothing is required.',
+    rolesRoomNote: (max, labels) => `The wheel has room for ${max} buttons. To make space, ${labels} will be left off for now.`,
+    rolesFootnote: 'You can change this any time: hold the button in the middle of the wheel, or go to Settings → Customize wheel.',
+    roleHints: {
+      zelfverwonding: 'Moments when your child hurts themselves',
+      weglopen: 'Running off or leaving without telling anyone',
+      stimmen: 'Flapping, rocking, sounds: often self-regulating',
+      eten: 'Refused, tried something new, ate',
+      zindelijkheid: 'Went well, or an accident',
+    },
+    logTitle: 'How logging works',
+    logTap: 'Tap a button on the wheel and the moment is saved, with the current time.',
+    logSecondLevel: 'Sometimes one quick choice follows, like severity or the kind of sensory input. That is all.',
+    logDetails: 'Want to add more later, when things are calm? Tap the event on the timeline to fill in the antecedent, location and what helped.',
+    logMove: 'Wrong time? Press and hold an event on the timeline and drag it.',
+    logHub: 'Tap the button in the middle to fold the wheel away. Hold it to customize the wheel.',
+    shareTitle: 'Sharing, and your privacy',
+    shareReport: 'Tap the clipboard icon for a day or week overview, and export a PDF for school or a care provider.',
+    sharePartner: 'Share a child with another parent or caregiver using a QR code. You both see the same timeline, no account needed.',
+    sharePrivacy: 'Everything stays on your own device by default, without an account. Sharing is end-to-end encrypted.',
+    shareNoDiagnosis: 'Vindra records, it does not diagnose. You draw conclusions together with the people who know your child.',
   },
   help: {
     title: 'What can Vindra do?',
@@ -805,7 +913,7 @@ export const en: Dictionary = {
       "Tap a button on the wheel to log instantly. Some types then ask for one quick choice (e.g. severity) — that's it, no extra steps in the moment itself.",
     customizeTitle: 'Customize the wheel',
     customizeBody:
-      'Under Settings → Customize wheel you can turn buttons on or off and change their order. Not every child needs the same types — Self-harm, Elopement, Stimming, Eating, and Toileting are off by default, but can be added with one tap (up to 8 at once).',
+      'Under Settings → Customize wheel you can turn buttons on or off and change their order. Not every child needs the same types: Self-harm, Elopement, Stimming, Eating, and Toileting are off by default, but can be added with one tap (up to 8 at once). Quickest way: press and hold the button in the middle of the wheel.',
     reportTitle: 'Report for school or a care provider',
     reportBody:
       "Tap the clipboard icon to see a day or week overview and export a PDF — including the antecedent/location/what-helped fields you can fill in for an event afterward.",
@@ -909,6 +1017,7 @@ export const de: Dictionary = {
     minutePlaceholder: 'mm',
     expandWheelLabel: 'Rad anzeigen',
     collapseWheelLabel: 'Rad ausblenden',
+    hubHint: 'Tippen zeigt oder verbirgt das Rad. Gedrückt halten, um das Rad anzupassen.',
   },
   settings: {
     title: 'Einstellungen',
@@ -939,6 +1048,7 @@ export const de: Dictionary = {
     wheelButton: 'Rad anpassen…',
     subscriptionButton: 'Abonnement',
     helpButton: 'Hilfe',
+    replayIntroButton: 'Einführung erneut ansehen',
     swipeToOpenHint: 'Nach links wischen zum Öffnen',
     sectionDanger: 'Gefahrenzone',
     deleteDayButton: 'Alle Ereignisse dieses Tages löschen',
@@ -1070,6 +1180,39 @@ export const de: Dictionary = {
   },
   onboarding: {
     nameBannerTitle: 'Wie heißt dein Kind?',
+    skip: 'Überspringen',
+    back: 'Zurück',
+    next: 'Weiter',
+    start: "Los geht's",
+    finish: 'Fertig',
+    welcomeTitle: 'Willkommen bei Vindra',
+    welcomeBody: 'Ein ruhiges Logbuch für Eltern eines neurodivergenten Kindes. Halte Verhalten, Reize und Stimmung direkt im Moment fest, mit wenigen Tipps.',
+    welcomeTagline: 'Und nimm eine klare Übersicht mit zur Schule oder zum Therapeuten.',
+    childTitle: 'Für wen führst du das Logbuch?',
+    childBody: 'Der Name bleibt auf deinem eigenen Gerät und erscheint nur in Berichten, die du selbst teilst. Das Geburtsdatum ist freiwillig.',
+    childFootnote: 'Mehrere Kinder? Die fügst du später unter Einstellungen → Kinder verwalten hinzu.',
+    rolesTitle: 'Was spielt bei deinem Kind eine Rolle?',
+    rolesBody: 'Das Rad hat schon eine feste Grundausstattung, etwa Verhalten, Reize und Stimmung. Wähle, was du zusätzlich festhalten möchtest. Nichts davon ist Pflicht.',
+    rolesRoomNote: (max, labels) => `Das Rad hat Platz für ${max} Buttons. Um Platz zu schaffen, lassen wir ${labels} vorerst weg.`,
+    rolesFootnote: 'Das kannst du jederzeit ändern: Halte den Button in der Mitte des Rads gedrückt, oder geh zu Einstellungen → Rad anpassen.',
+    roleHints: {
+      zelfverwonding: 'Momente, in denen dein Kind sich selbst wehtut',
+      weglopen: 'Davonlaufen oder unbemerkt weggehen',
+      stimmen: 'Flattern, Schaukeln, Geräusche: oft selbstregulierend',
+      eten: 'Abgelehnt, Neues probiert, gegessen',
+      zindelijkheid: 'Hat geklappt, oder ein kleines Missgeschick',
+    },
+    logTitle: 'So funktioniert das Protokollieren',
+    logTap: 'Tippe auf einen Button im Rad, und der Moment ist gespeichert, mit der aktuellen Uhrzeit.',
+    logSecondLevel: 'Manchmal folgt noch eine kurze Auswahl, etwa der Schweregrad oder die Art des Reizes. Mehr nicht.',
+    logDetails: 'Später in Ruhe ergänzen? Tippe in der Zeitleiste auf das Ereignis und trage Auslöser, Ort und Was geholfen hat ein.',
+    logMove: 'Uhrzeit stimmt nicht? Halte ein Ereignis in der Zeitleiste gedrückt und verschiebe es.',
+    logHub: 'Tippe auf den Button in der Mitte, um das Rad einzuklappen. Halte ihn gedrückt, um das Rad anzupassen.',
+    shareTitle: 'Teilen, und deine Privatsphäre',
+    shareReport: 'Über das Klemmbrett-Symbol erstellst du eine Tages- oder Wochenübersicht und exportierst ein PDF für Schule oder Therapeut.',
+    sharePartner: 'Teile ein Kind per QR-Code mit einem anderen Elternteil oder Betreuer. Ihr seht dieselbe Zeitleiste, ganz ohne Konto.',
+    sharePrivacy: 'Standardmäßig bleibt alles auf deinem eigenen Gerät, ohne Konto. Geteilt wird Ende-zu-Ende-verschlüsselt.',
+    shareNoDiagnosis: 'Vindra hält fest, stellt aber keine Diagnose. Schlüsse ziehst du gemeinsam mit den Menschen, die dein Kind kennen.',
   },
   help: {
     title: 'Was kann Vindra?',
@@ -1080,7 +1223,7 @@ export const de: Dictionary = {
       "Tippe auf einen Button im Rad, um sofort zu protokollieren. Manche Typen fragen danach noch kurz nach (z. B. dem Schweregrad) — das war's, keine weiteren Schritte im Moment selbst.",
     customizeTitle: 'Rad anpassen',
     customizeBody:
-      'Unter Einstellungen → Rad anpassen aktivierst oder deaktivierst du Buttons und änderst ihre Reihenfolge. Nicht jedes Kind braucht dieselben Typen — Selbstverletzung, Weglaufen, Stimming, Essen und Sauberkeitstraining sind daher standardmäßig deaktiviert, lassen sich aber mit einem Tipp hinzufügen (maximal 8 gleichzeitig).',
+      'Unter Einstellungen → Rad anpassen aktivierst oder deaktivierst du Buttons und änderst ihre Reihenfolge. Nicht jedes Kind braucht dieselben Typen: Selbstverletzung, Weglaufen, Stimming, Essen und Sauberkeitstraining sind daher standardmäßig deaktiviert, lassen sich aber mit einem Tipp hinzufügen (maximal 8 gleichzeitig). Am schnellsten: Halte den Button in der Mitte des Rads kurz gedrückt.',
     reportTitle: 'Bericht für Schule oder Therapeut',
     reportBody:
       'Über das Klemmbrett-Symbol siehst du eine Tages- oder Wochenübersicht und exportierst ein PDF — inklusive der Auslöser-/Ort-/Was-geholfen-hat-Felder, die du nachträglich bei einem Ereignis ausfüllen kannst.',
@@ -1184,6 +1327,7 @@ export const es: Dictionary = {
     minutePlaceholder: 'mm',
     expandWheelLabel: 'Mostrar rueda',
     collapseWheelLabel: 'Ocultar rueda',
+    hubHint: 'Toca para mostrar u ocultar la rueda. Mantén pulsado para personalizarla.',
   },
   settings: {
     title: 'Ajustes',
@@ -1214,6 +1358,7 @@ export const es: Dictionary = {
     wheelButton: 'Personalizar rueda…',
     subscriptionButton: 'Suscripción',
     helpButton: 'Ayuda',
+    replayIntroButton: 'Ver la introducción otra vez',
     swipeToOpenHint: 'Desliza hacia la izquierda para abrir',
     sectionDanger: 'Zona de peligro',
     deleteDayButton: 'Eliminar todos los eventos de este día',
@@ -1345,6 +1490,39 @@ export const es: Dictionary = {
   },
   onboarding: {
     nameBannerTitle: '¿Cómo se llama tu hijo/a?',
+    skip: 'Omitir',
+    back: 'Atrás',
+    next: 'Siguiente',
+    start: 'Empezar',
+    finish: 'Listo',
+    welcomeTitle: 'Te damos la bienvenida a Vindra',
+    welcomeBody: 'Un diario tranquilo para padres de un niño neurodivergente. Registra la conducta, los estímulos sensoriales y el estado de ánimo en el momento, con solo unos toques.',
+    welcomeTagline: 'Y lleva un resumen claro al colegio o al terapeuta.',
+    childTitle: '¿Para quién llevas el registro?',
+    childBody: 'El nombre se queda en tu propio dispositivo y solo aparece en los informes que tú decidas compartir. La fecha de nacimiento es opcional.',
+    childFootnote: '¿Más de un niño? Añádelos más tarde en Ajustes → Gestionar niños.',
+    rolesTitle: '¿Qué es relevante para tu hijo/a?',
+    rolesBody: 'La rueda ya tiene una base fija, como la conducta, los estímulos sensoriales y el estado de ánimo. Elige qué más quieres poder registrar. Nada es obligatorio.',
+    rolesRoomNote: (max, labels) => `La rueda tiene espacio para ${max} botones. Para hacer sitio, de momento dejamos fuera ${labels}.`,
+    rolesFootnote: 'Puedes cambiarlo cuando quieras: mantén pulsado el botón del centro de la rueda, o ve a Ajustes → Personalizar rueda.',
+    roleHints: {
+      zelfverwonding: 'Momentos en que tu hijo/a se hace daño a sí mismo/a',
+      weglopen: 'Salir corriendo o irse sin avisar',
+      stimmen: 'Aletear, balancearse, hacer sonidos: a menudo autorregulador',
+      eten: 'Rechazó, probó algo nuevo, comió',
+      zindelijkheid: 'Salió bien, o un pequeño accidente',
+    },
+    logTitle: 'Así funciona el registro',
+    logTap: 'Toca un botón de la rueda y el momento queda guardado, con la hora actual.',
+    logSecondLevel: 'A veces sigue una elección rápida, como la gravedad o el tipo de estímulo. Nada más.',
+    logDetails: '¿Quieres completarlo más tarde, con calma? Toca el evento en la línea de tiempo y añade el antecedente, la ubicación y qué ayudó.',
+    logMove: '¿La hora no es correcta? Mantén pulsado un evento en la línea de tiempo y arrástralo.',
+    logHub: 'Toca el botón del centro para plegar la rueda. Mantenlo pulsado para personalizarla.',
+    shareTitle: 'Compartir, y tu privacidad',
+    shareReport: 'Con el icono del portapapeles creas un resumen diario o semanal y exportas un PDF para el colegio o el terapeuta.',
+    sharePartner: 'Comparte un niño con otro padre, madre o cuidador mediante un código QR. La otra persona ve la misma línea de tiempo, sin necesidad de cuenta.',
+    sharePrivacy: 'Por defecto, todo se queda en tu propio dispositivo, sin cuenta. Compartir se hace con cifrado de extremo a extremo.',
+    shareNoDiagnosis: 'Vindra registra, pero no diagnostica. Las conclusiones las sacas tú junto con las personas que conocen a tu hijo/a.',
   },
   help: {
     title: '¿Qué puede hacer Vindra?',
@@ -1355,7 +1533,7 @@ export const es: Dictionary = {
       'Toca un botón de la rueda para registrar al instante. Algunos tipos piden después una elección rápida (por ejemplo, la gravedad) — eso es todo, sin pasos adicionales en el momento.',
     customizeTitle: 'Personalizar la rueda',
     customizeBody:
-      'En Ajustes → Personalizar rueda puedes activar o desactivar botones y cambiar su orden. No todos los niños necesitan los mismos tipos — Autolesión, Fuga, Autoestimulación, Alimentación y Control de esfínteres están desactivados por defecto, pero se pueden añadir con un toque (máximo 8 a la vez).',
+      'En Ajustes → Personalizar rueda puedes activar o desactivar botones y cambiar su orden. No todos los niños necesitan los mismos tipos: Autolesión, Fuga, Autoestimulación, Alimentación y Control de esfínteres están desactivados por defecto, pero se pueden añadir con un toque (máximo 8 a la vez). Lo más rápido: mantén pulsado el botón del centro de la rueda.',
     reportTitle: 'Informe para el colegio o el terapeuta',
     reportBody:
       'Con el icono del portapapeles ves un resumen diario o semanal y exportas un PDF — incluidos los campos de antecedente/ubicación/qué ayudó que puedes rellenar después en un evento.',
@@ -1459,6 +1637,7 @@ export const fr: Dictionary = {
     minutePlaceholder: 'mm',
     expandWheelLabel: 'Afficher la roue',
     collapseWheelLabel: 'Masquer la roue',
+    hubHint: 'Appuie pour afficher ou masquer la roue. Maintiens pour personnaliser la roue.',
   },
   settings: {
     title: 'Réglages',
@@ -1489,6 +1668,7 @@ export const fr: Dictionary = {
     wheelButton: 'Personnaliser la roue…',
     subscriptionButton: 'Abonnement',
     helpButton: 'Aide',
+    replayIntroButton: "Revoir l'introduction",
     swipeToOpenHint: 'Glisser vers la gauche pour ouvrir',
     sectionDanger: 'Zone de danger',
     deleteDayButton: 'Supprimer tous les événements de ce jour',
@@ -1620,6 +1800,39 @@ export const fr: Dictionary = {
   },
   onboarding: {
     nameBannerTitle: "Comment s'appelle ton enfant ?",
+    skip: 'Passer',
+    back: 'Retour',
+    next: 'Suivant',
+    start: 'Commencer',
+    finish: 'Terminé',
+    welcomeTitle: 'Bienvenue dans Vindra',
+    welcomeBody: "Un journal apaisant pour les parents d'un enfant neurodivergent. Note le comportement, les stimuli sensoriels et l'humeur sur le moment, en quelques touches.",
+    welcomeTagline: "Et apporte un aperçu clair à l'école ou au thérapeute.",
+    childTitle: 'Pour qui tiens-tu ce journal ?',
+    childBody: "Le prénom reste sur ton propre appareil et n'apparaît que dans les rapports que tu choisis de partager. La date de naissance est facultative.",
+    childFootnote: 'Plusieurs enfants ? Ajoute-les plus tard dans Réglages → Gérer les enfants.',
+    rolesTitle: "Qu'est-ce qui compte pour ton enfant ?",
+    rolesBody: "La roue a déjà une base fixe, comme le comportement, les stimuli sensoriels et l'humeur. Choisis ce que tu veux suivre en plus. Rien n'est obligatoire.",
+    rolesRoomNote: (max, labels) => `La roue a de la place pour ${max} boutons. Pour faire de la place, nous laissons ${labels} de côté pour l'instant.`,
+    rolesFootnote: 'Tu peux changer cela à tout moment : maintiens le bouton au centre de la roue, ou va dans Réglages → Personnaliser la roue.',
+    roleHints: {
+      zelfverwonding: 'Moments où ton enfant se fait du mal',
+      weglopen: "Partir en courant ou s'éloigner sans prévenir",
+      stimmen: 'Battre des mains, se balancer, faire des sons : souvent autorégulateur',
+      eten: 'Refusé, nouvel aliment goûté, mangé',
+      zindelijkheid: 'Réussi, ou un petit accident',
+    },
+    logTitle: 'Comment enregistrer',
+    logTap: "Appuie sur un bouton de la roue et le moment est enregistré, avec l'heure actuelle.",
+    logSecondLevel: "Parfois, un choix rapide suit, comme la gravité ou le type de stimulus. C'est tout.",
+    logDetails: "Compléter plus tard, au calme ? Appuie sur l'événement dans la chronologie et renseigne l'antécédent, le lieu et ce qui a aidé.",
+    logMove: "L'heure n'est pas la bonne ? Maintiens un événement dans la chronologie et fais-le glisser.",
+    logHub: 'Appuie sur le bouton au centre pour replier la roue. Maintiens-le pour personnaliser la roue.',
+    shareTitle: 'Partage et confidentialité',
+    shareReport: "L'icône presse-papiers crée un aperçu journalier ou hebdomadaire et exporte un PDF pour l'école ou le thérapeute.",
+    sharePartner: 'Partage un enfant avec un autre parent ou accompagnant grâce à un code QR. Vous voyez la même chronologie, sans compte.',
+    sharePrivacy: 'Par défaut, tout reste sur ton propre appareil, sans compte. Le partage est chiffré de bout en bout.',
+    shareNoDiagnosis: 'Vindra enregistre, mais ne pose pas de diagnostic. Les conclusions, tu les tires avec les personnes qui connaissent ton enfant.',
   },
   help: {
     title: 'Que peut faire Vindra ?',
@@ -1630,7 +1843,7 @@ export const fr: Dictionary = {
       "Appuie sur un bouton de la roue pour enregistrer instantanément. Certains types demandent ensuite un choix rapide (par exemple la gravité) — c'est tout, aucune étape supplémentaire sur le moment.",
     customizeTitle: 'Personnaliser la roue',
     customizeBody:
-      "Dans Réglages → Personnaliser la roue, tu actives ou désactives des boutons et changes leur ordre. Chaque enfant n'a pas besoin des mêmes types — Automutilation, Fugue, Autostimulation, Alimentation et Propreté sont donc désactivés par défaut, mais s'ajoutent en un tapotement (maximum 8 à la fois).",
+      "Dans Réglages → Personnaliser la roue, tu actives ou désactives des boutons et changes leur ordre. Chaque enfant n'a pas besoin des mêmes types: Automutilation, Fugue, Autostimulation, Alimentation et Propreté sont donc désactivés par défaut, mais s'ajoutent en un tapotement (maximum 8 à la fois). Le plus rapide : maintiens le bouton au centre de la roue.",
     reportTitle: "Rapport pour l'école ou le thérapeute",
     reportBody:
       "L'icône presse-papiers affiche un aperçu journalier ou hebdomadaire et exporte un PDF — avec les champs antécédent/lieu/ce qui a aidé que tu peux remplir après coup sur un événement.",
@@ -1734,6 +1947,7 @@ export const pt: Dictionary = {
     minutePlaceholder: 'mm',
     expandWheelLabel: 'Mostrar roda',
     collapseWheelLabel: 'Ocultar roda',
+    hubHint: 'Toque para mostrar ou ocultar a roda. Mantenha pressionado para personalizá-la.',
   },
   settings: {
     title: 'Configurações',
@@ -1764,6 +1978,7 @@ export const pt: Dictionary = {
     wheelButton: 'Personalizar roda…',
     subscriptionButton: 'Assinatura',
     helpButton: 'Ajuda',
+    replayIntroButton: 'Ver a introdução de novo',
     swipeToOpenHint: 'Deslize para a esquerda para abrir',
     sectionDanger: 'Zona de perigo',
     deleteDayButton: 'Excluir todos os eventos deste dia',
@@ -1895,6 +2110,39 @@ export const pt: Dictionary = {
   },
   onboarding: {
     nameBannerTitle: 'Qual é o nome do seu filho(a)?',
+    skip: 'Pular',
+    back: 'Voltar',
+    next: 'Próximo',
+    start: 'Começar',
+    finish: 'Concluir',
+    welcomeTitle: 'Boas-vindas ao Vindra',
+    welcomeBody: 'Um diário tranquilo para pais de uma criança neurodivergente. Registre comportamento, estímulos sensoriais e humor no momento, com poucos toques.',
+    welcomeTagline: 'E leve um resumo claro para a escola ou o terapeuta.',
+    childTitle: 'Para quem você vai registrar?',
+    childBody: 'O nome fica no seu próprio aparelho e só aparece nos relatórios que você decidir compartilhar. A data de nascimento é opcional.',
+    childFootnote: 'Mais de uma criança? Adicione depois em Configurações → Gerenciar crianças.',
+    rolesTitle: 'O que é relevante para o seu filho(a)?',
+    rolesBody: 'A roda já tem uma base fixa, como comportamento, estímulos sensoriais e humor. Escolha o que mais você quer poder registrar. Nada é obrigatório.',
+    rolesRoomNote: (max, labels) => `A roda tem espaço para ${max} botões. Para abrir espaço, deixamos ${labels} de fora por enquanto.`,
+    rolesFootnote: 'Você pode mudar isso quando quiser: mantenha pressionado o botão no centro da roda, ou vá em Configurações → Personalizar roda.',
+    roleHints: {
+      zelfverwonding: 'Momentos em que a criança se machuca',
+      weglopen: 'Sair correndo ou ir embora sem avisar',
+      stimmen: 'Agitar as mãos, balançar o corpo, fazer sons: muitas vezes autorregulador',
+      eten: 'Recusou, experimentou algo novo, comeu',
+      zindelijkheid: 'Deu certo, ou um escape',
+    },
+    logTitle: 'Como funciona o registro',
+    logTap: 'Toque em um botão da roda e o momento fica salvo, com o horário atual.',
+    logSecondLevel: 'Às vezes vem uma escolha rápida, como a gravidade ou o tipo de estímulo. Só isso.',
+    logDetails: 'Quer completar depois, com calma? Toque no evento na linha do tempo e preencha o antecedente, o local e o que ajudou.',
+    logMove: 'Horário errado? Mantenha pressionado um evento na linha do tempo e arraste.',
+    logHub: 'Toque no botão do centro para recolher a roda. Mantenha pressionado para personalizá-la.',
+    shareTitle: 'Compartilhar, e a sua privacidade',
+    shareReport: 'No ícone de prancheta você cria um resumo diário ou semanal e exporta um PDF para a escola ou o terapeuta.',
+    sharePartner: 'Compartilhe uma criança com outro pai, mãe ou cuidador por meio de um QR code. Vocês veem a mesma linha do tempo, sem conta.',
+    sharePrivacy: 'Por padrão, tudo fica no seu próprio aparelho, sem conta. O compartilhamento é criptografado de ponta a ponta.',
+    shareNoDiagnosis: 'O Vindra registra, mas não faz diagnóstico. As conclusões você tira junto com as pessoas que conhecem a criança.',
   },
   help: {
     title: 'O que o Vindra pode fazer?',
@@ -1905,7 +2153,7 @@ export const pt: Dictionary = {
       'Toque em um botão da roda para registrar instantaneamente. Alguns tipos pedem depois uma escolha rápida (por exemplo, a gravidade) — é só isso, sem etapas extras no momento.',
     customizeTitle: 'Personalizar a roda',
     customizeBody:
-      'Em Configurações → Personalizar roda, você ativa ou desativa botões e muda a ordem deles. Nem toda criança precisa dos mesmos tipos — por isso Automutilação, Fuga, Autoestimulação, Alimentação e Controle de esfíncteres vêm desativados por padrão, mas podem ser adicionados com um toque (no máximo 8 de uma vez).',
+      'Em Configurações → Personalizar roda, você ativa ou desativa botões e muda a ordem deles. Nem toda criança precisa dos mesmos tipos: por isso Automutilação, Fuga, Autoestimulação, Alimentação e Controle de esfíncteres vêm desativados por padrão, mas podem ser adicionados com um toque (no máximo 8 de uma vez). O jeito mais rápido: mantenha pressionado o botão no centro da roda.',
     reportTitle: 'Relatório para a escola ou o terapeuta',
     reportBody:
       'No ícone de prancheta você vê um resumo diário ou semanal e exporta um PDF — incluindo os campos de antecedente/local/o que ajudou que você pode preencher depois em um evento.',
