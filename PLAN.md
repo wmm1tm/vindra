@@ -1061,3 +1061,7 @@ verslepen en de kopbalk; eigen sectie "Hulp" bovenaan Instellingen (sleutel
 - De eerste build met de widget maakt een extra target `ExpoWidgetsTarget`
   (`com.woutertm.vindra.ExpoWidgetsTarget`, App Group `group.com.woutertm.vindra`); EAS
   vraagt eenmalig om daarvoor een provisioning profile te maken: Y.
+
+## Vraag om een beoordeling (2026-09-24)
+
+`src/lib/review-prompt.ts` (gegevens in `src/db/review-prompt.ts`): na een log via het wiel het iOS-beoordelingsvenster (`expo-store-review`), alleen bij minstens 10 events op 3 verschillende dagen, hooguit 3 keer en minstens 120 dagen ertussen, nooit in de nachtmodus of tijdens de intro. Geen eigen vraag vooraf.

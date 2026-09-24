@@ -50,6 +50,7 @@ import { usePreferences } from '@/lib/preferences-context';
 import { usePurchases } from '@/lib/purchases-context';
 import { pushDayRating, pushEvent, useSyncLoop } from '@/lib/sync';
 import { dateKey, minutesSinceMidnight, TIME_SNAP_MINUTES } from '@/lib/time';
+import { maybeAskForReview } from '@/lib/review-prompt';
 import { assignColumns, assignIntervalColumns } from '@/lib/timeline-layout';
 import { syncWidget } from '@/lib/widget-sync';
 
@@ -65,6 +66,8 @@ const MIN_EVENT_DURATION_MINUTES = TIME_SNAP_MINUTES;
 // and we lean on minDuration + the ScrollView's own pan recognition to keep a normal
 // scroll swipe from being mistaken for a long-press in the first place.
 const LONG_PRESS_MAX_DISTANCE = 10000;
+/** Wacht tot de log-animatie van het wiel klaar is voordat het review-venster verschijnt. */
+const REVIEW_PROMPT_DELAY_MS = 1500;
 
 // Which event kinds are duration-based, for getOpenOrOverlappingEvents — the db layer
 // itself doesn't know this (that's app-level config), so callers supply the list.
@@ -368,6 +371,18 @@ export default function TimelineScreen() {
       if (childId) pushEvent(db, childId, row);
     },
     [db, childId]
+  );
+
+  // Alleen een log via het wiel is een "net iets gedaan"-moment om om een review te vragen:
+  // niet na bewerken/verslepen en niet vanuit de widget. Nooit in de nachtmodus en niet
+  // zolang de intro nog loopt. Even wachten zodat de log-animatie klaar is.
+  const reviewAllowed = preferences.loaded && preferences.onboardingDone && !isNightMode;
+  const handleWheelLogged = useCallback(
+    (row: EventRow) => {
+      handleLogged(row);
+      if (reviewAllowed) setTimeout(() => maybeAskForReview(db), REVIEW_PROMPT_DELAY_MS);
+    },
+    [db, handleLogged, reviewAllowed]
   );
 
   const handleDelete = useCallback(() => {
@@ -729,7 +744,7 @@ export default function TimelineScreen() {
           )}
         </View>
         <WheelArc
-          onLogged={handleLogged}
+          onLogged={handleWheelLogged}
           onCancelledEvent={handleWheelCancelled}
           mirrored={mirrored}
           selectedDate={selectedDate}
