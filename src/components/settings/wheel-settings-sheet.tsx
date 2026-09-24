@@ -20,6 +20,9 @@ import { usePreferences } from '@/lib/preferences-context';
 
 interface WheelSettingsSheetProps {
   onClose: () => void;
+  /** false = eigen Modal (geopend door lang drukken op de wielknop op de tijdlijn); true
+   * (standaard) = als overlay binnen het instellingenscherm. */
+  nested?: boolean;
 }
 
 interface Row {
@@ -139,7 +142,7 @@ function DraggableWheelRow({
   );
 }
 
-export function WheelSettingsSheet({ onClose }: WheelSettingsSheetProps) {
+export function WheelSettingsSheet({ onClose, nested = true }: WheelSettingsSheetProps) {
   const preferences = usePreferences();
   const { t } = useI18n();
   const [rows, setRows] = useState<Row[]>(() => buildInitialRows(preferences.wheelConfig));
@@ -182,7 +185,7 @@ export function WheelSettingsSheet({ onClose }: WheelSettingsSheetProps) {
 
   return (
     <SettingsSheetShell
-      nested
+      nested={nested}
       title={t.wheelSettings.title}
       onClose={onClose}
       footer={

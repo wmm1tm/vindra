@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import {
@@ -36,7 +36,7 @@ import { PaywallScreen } from '@/components/paywall/paywall-screen';
 import { InlineInputCard } from '@/components/wheel/inline-input-card';
 import { WheelBadge } from '@/components/wheel/wheel-badge';
 import { WheelButton } from '@/components/wheel/wheel-button';
-import { WheelHandle } from '@/components/wheel/wheel-handle';
+import { WheelHub } from '@/components/wheel/wheel-hub';
 import { WheelRing, type WheelRingItem } from '@/components/wheel/wheel-ring';
 
 const RADIUS = 210;
@@ -69,6 +69,8 @@ interface WheelArcProps {
    * bewerken, verwijderen, verslepen) — ook wijzigingen die niet via het wiel zelf
    * gebeurden, zoals verwijderen via het tijdlijn-detailscherm. */
   badgeRefreshToken?: number;
+  /** Lang drukken op de wielknop in het midden: "Wiel aanpassen" openen. */
+  onCustomizeWheel?: () => void;
 }
 
 export function WheelArc({
@@ -79,6 +81,7 @@ export function WheelArc({
   targetTime = null,
   onTargetConsumed,
   badgeRefreshToken = 0,
+  onCustomizeWheel,
 }: WheelArcProps) {
   const db = useSQLiteContext();
   const { volumeUnit, tempUnit, dayStartHour, wheelConfig } = usePreferences();
@@ -108,6 +111,9 @@ export function WheelArc({
   // Start altijd uitgeklapt bij het openen van de app.
   const [wheelExpanded, setWheelExpanded] = useState(true);
   const arcProgress = useSharedValue(1);
+  // Kort wiebelen van de knoppen bij lang drukken op de hub, zoals iOS-apps op het
+  // beginscherm wiebelen als je ze gaat schikken. Daarna opent "Wiel aanpassen".
+  const wiggle = useSharedValue(0);
   useEffect(() => {
     arcProgress.value = withSpring(wheelExpanded ? 1 : 0, { damping: 20, stiffness: 200 });
   }, [wheelExpanded, arcProgress]);
@@ -148,6 +154,7 @@ export function WheelArc({
     opacity: arcProgress.value,
     transform: [
       { translateX: (1 - arcProgress.value) * (mirrored ? -WHEEL_COLLAPSE_TRANSLATE : WHEEL_COLLAPSE_TRANSLATE) },
+      { rotate: `${wiggle.value}deg` },
     ],
   }));
   const mirrorX = (x: number) => (mirrored ? width - x : x);
@@ -642,7 +649,23 @@ export function WheelArc({
         })}
       </Animated.View>
       {stage === 'closed' && (
-        <WheelHandle mirrored={mirrored} y={pivot.y} expanded={wheelExpanded} onSetExpanded={setWheelExpanded} />
+        <WheelHub
+          mirrored={mirrored}
+          y={pivot.y}
+          expanded={wheelExpanded}
+          onSetExpanded={setWheelExpanded}
+          onCustomize={() => {
+            setWheelExpanded(true);
+            wiggle.value = withSequence(
+              withTiming(-1.6, { duration: 60 }),
+              withTiming(1.6, { duration: 80 }),
+              withTiming(-1.2, { duration: 80 }),
+              withTiming(1.2, { duration: 80 }),
+              withTiming(0, { duration: 60 })
+            );
+            setTimeout(() => onCustomizeWheel?.(), 360);
+          }}
+        />
       )}
 
       {stage === 'group' && activeEntry && (
