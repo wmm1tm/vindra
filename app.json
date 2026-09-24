@@ -2,7 +2,7 @@
   "expo": {
     "name": "Vindra",
     "slug": "Vindra",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "vindra",
@@ -54,6 +54,24 @@
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
+      ],
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "QuickLog",
+              "displayName": "Vindra",
+              "description": "Log a moment in one tap, straight from your home screen.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium"
+                ]
+              }
+            }
+          ]
+        }
       ]
     ],
     "experiments": {
@@ -67,7 +85,24 @@
       "revenuecatAndroidApiKey": "test_LniOVHomAMQOawlqMGAGsINALxU",
       "router": {},
       "eas": {
-        "projectId": "94d817ec-3474-46ec-ba91-8b53c26134a3"
+        "projectId": "94d817ec-3474-46ec-ba91-8b53c26134a3",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "ExpoWidgetsTarget",
+                  "bundleIdentifier": "com.woutertm.vindra.ExpoWidgetsTarget",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.woutertm.vindra"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
       }
     }
   }

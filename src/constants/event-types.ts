@@ -35,6 +35,9 @@ export interface EventTypeConfig {
    * database-/schemaveld — zelfde reden als bij Nuvo: een nieuw gratis/premium-type
    * mag nooit een migratie vergen. */
   requiresPremium: boolean;
+  /** SF Symbol voor de beginscherm-widget: die draait in een aparte iOS-runtime die
+   * alleen SwiftUI kent, dus niet onze eigen iconensets. */
+  widgetSymbol: string;
 }
 
 export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
@@ -44,6 +47,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   // aanvoelt als "nog een moodtracker". Rapport/export blijft wél premium.
   gedrag: {
     kind: 'gedrag',
+    widgetSymbol: 'exclamationmark.triangle.fill',
     label: (t) => t.eventTypes.gedrag,
     icon: 'report-problem',
     iconSet: 'material',
@@ -54,6 +58,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
   prikkel: {
     kind: 'prikkel',
+    widgetSymbol: 'bolt.fill',
     label: (t) => t.eventTypes.prikkel,
     icon: 'lightning-bolt',
     iconSet: 'mci',
@@ -64,6 +69,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
   stemming: {
     kind: 'stemming',
+    widgetSymbol: 'face.smiling',
     label: (t) => t.eventTypes.stemming,
     icon: 'mood',
     iconSet: 'material',
@@ -74,6 +80,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
   medicatie: {
     kind: 'medicatie',
+    widgetSymbol: 'pills.fill',
     label: (t) => t.eventTypes.medicatie,
     icon: 'medication',
     iconSet: 'material',
@@ -84,6 +91,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
   slaap: {
     kind: 'slaap',
+    widgetSymbol: 'moon.fill',
     label: (t) => t.eventTypes.slaap,
     icon: 'bedtime',
     iconSet: 'material',
@@ -96,6 +104,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
   positief: {
     kind: 'positief',
+    widgetSymbol: 'star.fill',
     label: (t) => t.eventTypes.positief,
     icon: 'star',
     iconSet: 'material',
@@ -109,6 +118,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   // direct loggen, geen tweede keuzelaag, vrije notitie erna.
   overig: {
     kind: 'overig',
+    widgetSymbol: 'plus.circle.fill',
     label: (t) => t.eventTypes.overig,
     icon: 'add-circle',
     iconSet: 'material',
@@ -122,6 +132,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   // de catalogus (en daarmee in "Wiel aanpassen") maar niet standaard op het wiel.
   zelfverwonding: {
     kind: 'zelfverwonding',
+    widgetSymbol: 'bandage.fill',
     label: (t) => t.eventTypes.zelfverwonding,
     icon: 'bandage',
     iconSet: 'mci',
@@ -132,6 +143,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
   weglopen: {
     kind: 'weglopen',
+    widgetSymbol: 'figure.run',
     label: (t) => t.eventTypes.weglopen,
     icon: 'run-fast',
     iconSet: 'mci',
@@ -142,6 +154,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
   stimmen: {
     kind: 'stimmen',
+    widgetSymbol: 'hand.wave.fill',
     label: (t) => t.eventTypes.stimmen,
     icon: 'hand-wave',
     iconSet: 'mci',
@@ -152,6 +165,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
   eten: {
     kind: 'eten',
+    widgetSymbol: 'fork.knife',
     label: (t) => t.eventTypes.eten,
     icon: 'silverware-fork-knife',
     iconSet: 'mci',
@@ -162,6 +176,7 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
   zindelijkheid: {
     kind: 'zindelijkheid',
+    widgetSymbol: 'toilet.fill',
     label: (t) => t.eventTypes.zindelijkheid,
     icon: 'toilet',
     iconSet: 'mci',
@@ -464,4 +479,12 @@ export function getEventVisual(kind: EventKind, variant: string | null): { icon:
     iconSet: option?.iconSet ?? base.iconSet,
     color: option?.color ?? base.color,
   };
+}
+
+/** Of een kind-string uit de database, een sync-payload of een back-up een type is dat
+ * deze app-versie kent. Een partner met een nieuwere versie kan een type loggen dat hier
+ * (nog) niet bestaat; zo'n event slaan we over in plaats van te crashen op
+ * `EVENT_TYPES[kind]` === undefined. */
+export function isKnownEventKind(kind: string): kind is EventKind {
+  return Object.prototype.hasOwnProperty.call(EVENT_TYPES, kind);
 }

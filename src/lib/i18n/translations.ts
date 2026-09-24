@@ -325,6 +325,13 @@ export interface Dictionary {
     termsOfUseLabel: string;
     privacyPolicyLabel: string;
   };
+  /** Teksten op de beginscherm-widget (lib/widget-sync.ts). */
+  widget: {
+    today: string;
+    sleepStart: string;
+    sleepSince: string;
+    lockedHint: string;
+  };
 }
 
 export const nl: Dictionary = {
@@ -661,6 +668,12 @@ export const nl: Dictionary = {
     termsOfUseLabel: 'Gebruiksvoorwaarden',
     privacyPolicyLabel: 'Privacybeleid',
   },
+  widget: {
+    today: 'vandaag',
+    sleepStart: 'Start',
+    sleepSince: 'sinds',
+    lockedHint: 'Meer knoppen met een abonnement',
+  },
 };
 
 // Placeholder-aliassen — nog geen echte vertaling, zie bestandsheader.
@@ -981,6 +994,12 @@ export const en: Dictionary = {
     termsOfUseLabel: 'Terms of Use',
     privacyPolicyLabel: 'Privacy Policy',
   },
+  widget: {
+    today: 'today',
+    sleepStart: 'Start',
+    sleepSince: 'since',
+    lockedHint: 'More buttons with a subscription',
+  },
 };
 export const de: Dictionary = {
   common: {
@@ -1298,6 +1317,12 @@ export const de: Dictionary = {
       'Abonnements verlängern sich automatisch, außer du kündigst mindestens 24 Stunden vor Ende des laufenden Zeitraums über deine Apple-ID-Einstellungen.',
     termsOfUseLabel: 'Nutzungsbedingungen',
     privacyPolicyLabel: 'Datenschutzerklärung',
+  },
+  widget: {
+    today: 'heute',
+    sleepStart: 'Start',
+    sleepSince: 'seit',
+    lockedHint: 'Mehr Tasten mit einem Abo',
   },
 };
 export const es: Dictionary = {
@@ -1617,6 +1642,12 @@ export const es: Dictionary = {
     termsOfUseLabel: 'Condiciones de uso',
     privacyPolicyLabel: 'Política de privacidad',
   },
+  widget: {
+    today: 'hoy',
+    sleepStart: 'Iniciar',
+    sleepSince: 'desde',
+    lockedHint: 'Más botones con una suscripción',
+  },
 };
 export const fr: Dictionary = {
   common: {
@@ -1935,6 +1966,12 @@ export const fr: Dictionary = {
     termsOfUseLabel: "Conditions d'utilisation",
     privacyPolicyLabel: 'Politique de confidentialité',
   },
+  widget: {
+    today: 'aujourd’hui',
+    sleepStart: 'Début',
+    sleepSince: 'depuis',
+    lockedHint: 'Plus de boutons avec un abonnement',
+  },
 };
 export const pt: Dictionary = {
   common: {
@@ -2252,5 +2289,11 @@ export const pt: Dictionary = {
       'As assinaturas são renovadas automaticamente, a menos que você cancele pelo menos 24 horas antes do fim do período atual, nas configurações do seu Apple ID.',
     termsOfUseLabel: 'Termos de uso',
     privacyPolicyLabel: 'Política de privacidade',
+  },
+  widget: {
+    today: 'hoje',
+    sleepStart: 'Iniciar',
+    sleepSince: 'desde',
+    lockedHint: 'Mais botões com uma assinatura',
   },
 };

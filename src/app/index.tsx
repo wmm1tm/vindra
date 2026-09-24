@@ -1,7 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { AppState, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS, useSharedValue } from 'react-native-reanimated';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -47,9 +47,11 @@ import { useActiveChild } from '@/lib/active-child-context';
 import { GlowProvider } from '@/lib/glow-context';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/preferences-context';
+import { usePurchases } from '@/lib/purchases-context';
 import { pushDayRating, pushEvent, useSyncLoop } from '@/lib/sync';
 import { dateKey, minutesSinceMidnight, TIME_SNAP_MINUTES } from '@/lib/time';
 import { assignColumns, assignIntervalColumns } from '@/lib/timeline-layout';
+import { syncWidget } from '@/lib/widget-sync';
 
 const MIN_PIXELS_PER_HOUR = 55;
 const MAX_PIXELS_PER_HOUR = 280;
@@ -202,6 +204,7 @@ export default function TimelineScreen() {
   const preferences = usePreferences();
   const { t, localeTag } = useI18n();
   const { childId } = useActiveChild();
+  const { status: purchasesStatus } = usePurchases();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const mirrored = preferences.leftHanded;
   const scrollRef = useRef<ScrollView>(null);
@@ -290,6 +293,30 @@ export default function TimelineScreen() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMarkedTime(null);
   }, [childId, selectedDate, selectedDateKey, refetchEvents]);
+
+  // Beginscherm-widget (lib/widget-sync.ts): bij openen en bij terugkomen naar de app de
+  // tikken van de widget inlezen als events (ook slaap starten/stoppen), en na elke
+  // wijziging de tellers en de slaapstand erop bijwerken. Doet niets in Expo Go.
+  const { wheelConfig, dayStartHour, timeFormat } = preferences;
+  const isEntitled = purchasesStatus === 'entitled';
+  const runWidgetSync = useCallback(() => {
+    if (!childId) return;
+    syncWidget(db, childId, wheelConfig, dayStartHour, isEntitled, timeFormat === '12h', t).then((changed) => {
+      if (changed.length === 0) return;
+      refetchEvents();
+      setBadgeRefreshToken((token) => token + 1);
+      for (const row of changed) pushEvent(db, childId, row);
+    });
+  }, [db, childId, wheelConfig, dayStartHour, isEntitled, timeFormat, t, refetchEvents]);
+  useEffect(() => {
+    runWidgetSync();
+  }, [runWidgetSync, badgeRefreshToken]);
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') runWidgetSync();
+    });
+    return () => subscription.remove();
+  }, [runWidgetSync]);
 
   useEffect(() => {
     if (!isToday) return;
