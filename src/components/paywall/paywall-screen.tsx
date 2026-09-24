@@ -15,7 +15,9 @@ import { ENTITLEMENT_ID } from '@/lib/purchases';
 // the privacy policy) on the purchase screen itself, not just in the App Store listing
 // text.
 const EULA_URL = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
-const PRIVACY_POLICY_URL = 'https://wmm1tm.github.io/vindra-privacy/';
+// Op het eigen domein (vindra.nl), in het Nederlands of Engels — de site heeft alleen die twee.
+const PRIVACY_POLICY_URL_NL = 'https://vindra.nl/nl/privacy/';
+const PRIVACY_POLICY_URL_EN = 'https://vindra.nl/en/privacy/';
 
 type OfferingsState =
   | { kind: 'loading' }
@@ -89,7 +91,8 @@ function PlanOption({
  * Prijzen komen live van RevenueCat/de App Store (`priceString`) i.p.v. hardcoded, zodat
  * ze automatisch kloppen per regio/valuta. */
 export function PaywallScreen({ onClose }: { onClose?: () => void }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const privacyPolicyUrl = language === 'nl' ? PRIVACY_POLICY_URL_NL : PRIVACY_POLICY_URL_EN;
   const insets = useSafeAreaInsets();
   const [state, setState] = useState<OfferingsState>({ kind: 'loading' });
   const [selected, setSelected] = useState<'monthly' | 'annual'>('annual');
@@ -242,7 +245,7 @@ export function PaywallScreen({ onClose }: { onClose?: () => void }) {
             <Text style={styles.termsLink}>{t.subscription.termsOfUseLabel}</Text>
           </Pressable>
           <Text style={styles.terms}> · </Text>
-          <Pressable onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+          <Pressable onPress={() => Linking.openURL(privacyPolicyUrl)}>
             <Text style={styles.termsLink}>{t.subscription.privacyPolicyLabel}</Text>
           </Pressable>
         </View>

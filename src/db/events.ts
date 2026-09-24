@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { EventDetails, EventKind } from '@/constants/event-types';
+import { isKnownEventKind, type EventDetails, type EventKind } from '@/constants/event-types';
 
 export interface EventRow {
   id: string;
@@ -27,6 +27,14 @@ export interface EventRow {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+}
+
+/** Laat events weg waarvan deze app-versie het type niet kent — bv. een type dat een
+ * partner met een nieuwere versie via sync (of een back-up van een nieuwere versie)
+ * heeft aangeleverd. De rij blijft wel in de database staan, dus na een app-update
+ * verschijnt hij alsnog. Zonder dit crasht elk scherm op `EVENT_TYPES[kind]`. */
+function knownKindsOnly(rows: EventRow[]): EventRow[] {
+  return rows.filter((row) => isKnownEventKind(row.kind));
 }
 
 function generateId() {
@@ -85,10 +93,11 @@ export async function insertMomentEvent(
 }
 
 export async function getAllEvents(db: SQLiteDatabase, childId: string): Promise<EventRow[]> {
-  return db.getAllAsync<EventRow>(
+  const rows = await db.getAllAsync<EventRow>(
     `SELECT * FROM event WHERE child_id = ? AND deleted_at IS NULL ORDER BY start_at ASC`,
     [childId]
   );
+  return knownKindsOnly(rows);
 }
 
 /** Zet een volledige event-rij terug (export/import), met behoud van het originele id en
@@ -179,12 +188,13 @@ export async function getEventsForRange(
   rangeStart: Date,
   rangeEnd: Date
 ): Promise<EventRow[]> {
-  return db.getAllAsync<EventRow>(
+  const rows = await db.getAllAsync<EventRow>(
     `SELECT * FROM event
      WHERE child_id = ? AND deleted_at IS NULL AND start_at >= ? AND start_at < ?
      ORDER BY start_at ASC`,
     [childId, rangeStart.toISOString(), rangeEnd.toISOString()]
   );
+  return knownKindsOnly(rows);
 }
 
 /** Days into the past this still looks for a session that hasn't wrapped up yet —

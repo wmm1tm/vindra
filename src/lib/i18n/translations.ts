@@ -81,6 +81,7 @@ export interface Dictionary {
     sectionDisplay: string;
     sectionTimeUnits: string;
     sectionManage: string;
+    sectionHelp: string;
     sectionBackup: string;
     timeFormat: string;
     format24: string;
@@ -106,7 +107,7 @@ export interface Dictionary {
     wheelButton: string;
     subscriptionButton: string;
     helpButton: string;
-    replayIntroButton: string;
+    replayOnboarding: string;
     swipeToOpenHint: string;
     sectionDanger: string;
     deleteDayButton: string;
@@ -286,6 +287,12 @@ export interface Dictionary {
     intro: string;
     wheelTitle: string;
     wheelBody: string;
+    timeTitle: string;
+    timeBody: string;
+    editTitle: string;
+    editBody: string;
+    headerTitle: string;
+    headerBody: string;
     customizeTitle: string;
     customizeBody: string;
     reportTitle: string;
@@ -406,6 +413,7 @@ export const nl: Dictionary = {
     sectionDisplay: 'Weergave',
     sectionTimeUnits: 'Tijd & eenheden',
     sectionManage: 'Beheer',
+    sectionHelp: 'Hulp',
     sectionBackup: 'Back-up',
     timeFormat: 'Tijdnotatie',
     format24: '24-uurs',
@@ -431,7 +439,7 @@ export const nl: Dictionary = {
     wheelButton: 'Wiel aanpassen…',
     subscriptionButton: 'Abonnement',
     helpButton: 'Help',
-    replayIntroButton: 'Intro opnieuw bekijken',
+    replayOnboarding: 'Intro opnieuw bekijken',
     swipeToOpenHint: 'Veeg naar links om te openen',
     sectionDanger: 'Gevarenzone',
     deleteDayButton: 'Verwijder alle events van deze dag',
@@ -625,6 +633,12 @@ export const nl: Dictionary = {
     wheelBody:
       'Tik op een knop in het wiel om direct te loggen. Sommige types vragen daarna nog om een korte keuze (bv. de ernst) — dat is alles, geen extra stappen tijdens het moment zelf.',
     customizeTitle: 'Wiel aanpassen',
+    timeTitle: 'Op een ander tijdstip loggen',
+    timeBody: 'Houd je vinger op een lege plek in de tijdlijn en schuif naar het juiste tijdstip. Wat je daarna in het wiel kiest, krijgt die tijd. Bekijk je een andere dag dan vandaag, dan vraagt Vindra zelf om een tijd.',
+    editTitle: 'Aanpassen of verwijderen',
+    editBody: 'Tik op een event in de tijdlijn om het te bekijken, aan te passen of te verwijderen. Houd een event vast en schuif het om het naar een andere tijd te verplaatsen.',
+    headerTitle: 'De knoppen bovenin',
+    headerBody: 'Ster: geef de dag een score. Klembord: dag- en weekrapport, ook als PDF. Pijltjes: wiel naar links of rechts (linkshandig). Maan: nachtmodus met gedimde kleuren. Tandwiel: instellingen. Tik op de naam van je kind om te wisselen, en op de datum om een andere dag te kiezen.',
     customizeBody:
       'Via Instellingen → Wiel aanpassen zet je knoppen aan of uit en verander je de volgorde. Niet elk kind heeft dezelfde types nodig: Zelfverwonding, Weglopen, Stimmen, Eten en Zindelijkheid staan daarom standaard uit, maar zijn met één tik toe te voegen (maximaal 8 tegelijk). Snelste weg: houd de knop in het midden van het wiel even ingedrukt.',
     reportTitle: 'Rapport voor school of behandelaar',
@@ -745,6 +759,7 @@ export const en: Dictionary = {
     sectionDisplay: 'Display',
     sectionTimeUnits: 'Time & units',
     sectionManage: 'Manage',
+    sectionHelp: 'Help',
     sectionBackup: 'Backup',
     timeFormat: 'Time format',
     format24: '24-hour',
@@ -769,7 +784,7 @@ export const en: Dictionary = {
     wheelButton: 'Customize wheel…',
     subscriptionButton: 'Subscription',
     helpButton: 'Help',
-    replayIntroButton: 'Replay the intro',
+    replayOnboarding: 'Replay the intro',
     swipeToOpenHint: 'Swipe left to open',
     sectionDanger: 'Danger zone',
     deleteDayButton: 'Delete all events for this day',
@@ -951,6 +966,12 @@ export const en: Dictionary = {
     wheelBody:
       "Tap a button on the wheel to log instantly. Some types then ask for one quick choice (e.g. severity) — that's it, no extra steps in the moment itself.",
     customizeTitle: 'Customize the wheel',
+    timeTitle: 'Logging at a different time',
+    timeBody: 'Press and hold an empty spot on the timeline and slide to the right time. Whatever you pick on the wheel next gets that time. When you view a day other than today, Vindra asks you for a time.',
+    editTitle: 'Editing or deleting',
+    editBody: 'Tap an event on the timeline to view, edit or delete it. Press and hold an event and slide it to move it to a different time.',
+    headerTitle: 'The buttons at the top',
+    headerBody: 'Star: rate the day. Clipboard: day and week report, also as PDF. Arrows: wheel on the left or right (left-handed). Moon: night mode with dimmed colors. Gear: settings. Tap your child\'s name to switch, and the date to pick another day.',
     customizeBody:
       'Under Settings → Customize wheel you can turn buttons on or off and change their order. Not every child needs the same types: Self-harm, Elopement, Stimming, Eating, and Toileting are off by default, but can be added with one tap (up to 8 at once). Quickest way: press and hold the button in the middle of the wheel.',
     reportTitle: 'Report for school or a care provider',
@@ -1069,6 +1090,7 @@ export const de: Dictionary = {
     sectionDisplay: 'Anzeige',
     sectionTimeUnits: 'Zeit & Einheiten',
     sectionManage: 'Verwalten',
+    sectionHelp: 'Hilfe',
     sectionBackup: 'Backup',
     timeFormat: 'Zeitformat',
     format24: '24-Stunden',
@@ -1093,7 +1115,7 @@ export const de: Dictionary = {
     wheelButton: 'Rad anpassen…',
     subscriptionButton: 'Abonnement',
     helpButton: 'Hilfe',
-    replayIntroButton: 'Einführung erneut ansehen',
+    replayOnboarding: 'Einführung erneut ansehen',
     swipeToOpenHint: 'Nach links wischen zum Öffnen',
     sectionDanger: 'Gefahrenzone',
     deleteDayButton: 'Alle Ereignisse dieses Tages löschen',
@@ -1275,6 +1297,12 @@ export const de: Dictionary = {
     wheelBody:
       "Tippe auf einen Button im Rad, um sofort zu protokollieren. Manche Typen fragen danach noch kurz nach (z. B. dem Schweregrad) — das war's, keine weiteren Schritte im Moment selbst.",
     customizeTitle: 'Rad anpassen',
+    timeTitle: 'Zu einer anderen Uhrzeit erfassen',
+    timeBody: 'Halte eine leere Stelle in der Zeitleiste gedrückt und schiebe zur richtigen Uhrzeit. Was du danach im Rad wählst, bekommt diese Uhrzeit. Schaust du dir einen anderen Tag als heute an, fragt Vindra selbst nach einer Uhrzeit.',
+    editTitle: 'Bearbeiten oder löschen',
+    editBody: 'Tippe auf einen Eintrag in der Zeitleiste, um ihn anzusehen, zu bearbeiten oder zu löschen. Halte einen Eintrag gedrückt und schiebe ihn, um ihn auf eine andere Uhrzeit zu verschieben.',
+    headerTitle: 'Die Buttons oben',
+    headerBody: 'Stern: bewerte den Tag. Klemmbrett: Tages- und Wochenbericht, auch als PDF. Pfeile: Rad links oder rechts (Linkshänder). Mond: Nachtmodus mit gedimmten Farben. Zahnrad: Einstellungen. Tippe auf den Namen deines Kindes, um zu wechseln, und auf das Datum, um einen anderen Tag zu wählen.',
     customizeBody:
       'Unter Einstellungen → Rad anpassen aktivierst oder deaktivierst du Buttons und änderst ihre Reihenfolge. Nicht jedes Kind braucht dieselben Typen: Selbstverletzung, Weglaufen, Stimming, Essen und Sauberkeitstraining sind daher standardmäßig deaktiviert, lassen sich aber mit einem Tipp hinzufügen (maximal 8 gleichzeitig). Am schnellsten: Halte den Button in der Mitte des Rads kurz gedrückt.',
     reportTitle: 'Bericht für Schule oder Therapeut',
@@ -1393,6 +1421,7 @@ export const es: Dictionary = {
     sectionDisplay: 'Pantalla',
     sectionTimeUnits: 'Hora y unidades',
     sectionManage: 'Gestionar',
+    sectionHelp: 'Ayuda',
     sectionBackup: 'Copia de seguridad',
     timeFormat: 'Formato de hora',
     format24: '24 horas',
@@ -1417,7 +1446,7 @@ export const es: Dictionary = {
     wheelButton: 'Personalizar rueda…',
     subscriptionButton: 'Suscripción',
     helpButton: 'Ayuda',
-    replayIntroButton: 'Ver la introducción otra vez',
+    replayOnboarding: 'Ver la introducción otra vez',
     swipeToOpenHint: 'Desliza hacia la izquierda para abrir',
     sectionDanger: 'Zona de peligro',
     deleteDayButton: 'Eliminar todos los eventos de este día',
@@ -1599,6 +1628,12 @@ export const es: Dictionary = {
     wheelBody:
       'Toca un botón de la rueda para registrar al instante. Algunos tipos piden después una elección rápida (por ejemplo, la gravedad) — eso es todo, sin pasos adicionales en el momento.',
     customizeTitle: 'Personalizar la rueda',
+    timeTitle: 'Registrar a otra hora',
+    timeBody: 'Mantén pulsado un espacio vacío de la línea de tiempo y desliza hasta la hora correcta. Lo siguiente que elijas en la rueda tendrá esa hora. Si miras otro día que no sea hoy, Vindra te pedirá una hora.',
+    editTitle: 'Editar o eliminar',
+    editBody: 'Toca un registro en la línea de tiempo para verlo, editarlo o eliminarlo. Mantén pulsado un registro y deslízalo para moverlo a otra hora.',
+    headerTitle: 'Los botones de arriba',
+    headerBody: 'Estrella: puntúa el día. Portapapeles: informe del día y de la semana, también en PDF. Flechas: rueda a la izquierda o a la derecha (zurdos). Luna: modo noche con colores atenuados. Engranaje: ajustes. Toca el nombre de tu hijo para cambiar, y la fecha para elegir otro día.',
     customizeBody:
       'En Ajustes → Personalizar rueda puedes activar o desactivar botones y cambiar su orden. No todos los niños necesitan los mismos tipos: Autolesión, Fuga, Autoestimulación, Alimentación y Control de esfínteres están desactivados por defecto, pero se pueden añadir con un toque (máximo 8 a la vez). Lo más rápido: mantén pulsado el botón del centro de la rueda.',
     reportTitle: 'Informe para el colegio o el terapeuta',
@@ -1717,6 +1752,7 @@ export const fr: Dictionary = {
     sectionDisplay: 'Affichage',
     sectionTimeUnits: 'Heure et unités',
     sectionManage: 'Gérer',
+    sectionHelp: 'Aide',
     sectionBackup: 'Sauvegarde',
     timeFormat: "Format de l'heure",
     format24: '24 heures',
@@ -1741,7 +1777,7 @@ export const fr: Dictionary = {
     wheelButton: 'Personnaliser la roue…',
     subscriptionButton: 'Abonnement',
     helpButton: 'Aide',
-    replayIntroButton: "Revoir l'introduction",
+    replayOnboarding: "Revoir l'introduction",
     swipeToOpenHint: 'Glisser vers la gauche pour ouvrir',
     sectionDanger: 'Zone de danger',
     deleteDayButton: 'Supprimer tous les événements de ce jour',
@@ -1903,12 +1939,12 @@ export const fr: Dictionary = {
     logDetails: "Compléter plus tard, au calme ? Appuie sur l'événement dans la chronologie et renseigne l'antécédent, le lieu et ce qui a aidé.",
     logMove: "L'heure n'est pas la bonne ? Maintiens un événement dans la chronologie et fais-le glisser.",
     logHub: 'Appuie sur le bouton au centre pour replier la roue. Maintiens-le pour personnaliser la roue.',
-    widgetTitle: 'Noter depuis l’écran d’accueil',
-    widgetBody: 'Le widget enregistre d’un toucher, sans ouvrir l’app. Pratique quand vous avez les mains prises.',
-    widgetStep1: 'Maintenez le doigt sur un espace vide de l’écran d’accueil.',
-    widgetStep2: 'Touchez Modifier (ou + en haut), puis Ajouter un widget.',
-    widgetStep3: 'Cherchez Vindra et choisissez une taille.',
-    widgetFootnote: 'Noter un comportement est toujours gratuit. Les autres boutons, ainsi que démarrer et arrêter le sommeil, font partie de l’abonnement.',
+    widgetTitle: 'Enregistrer depuis l’écran d’accueil',
+    widgetBody: 'Le widget enregistre d’un toucher, sans ouvrir l’app. Pratique quand tu as les mains prises.',
+    widgetStep1: 'Maintiens le doigt sur un espace vide de l’écran d’accueil.',
+    widgetStep2: 'Touche Modifier (ou + en haut), puis Ajouter un widget.',
+    widgetStep3: 'Cherche Vindra et choisis une taille.',
+    widgetFootnote: 'Enregistrer un comportement est toujours gratuit. Les autres boutons, ainsi que démarrer et arrêter le sommeil, font partie de l’abonnement.',
     shareTitle: 'Partage et confidentialité',
     shareReport: "L'icône presse-papiers crée un aperçu journalier ou hebdomadaire et exporte un PDF pour l'école ou le thérapeute.",
     sharePartner: 'Partage un enfant avec un autre parent ou accompagnant grâce à un code QR. Vous voyez la même chronologie, sans compte.',
@@ -1923,6 +1959,12 @@ export const fr: Dictionary = {
     wheelBody:
       "Appuie sur un bouton de la roue pour enregistrer instantanément. Certains types demandent ensuite un choix rapide (par exemple la gravité) — c'est tout, aucune étape supplémentaire sur le moment.",
     customizeTitle: 'Personnaliser la roue',
+    timeTitle: 'Enregistrer à une autre heure',
+    timeBody: 'Maintiens le doigt sur un endroit vide de la chronologie et fais-le glisser jusqu\'à la bonne heure. Ce que tu choisis ensuite sur la roue prend cette heure. Si tu regardes un autre jour qu\'aujourd\'hui, Vindra te demande une heure.',
+    editTitle: 'Modifier ou supprimer',
+    editBody: 'Touche un événement dans la chronologie pour le voir, le modifier ou le supprimer. Maintiens un événement et fais-le glisser pour le déplacer à une autre heure.',
+    headerTitle: 'Les boutons en haut',
+    headerBody: 'Étoile : note la journée. Presse-papiers : rapport du jour et de la semaine, aussi en PDF. Flèches : roue à gauche ou à droite (gauchers). Lune : mode nuit aux couleurs atténuées. Engrenage : réglages. Touche le prénom de ton enfant pour changer, et la date pour choisir un autre jour.',
     customizeBody:
       "Dans Réglages → Personnaliser la roue, tu actives ou désactives des boutons et changes leur ordre. Chaque enfant n'a pas besoin des mêmes types: Automutilation, Fugue, Autostimulation, Alimentation et Propreté sont donc désactivés par défaut, mais s'ajoutent en un tapotement (maximum 8 à la fois). Le plus rapide : maintiens le bouton au centre de la roue.",
     reportTitle: "Rapport pour l'école ou le thérapeute",
@@ -2041,6 +2083,7 @@ export const pt: Dictionary = {
     sectionDisplay: 'Exibição',
     sectionTimeUnits: 'Hora e unidades',
     sectionManage: 'Gerenciar',
+    sectionHelp: 'Ajuda',
     sectionBackup: 'Backup',
     timeFormat: 'Formato de hora',
     format24: '24 horas',
@@ -2065,7 +2108,7 @@ export const pt: Dictionary = {
     wheelButton: 'Personalizar roda…',
     subscriptionButton: 'Assinatura',
     helpButton: 'Ajuda',
-    replayIntroButton: 'Ver a introdução de novo',
+    replayOnboarding: 'Ver a introdução de novo',
     swipeToOpenHint: 'Deslize para a esquerda para abrir',
     sectionDanger: 'Zona de perigo',
     deleteDayButton: 'Excluir todos os eventos deste dia',
@@ -2247,6 +2290,12 @@ export const pt: Dictionary = {
     wheelBody:
       'Toque em um botão da roda para registrar instantaneamente. Alguns tipos pedem depois uma escolha rápida (por exemplo, a gravidade) — é só isso, sem etapas extras no momento.',
     customizeTitle: 'Personalizar a roda',
+    timeTitle: 'Registrar em outro horário',
+    timeBody: 'Mantenha o dedo pressionado em um espaço vazio da linha do tempo e deslize até o horário certo. O que você escolher na roda em seguida fica com esse horário. Se você estiver vendo outro dia que não hoje, o Vindra pede um horário.',
+    editTitle: 'Editar ou excluir',
+    editBody: 'Toque em um registro na linha do tempo para ver, editar ou excluir. Mantenha um registro pressionado e deslize para movê-lo para outro horário.',
+    headerTitle: 'Os botões no topo',
+    headerBody: 'Estrela: dê uma nota ao dia. Prancheta: relatório do dia e da semana, também em PDF. Setas: roda à esquerda ou à direita (canhotos). Lua: modo noturno com cores suaves. Engrenagem: configurações. Toque no nome da criança para trocar, e na data para escolher outro dia.',
     customizeBody:
       'Em Configurações → Personalizar roda, você ativa ou desativa botões e muda a ordem deles. Nem toda criança precisa dos mesmos tipos: por isso Automutilação, Fuga, Autoestimulação, Alimentação e Controle de esfíncteres vêm desativados por padrão, mas podem ser adicionados com um toque (no máximo 8 de uma vez). O jeito mais rápido: mantenha pressionado o botão no centro da roda.',
     reportTitle: 'Relatório para a escola ou o terapeuta',

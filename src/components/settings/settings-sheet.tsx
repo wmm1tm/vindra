@@ -32,6 +32,9 @@ interface SettingsSheetProps {
   onDayEventsDeleted: (rows: EventRow[]) => void;
 }
 
+// Lang genoeg voor de sluit-animatie van Instellingen voordat de intro-Modal opent.
+const REPLAY_AFTER_CLOSE_MS = 350;
+
 function clampDayStartHour(text: string): number {
   const parsed = Number(text);
   return text.trim() && !Number.isNaN(parsed) ? Math.min(Math.max(Math.round(parsed), 0), 23) : 0;
@@ -164,6 +167,25 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
           )}
         </>
       }>
+        <SectionLabel label={t.settings.sectionHelp} />
+        <SwipeActionRow
+          label={t.settings.helpButton}
+          hint={t.settings.swipeToOpenHint}
+          icon="help-circle-outline"
+          onTrigger={() => setShowHelp(true)}
+        />
+        <SwipeActionRow
+          label={t.settings.replayOnboarding}
+          hint={t.settings.swipeToOpenHint}
+          icon="play-circle-outline"
+          onTrigger={() => {
+            // Eerst Instellingen dicht: twee native Modals tegelijk openen faalt op iOS
+            // soms stil (zie SettingsSheetShell). Pas daarna de intro weer aanzetten.
+            onClose();
+            setTimeout(() => preferences.setOnboardingDone(false), REPLAY_AFTER_CLOSE_MS);
+          }}
+        />
+
         <SectionLabel label={t.settings.sectionDisplay} />
         <SwitchRow
           label={t.settings.leftHanded}
@@ -255,23 +277,6 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
           hint={t.settings.swipeToOpenHint}
           icon="star-outline"
           onTrigger={() => setShowSubscription(true)}
-        />
-        <SwipeActionRow
-          label={t.settings.helpButton}
-          hint={t.settings.swipeToOpenHint}
-          icon="help-circle-outline"
-          onTrigger={() => setShowHelp(true)}
-        />
-        <SwipeActionRow
-          label={t.settings.replayIntroButton}
-          hint={t.settings.swipeToOpenHint}
-          icon="play-circle-outline"
-          onTrigger={() => {
-            // Eerst Instellingen dicht: twee native Modals tegelijk openen faalt op iOS
-            // soms stil (zie SettingsSheetShell). Pas daarna de intro weer aanzetten.
-            onClose();
-            setTimeout(() => preferences.setOnboardingDone(false), 350);
-          }}
         />
 
         <SectionLabel label={t.settings.sectionBackup} />
