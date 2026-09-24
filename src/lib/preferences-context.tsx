@@ -7,6 +7,7 @@ import {
   type ChildSettings,
   type ChildSettingsUpdate,
 } from '@/db/child';
+import { getOnboardingDone, setOnboardingDone as persistOnboardingDone } from '@/db/onboarding';
 import { useActiveChild } from '@/lib/active-child-context';
 
 const DEFAULT_SETTINGS: ChildSettings = {
@@ -22,12 +23,23 @@ const DEFAULT_SETTINGS: ChildSettings = {
 };
 
 interface PreferencesContextValue extends ChildSettings {
+  /** false tot de instellingen uit de database zijn gelezen. Nodig om bv. de intro niet
+   * even te laten opflitsen bij iemand die hem al gedaan heeft. */
+  loaded: boolean;
+  /** Is de intro bij de eerste start doorlopen of overgeslagen? Toestelniveau, niet per
+   * kind (zie db/onboarding.ts), maar hier meegegeven omdat het net als de rest een
+   * weergave-instelling is die het hoofdscherm moet kennen. */
+  onboardingDone: boolean;
+  setOnboardingDone: (done: boolean) => Promise<void>;
   save: (patch: ChildSettingsUpdate) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
 const PreferencesContext = createContext<PreferencesContextValue>({
   ...DEFAULT_SETTINGS,
+  loaded: false,
+  onboardingDone: true,
+  setOnboardingDone: async () => {},
   save: async () => {},
   refresh: async () => {},
 });
@@ -38,6 +50,8 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const db = useSQLiteContext();
   const { childId } = useActiveChild();
   const [settings, setSettings] = useState<ChildSettings>(DEFAULT_SETTINGS);
+  const [loaded, setLoaded] = useState(false);
+  const [onboardingDone, setOnboardingDoneState] = useState(true);
 
   const refresh = useCallback(async () => {
     if (!childId) return;
@@ -49,8 +63,12 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     if (!childId) return;
     let ignore = false;
     (async () => {
-      const next = await getChildSettings(db, childId);
-      if (!ignore) setSettings(next);
+      const [next, done] = await Promise.all([getChildSettings(db, childId), getOnboardingDone(db)]);
+      if (!ignore) {
+        setSettings(next);
+        setOnboardingDoneState(done);
+        setLoaded(true);
+      }
     })();
     return () => {
       ignore = true;
@@ -66,8 +84,18 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     [db, childId, refresh]
   );
 
+  const setOnboardingDone = useCallback(
+    async (done: boolean) => {
+      await persistOnboardingDone(db, done);
+      setOnboardingDoneState(done);
+    },
+    [db]
+  );
+
   return (
-    <PreferencesContext.Provider value={{ ...settings, save, refresh }}>{children}</PreferencesContext.Provider>
+    <PreferencesContext.Provider value={{ ...settings, loaded, onboardingDone, setOnboardingDone, save, refresh }}>
+      {children}
+    </PreferencesContext.Provider>
   );
 }
 
