@@ -40,6 +40,11 @@ import { WheelHub } from '@/components/wheel/wheel-hub';
 import { WheelRing, type WheelRingItem } from '@/components/wheel/wheel-ring';
 
 const RADIUS = 210;
+// Bij 7-8 knoppen overlappen de knoppen en hun namen op de standaardboog: dan een grotere
+// én bredere boog (zoals Ebbly na de toesteltest van 2026-09-24).
+const RADIUS_WIDE = 240;
+const ANGLE_SPAN_WIDE_DEG = 152;
+const WIDE_FROM_COUNT = 7;
 const RADIUS_STEP = 100;
 const ANGLE_SPAN_DEG = 130;
 const ANCHOR_HEIGHT_RATIO = 0.63;
@@ -53,7 +58,7 @@ const NEXT_COLOR = '#D6A866';
 const CANCEL_COLOR = '#C97B7B';
 
 // Ver genoeg om de hele boog (straal + knopgrootte) buiten beeld te schuiven.
-const WHEEL_COLLAPSE_TRANSLATE = RADIUS + 90;
+const WHEEL_COLLAPSE_TRANSLATE = RADIUS_WIDE + 90;
 
 type Stage = 'closed' | 'group' | 'options' | 'manualTime' | 'details';
 type DetailField = 'amount' | 'note' | 'endTime' | 'temperature' | null;
@@ -143,11 +148,14 @@ export function WheelArc({
   const [endMinute, setEndMinute] = useState('');
 
   const { width, height } = useWindowDimensions();
-  const stepDeg = wheelOrder.length > 1 ? ANGLE_SPAN_DEG / (wheelOrder.length - 1) : 0;
-  const angleSpanRad = (ANGLE_SPAN_DEG * Math.PI) / 180;
+  const isWide = wheelOrder.length >= WIDE_FROM_COUNT;
+  const radius = isWide ? RADIUS_WIDE : RADIUS;
+  const angleSpanDeg = isWide ? ANGLE_SPAN_WIDE_DEG : ANGLE_SPAN_DEG;
+  const stepDeg = wheelOrder.length > 1 ? angleSpanDeg / (wheelOrder.length - 1) : 0;
+  const angleSpanRad = (angleSpanDeg * Math.PI) / 180;
   const tuckedCos = Math.cos(Math.PI - angleSpanRad / 2);
   const pivot = {
-    x: width - EDGE_INSET - tuckedCos * RADIUS,
+    x: width - EDGE_INSET - tuckedCos * radius,
     y: height * ANCHOR_HEIGHT_RATIO,
   };
   const arcStyle = useAnimatedStyle(() => ({
@@ -160,7 +168,7 @@ export function WheelArc({
   const mirrorX = (x: number) => (mirrored ? width - x : x);
   const keyboardAnchor = { x: mirrored ? EDGE_INSET : width - EDGE_INSET, y: 130 };
 
-  const confirmCancelRadius = RADIUS - 70;
+  const confirmCancelRadius = radius - 70;
   const cancelPos = arcPosition({
     index: 0,
     count: 2,
@@ -177,7 +185,7 @@ export function WheelArc({
   });
 
   const positions = wheelOrder.map((entry, index) =>
-    arcPosition({ index, count: wheelOrder.length, radius: RADIUS, angleSpanDeg: ANGLE_SPAN_DEG, pivot })
+    arcPosition({ index, count: wheelOrder.length, radius, angleSpanDeg, pivot })
   );
   // Anchored to the arc itself (pivot/RADIUS), not to the header above it — the header's
   // own height varies (the lane-summary pills only render when there's something to
@@ -185,7 +193,7 @@ export function WheelArc({
   // the lane header on days with a shorter header. RADIUS is always >= the arc's actual
   // vertical reach (reach = RADIUS * sin(halfSpan) < RADIUS), so this clears the topmost
   // wheel button with room to spare regardless of screen height.
-  const activeLabelTop = pivot.y - RADIUS - 40;
+  const activeLabelTop = pivot.y - radius - 40;
 
   useEffect(() => {
     if (stage !== 'details' || !activeKind || !AMOUNT_KINDS.has(activeKind) || !childId) return;
@@ -622,6 +630,7 @@ export function WheelArc({
             icon={entry.icon}
             iconSet={entry.iconSet}
             accessibilityLabel={entry.label(t)}
+            caption={entry.label(t)}
             dimmed={activeEntryId !== null && activeEntryId !== entry.id}
             locked={!isEntitled && wheelEntryRequiresPremium(entry)}
             onPress={() => handleEntryPress(entry)}
@@ -672,7 +681,7 @@ export function WheelArc({
         <WheelRing
           items={groupItems}
           color={activeEntry.color}
-          radius={RADIUS + RADIUS_STEP}
+          radius={radius + RADIUS_STEP}
           pivot={pivot}
           stepDeg={stepDeg}
           onSelect={(id) => beginKindFlow(id as EventKind)}
@@ -686,7 +695,7 @@ export function WheelArc({
         <WheelRing
           items={optionItems}
           color={EVENT_TYPES[activeKind].color}
-          radius={RADIUS + RADIUS_STEP}
+          radius={radius + RADIUS_STEP}
           pivot={pivot}
           stepDeg={stepDeg}
           onSelect={handleSelectOption}
@@ -732,7 +741,7 @@ export function WheelArc({
         <WheelRing
           items={detailItems}
           color={EVENT_TYPES[activeKind].color}
-          radius={RADIUS + RADIUS_STEP}
+          radius={radius + RADIUS_STEP}
           pivot={pivot}
           stepDeg={stepDeg}
           onSelect={handleSelectDetailField}

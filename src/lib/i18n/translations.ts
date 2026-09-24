@@ -228,6 +228,10 @@ export interface Dictionary {
     summarySensory: (value: string) => string;
     summaryMood: (value: string) => string;
     summaryCare: (value: string) => string;
+    /** Onderregel van de lang-druk-banner: "sleep om te verplaatsen". */
+    holdHint: string;
+    /** Verschuiving tijdens slepen, bv. "+15 min". */
+    holdDelta: (minutes: number) => string;
   };
   formats: {
     durationHour: string;
@@ -543,11 +547,13 @@ export const nl: Dictionary = {
     laneBehavior: 'Gedrag',
     laneSensory: 'Prikkel',
     laneMood: 'Stemming',
-    laneCare: 'Verzorging',
+    laneCare: 'Zorg',
     summaryBehavior: (value) => `${value} gedrag`,
     summarySensory: (value) => `${value} prikkel`,
     summaryMood: (value) => `${value} stemming`,
     summaryCare: (value) => `${value} verzorging`,
+    holdHint: 'sleep om te verplaatsen',
+    holdDelta: (minutes) => `${minutes > 0 ? '+' : ''}${minutes} min`,
   },
   formats: {
     durationHour: 'u',
@@ -863,6 +869,8 @@ export const en: Dictionary = {
     summarySensory: (value) => `${value} sensory`,
     summaryMood: (value) => `${value} mood`,
     summaryCare: (value) => `${value} care`,
+    holdHint: 'drag to move',
+    holdDelta: (minutes) => `${minutes > 0 ? '+' : ''}${minutes} min`,
   },
   formats: {
     durationHour: 'h',
@@ -1173,6 +1181,8 @@ export const de: Dictionary = {
     summarySensory: (value) => `${value} Reize`,
     summaryMood: (value) => `${value} Stimmung`,
     summaryCare: (value) => `${value} Pflege`,
+    holdHint: 'ziehen zum Verschieben',
+    holdDelta: (minutes) => `${minutes > 0 ? '+' : ''}${minutes} Min.`,
   },
   formats: {
     durationHour: 'Std',
@@ -1477,12 +1487,14 @@ export const es: Dictionary = {
   timeline: {
     laneBehavior: 'Conducta',
     laneSensory: 'Estímulos',
-    laneMood: 'Estado de ánimo',
+    laneMood: 'Ánimo',
     laneCare: 'Cuidados',
     summaryBehavior: (value) => `${value} conducta`,
     summarySensory: (value) => `${value} estímulos`,
     summaryMood: (value) => `${value} estado de ánimo`,
     summaryCare: (value) => `${value} cuidados`,
+    holdHint: 'arrastra para mover',
+    holdDelta: (minutes) => `${minutes > 0 ? '+' : ''}${minutes} min`,
   },
   formats: {
     durationHour: 'h',
@@ -1785,7 +1797,7 @@ export const fr: Dictionary = {
     sensoryResponseAvoiding: 'Évitement sensoriel',
   },
   timeline: {
-    laneBehavior: 'Comportement',
+    laneBehavior: 'Conduite',
     laneSensory: 'Stimuli',
     laneMood: 'Humeur',
     laneCare: 'Soins',
@@ -1793,6 +1805,8 @@ export const fr: Dictionary = {
     summarySensory: (value) => `${value} stimuli`,
     summaryMood: (value) => `${value} humeur`,
     summaryCare: (value) => `${value} soins`,
+    holdHint: 'glisser pour déplacer',
+    holdDelta: (minutes) => `${minutes > 0 ? '+' : ''}${minutes} min`,
   },
   formats: {
     durationHour: 'h',
@@ -2095,7 +2109,7 @@ export const pt: Dictionary = {
     sensoryResponseAvoiding: 'Esquiva sensorial',
   },
   timeline: {
-    laneBehavior: 'Comportamento',
+    laneBehavior: 'Conduta',
     laneSensory: 'Estímulos',
     laneMood: 'Humor',
     laneCare: 'Cuidados',
@@ -2103,6 +2117,8 @@ export const pt: Dictionary = {
     summarySensory: (value) => `${value} estímulos`,
     summaryMood: (value) => `${value} humor`,
     summaryCare: (value) => `${value} cuidados`,
+    holdHint: 'arraste para mover',
+    holdDelta: (minutes) => `${minutes > 0 ? '+' : ''}${minutes} min`,
   },
   formats: {
     durationHour: 'h',

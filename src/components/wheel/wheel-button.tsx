@@ -3,7 +3,9 @@ import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EventIcon, type IconSet } from '@/components/ui/event-icon';
-import { darken, lighten, withAlpha } from '@/lib/color';
+import { Design, glowStyle } from '@/constants/design';
+import { withAlpha } from '@/lib/color';
+import { useGlow } from '@/lib/glow-context';
 
 export const WHEEL_BUTTON_SIZE = 66;
 
@@ -39,6 +41,7 @@ export function WheelButton({
   selected = false,
   locked = false,
 }: WheelButtonProps) {
+  const glow = useGlow();
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
@@ -55,34 +58,30 @@ export function WheelButton({
             left: x - WHEEL_BUTTON_SIZE / 2,
             top: y - WHEEL_BUTTON_SIZE / 2,
             opacity: dimmed ? 0.25 : locked ? 0.55 : 1,
-            // Ambient shadow tinted to the button's own color instead of plain black —
-            // this is what gives the "soft depth" buttons their glow. iOS-only (Android
-            // ignores shadowColor and falls back to its own grey elevation shadow).
-            shadowColor: color,
+            // Gloed in de eigen kleur van de knop (stijl A "Gloeiring", design-voorstel
+            // 2026-09-24). Alleen iOS; Android valt terug op zijn eigen grijze schaduw.
+            ...glowStyle(color, glow, 0.55, 10),
+            borderColor: color,
           },
           selected && styles.selected,
         ]}
         accessibilityLabel={accessibilityLabel ?? label}
         accessibilityRole="button">
-        {/* Diagonal light-to-dark gradient approximates the radial glass-highlight look
-            (RN's LinearGradient has no radial variant) — lightened top-left, true color
-            at center, darkened bottom-right for a subtle 3D roundness. */}
+        {/* Stijl A: donkere kern met een lichte kant linksboven (benadert een radiaal verloop,
+            RN's LinearGradient heeft geen radiale variant), icoon en ring in de eigen kleur. */}
         <LinearGradient
-          colors={[lighten(color, 0.12), color, darken(color, 0.08)]}
-          locations={[0, 0.55, 1]}
-          start={{ x: 0.25, y: 0.12 }}
+          colors={Design.coreGradient}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.3, y: 0.15 }}
           end={{ x: 0.8, y: 0.95 }}
           style={styles.fill}>
-          {/* Gloss cap getemperd (was 0.38) — minder glazig-glanzend, past beter bij een
-              doelgroep die vaak onder stress logt (zie PLAN.md, look-and-feel-onderzoek
-              2026-09-21). */}
           <LinearGradient
-            colors={[withAlpha('#FFFFFF', 0.14), withAlpha('#FFFFFF', 0)]}
+            colors={[withAlpha(color, 0.18), withAlpha(color, 0)]}
             pointerEvents="none"
             style={styles.glossCap}
           />
           {icon ? (
-            <EventIcon name={icon} set={iconSet} size={32} color="#12171C" />
+            <EventIcon name={icon} set={iconSet} size={30} color={color} />
           ) : (
             <Text style={styles.label} numberOfLines={2}>
               {label}
@@ -97,8 +96,10 @@ export function WheelButton({
       </Pressable>
       {caption && !dimmed && (
         <Text
-          style={[styles.caption, { left: x - 40, top: y + WHEEL_BUTTON_SIZE / 2 + 4, color }]}
+          style={[styles.caption, { left: x - 40, top: y + WHEEL_BUTTON_SIZE / 2 + 5 }]}
           numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
           pointerEvents="none">
           {caption}
         </Text>
@@ -113,9 +114,8 @@ const styles = StyleSheet.create({
     width: WHEEL_BUTTON_SIZE,
     height: WHEEL_BUTTON_SIZE,
     borderRadius: WHEEL_BUTTON_SIZE / 2,
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 3 },
+    borderWidth: 2,
+    shadowOffset: { width: 0, height: 0 },
     elevation: 3,
   },
   fill: {
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.15)',
   },
   label: {
-    color: '#12171C',
+    color: '#F1EEE7',
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
@@ -160,7 +160,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 80,
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
+    color: '#F1EEE7',
+    textShadowColor: 'rgba(0,0,0,0.6)',
+    textShadowRadius: 4,
     textAlign: 'center',
   },
 });

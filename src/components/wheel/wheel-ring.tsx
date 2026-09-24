@@ -81,7 +81,6 @@ export function WheelRing({
               y={y}
               text={item.badge}
               color={item.color ?? color}
-              hasCaption={Boolean(item.caption)}
               screenWidth={screenWidth}
               screenHeight={screenHeight}
             />

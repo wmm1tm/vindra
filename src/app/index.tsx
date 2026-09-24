@@ -19,6 +19,7 @@ import { EventDetailSheet } from '@/components/timeline/event-detail-sheet';
 import { HourColumn } from '@/components/timeline/hour-column';
 import { LaneHeader } from '@/components/timeline/lane-header';
 import { LaneSummaryPills } from '@/components/timeline/lane-summary-pills';
+import { HoldBanner } from '@/components/timeline/hold-banner';
 import { NowLine } from '@/components/timeline/now-line';
 import { OnboardingNameBanner } from '@/components/timeline/onboarding-name-banner';
 import { TargetTimeLine } from '@/components/timeline/target-time-line';
@@ -43,6 +44,7 @@ import {
   type EventRow,
 } from '@/db/events';
 import { useActiveChild } from '@/lib/active-child-context';
+import { GlowProvider } from '@/lib/glow-context';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/preferences-context';
 import { pushDayRating, pushEvent, useSyncLoop } from '@/lib/sync';
@@ -579,170 +581,190 @@ export default function TimelineScreen() {
   const dotDetailMaxWidth = Math.max(MIN_DETAIL_MAX_WIDTH, laneWidthPx - DOT_SIZE - 10);
 
   return (
-    <View style={[styles.screen, isNightMode && styles.screenNight]}>
-      <View style={styles.header}>
-        <View style={styles.headerTitleColumn}>
-          <View style={styles.headerTitleRow}>
-            <Pressable style={styles.headerTitleShrink} onPress={() => setShowDayPicker(true)}>
-              <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">
-                {headerTitle}
-              </Text>
-            </Pressable>
-            {activeChildName && (
-              <Pressable style={styles.headerTitleShrink} onPress={() => setShowChildSwitcher(true)} hitSlop={6}>
-                <Text style={styles.headerChildBadge} numberOfLines={1} ellipsizeMode="tail">
-                  {activeChildName}
+    <GlowProvider nightMode={isNightMode}>
+      <View style={[styles.screen, isNightMode && styles.screenNight]}>
+        <View style={styles.header}>
+          <View style={styles.headerTitleColumn}>
+            <View style={styles.headerTitleRow}>
+              <Pressable style={styles.headerTitleShrink} onPress={() => setShowDayPicker(true)}>
+                <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">
+                  {headerTitle}
                 </Text>
               </Pressable>
-            )}
-          </View>
-          <Pressable onPress={() => setShowDayPicker(true)}>
-            <Text style={styles.headerDate}>{headerDateLine}</Text>
-          </Pressable>
-        </View>
-        <View style={styles.headerButtons}>
-          <IconButton onPress={() => setShowRatingSheet(true)} hitSlop={8}>
-            <MaterialCommunityIcons name={dayRating !== null ? 'star' : 'star-outline'} size={20} color="#F1EEE7" />
-          </IconButton>
-          <IconButton onPress={() => setShowReportSheet(true)} hitSlop={8}>
-            <MaterialCommunityIcons name="clipboard-text-outline" size={20} color="#F1EEE7" />
-          </IconButton>
-          <IconButton onPress={() => preferences.save({ leftHanded: !preferences.leftHanded })} hitSlop={8}>
-            <MaterialCommunityIcons name="swap-horizontal" size={20} color="#F1EEE7" />
-          </IconButton>
-          <IconButton onPress={() => setManualNightMode(!isNightMode)} hitSlop={8} active={isNightMode}>
-            <MaterialCommunityIcons name="weather-night" size={20} color={isNightMode ? '#E0673A' : '#F1EEE7'} />
-          </IconButton>
-          <IconButton onPress={() => setShowSettings(true)} hitSlop={8}>
-            <MaterialCommunityIcons name="cog-outline" size={20} color="#F1EEE7" />
-          </IconButton>
-        </View>
-      </View>
-      {showOnboardingNameBanner && childId && (
-        <OnboardingNameBanner childId={childId} onSaved={refetchChildren} />
-      )}
-      <LaneSummaryPills selectedDate={selectedDate} badgeRefreshToken={badgeRefreshToken} />
-      <View style={styles.timelineWrapper}>
-        <LaneHeader mirrored={mirrored} laneWidth={laneWidthPx} hourColumnWidth={HOUR_COLUMN_WIDTH} />
-        <GestureDetector gesture={pinchGesture}>
-          <ScrollView ref={scrollRef} contentContainerStyle={{ height: timelineHeight }}>
-            <View style={[styles.timelineRow, mirrored && styles.timelineRowMirrored]}>
-              <HourColumn pixelsPerHour={pixelsPerHour} />
-              <GestureDetector gesture={longPressGesture}>
-                <View style={styles.eventsArea}>
-                  <TimelineGrid pixelsPerHour={pixelsPerHour} />
-                  {durationEvents.map((event) => (
-                    <EventCapsule
-                      key={event.id}
-                      event={event}
-                      column={durationColumns.get(event) ?? 0}
-                      pixelsPerHour={pixelsPerHour}
-                      onPress={() => setSelectedEvent(event)}
-                      mirrored={mirrored}
-                      dayStart={selectedDate}
-                      isToday={isToday}
-                      previewEdit={reschedulingTarget?.event.id === event.id ? reschedulePreview : null}
-                      laneOffset={laneOffsetForEvent(event, laneWidthPx)}
-                      detailMaxWidth={capsuleDetailMaxWidth}
-                    />
-                  ))}
-                  {momentEvents.map((event) => (
-                    <EventDot
-                      key={event.id}
-                      event={event}
-                      column={columns.get(event) ?? 0}
-                      pixelsPerHour={pixelsPerHour}
-                      onPress={() => setSelectedEvent(event)}
-                      mirrored={mirrored}
-                      previewOffsetMinutes={
-                        reschedulingTarget?.event.id === event.id && reschedulePreview
-                          ? (reschedulePreview.time.getTime() - new Date(event.start_at).getTime()) / 60000
-                          : null
-                      }
-                      laneOffset={laneOffsetForEvent(event, laneWidthPx)}
-                      detailMaxWidth={dotDetailMaxWidth}
-                    />
-                  ))}
-                  {markedTime && (
-                    <TargetTimeLine
-                      time={markedTime}
-                      pixelsPerHour={pixelsPerHour}
-                      onClear={reschedulingTarget ? undefined : () => setMarkedTime(null)}
-                    />
-                  )}
-                </View>
-              </GestureDetector>
-              <NowLine pixelsPerHour={pixelsPerHour} color={isNightMode ? '#E0673A' : undefined} />
+              {activeChildName && (
+                <Pressable style={styles.headerTitleShrink} onPress={() => setShowChildSwitcher(true)} hitSlop={6}>
+                  <Text style={styles.headerChildBadge} numberOfLines={1} ellipsizeMode="tail">
+                    {activeChildName}
+                  </Text>
+                </Pressable>
+              )}
             </View>
-          </ScrollView>
-        </GestureDetector>
-        {/* Nachtmodus dimt de tijdlijn — het wiel zit in een eigen laag hieronder en
-            blijft dus, net als bedoeld, volledig zichtbaar. */}
-        {isNightMode && <View pointerEvents="none" style={styles.nightOverlay} />}
+            <Pressable onPress={() => setShowDayPicker(true)}>
+              <Text style={styles.headerDate}>{headerDateLine}</Text>
+            </Pressable>
+          </View>
+          <View style={styles.headerButtons}>
+            <IconButton onPress={() => setShowRatingSheet(true)} hitSlop={8}>
+              <MaterialCommunityIcons name={dayRating !== null ? 'star' : 'star-outline'} size={20} color="#F1EEE7" />
+            </IconButton>
+            <IconButton onPress={() => setShowReportSheet(true)} hitSlop={8}>
+              <MaterialCommunityIcons name="clipboard-text-outline" size={20} color="#F1EEE7" />
+            </IconButton>
+            <IconButton onPress={() => preferences.save({ leftHanded: !preferences.leftHanded })} hitSlop={8}>
+              <MaterialCommunityIcons name="swap-horizontal" size={20} color="#F1EEE7" />
+            </IconButton>
+            <IconButton onPress={() => setManualNightMode(!isNightMode)} hitSlop={8} active={isNightMode}>
+              <MaterialCommunityIcons name="weather-night" size={20} color={isNightMode ? '#E0673A' : '#F1EEE7'} />
+            </IconButton>
+            <IconButton onPress={() => setShowSettings(true)} hitSlop={8}>
+              <MaterialCommunityIcons name="cog-outline" size={20} color="#F1EEE7" />
+            </IconButton>
+          </View>
+        </View>
+        {showOnboardingNameBanner && childId && (
+          <OnboardingNameBanner childId={childId} onSaved={refetchChildren} />
+        )}
+        <LaneSummaryPills selectedDate={selectedDate} badgeRefreshToken={badgeRefreshToken} />
+        <View style={styles.timelineWrapper}>
+          <LaneHeader
+            mirrored={mirrored}
+            laneWidth={laneWidthPx}
+            hourColumnWidth={HOUR_COLUMN_WIDTH}
+            activeLaneIndex={reschedulingTarget ? laneIndexForKind(reschedulingTarget.event.kind) : null}
+          />
+          <GestureDetector gesture={pinchGesture}>
+            <ScrollView ref={scrollRef} contentContainerStyle={{ height: timelineHeight }}>
+              <View style={[styles.timelineRow, mirrored && styles.timelineRowMirrored]}>
+                <HourColumn pixelsPerHour={pixelsPerHour} />
+                {/* Vóór de events getekend, zodat de nu-lijn eronder loopt i.p.v. over de labels. */}
+                <NowLine pixelsPerHour={pixelsPerHour} mirrored={mirrored} color={isNightMode ? '#E0673A' : undefined} />
+                <GestureDetector gesture={longPressGesture}>
+                  <View style={styles.eventsArea}>
+                    <TimelineGrid pixelsPerHour={pixelsPerHour} />
+                    {durationEvents.map((event) => (
+                      <EventCapsule
+                        key={event.id}
+                        event={event}
+                        column={durationColumns.get(event) ?? 0}
+                        pixelsPerHour={pixelsPerHour}
+                        onPress={() => setSelectedEvent(event)}
+                        mirrored={mirrored}
+                        dayStart={selectedDate}
+                        isToday={isToday}
+                        previewEdit={reschedulingTarget?.event.id === event.id ? reschedulePreview : null}
+                        laneOffset={laneOffsetForEvent(event, laneWidthPx)}
+                        detailMaxWidth={capsuleDetailMaxWidth}
+                        dimmed={reschedulingTarget !== null && reschedulingTarget.event.id !== event.id}
+                      />
+                    ))}
+                    {momentEvents.map((event) => (
+                      <EventDot
+                        key={event.id}
+                        event={event}
+                        column={columns.get(event) ?? 0}
+                        pixelsPerHour={pixelsPerHour}
+                        onPress={() => setSelectedEvent(event)}
+                        mirrored={mirrored}
+                        previewOffsetMinutes={
+                          reschedulingTarget?.event.id === event.id && reschedulePreview
+                            ? (reschedulePreview.time.getTime() - new Date(event.start_at).getTime()) / 60000
+                            : null
+                        }
+                        laneOffset={laneOffsetForEvent(event, laneWidthPx)}
+                        detailMaxWidth={dotDetailMaxWidth}
+                        dimmed={reschedulingTarget !== null && reschedulingTarget.event.id !== event.id}
+                      />
+                    ))}
+                    {markedTime && (
+                      <TargetTimeLine
+                        time={markedTime}
+                        pixelsPerHour={pixelsPerHour}
+                        onClear={reschedulingTarget ? undefined : () => setMarkedTime(null)}
+                      />
+                    )}
+                  </View>
+                </GestureDetector>
+              </View>
+            </ScrollView>
+          </GestureDetector>
+          {/* Nachtmodus dimt de tijdlijn — het wiel zit in een eigen laag hieronder en
+              blijft dus, net als bedoeld, volledig zichtbaar. */}
+          {isNightMode && <View pointerEvents="none" style={styles.nightOverlay} />}
+          {reschedulingTarget && (
+            <HoldBanner
+              event={reschedulingTarget.event}
+              edge={reschedulingTarget.edge}
+              previewTime={markedTime}
+              laneWidth={laneWidthPx}
+              hourColumnWidth={HOUR_COLUMN_WIDTH}
+              mirrored={mirrored}
+            />
+          )}
+        </View>
+        <WheelArc
+          onLogged={handleLogged}
+          onCancelledEvent={handleWheelCancelled}
+          mirrored={mirrored}
+          selectedDate={selectedDate}
+          targetTime={markedTime}
+          onTargetConsumed={() => setMarkedTime(null)}
+          badgeRefreshToken={badgeRefreshToken}
+          onCustomizeWheel={() => setShowWheelSettings(true)}
+        />
+        {showWheelSettings && <WheelSettingsSheet nested={false} onClose={() => setShowWheelSettings(false)} />}
+        {selectedEvent && (
+          <EventDetailSheet
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+            onDelete={handleDelete}
+            onSaved={handleLogged}
+          />
+        )}
+        {showRatingSheet && (
+          <DayRatingSheet
+            currentRating={dayRating}
+            onClose={() => setShowRatingSheet(false)}
+            onSelect={handleSelectRating}
+          />
+        )}
+        {showReportSheet && (
+          <DayReportSheet
+            selectedDate={selectedDate}
+            dateLabel={formattedDate}
+            rating={dayRating}
+            events={events}
+            onClose={() => setShowReportSheet(false)}
+          />
+        )}
+        {showDayPicker && (
+          <DayPickerSheet
+            selectedDate={selectedDate}
+            onClose={() => setShowDayPicker(false)}
+            onSelect={(date) => {
+              setSelectedDate(startOfDay(date));
+              setShowDayPicker(false);
+            }}
+          />
+        )}
+        {showSettings && (
+          <SettingsSheet
+            onClose={() => setShowSettings(false)}
+            selectedDate={selectedDate}
+            dayLabel={isToday ? t.common.today : formattedDate}
+            onDayEventsDeleted={handleDayEventsDeleted}
+          />
+        )}
+        {showChildSwitcher && (
+          <ChildSwitcherSheet childList={children} onClose={() => setShowChildSwitcher(false)} />
+        )}
+        {/* Pas tonen zodra de instellingen gelezen zijn (preferences.loaded), anders flitst de
+            intro even op bij iemand die hem al gedaan heeft. Bestaande gebruikers met events
+            of een eigen kindnaam slaan hem vanzelf over (zie db/onboarding.ts). */}
+        {preferences.loaded && !preferences.onboardingDone && (
+          <OnboardingFlow onDone={refetchChildren} onChildUpdated={refetchChildren} />
+        )}
       </View>
-      <WheelArc
-        onLogged={handleLogged}
-        onCancelledEvent={handleWheelCancelled}
-        mirrored={mirrored}
-        selectedDate={selectedDate}
-        targetTime={markedTime}
-        onTargetConsumed={() => setMarkedTime(null)}
-        badgeRefreshToken={badgeRefreshToken}
-        onCustomizeWheel={() => setShowWheelSettings(true)}
-      />
-      {showWheelSettings && <WheelSettingsSheet nested={false} onClose={() => setShowWheelSettings(false)} />}
-      {selectedEvent && (
-        <EventDetailSheet
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          onDelete={handleDelete}
-          onSaved={handleLogged}
-        />
-      )}
-      {showRatingSheet && (
-        <DayRatingSheet
-          currentRating={dayRating}
-          onClose={() => setShowRatingSheet(false)}
-          onSelect={handleSelectRating}
-        />
-      )}
-      {showReportSheet && (
-        <DayReportSheet
-          selectedDate={selectedDate}
-          dateLabel={formattedDate}
-          rating={dayRating}
-          events={events}
-          onClose={() => setShowReportSheet(false)}
-        />
-      )}
-      {showDayPicker && (
-        <DayPickerSheet
-          selectedDate={selectedDate}
-          onClose={() => setShowDayPicker(false)}
-          onSelect={(date) => {
-            setSelectedDate(startOfDay(date));
-            setShowDayPicker(false);
-          }}
-        />
-      )}
-      {showSettings && (
-        <SettingsSheet
-          onClose={() => setShowSettings(false)}
-          selectedDate={selectedDate}
-          dayLabel={isToday ? t.common.today : formattedDate}
-          onDayEventsDeleted={handleDayEventsDeleted}
-        />
-      )}
-      {showChildSwitcher && (
-        <ChildSwitcherSheet childList={children} onClose={() => setShowChildSwitcher(false)} />
-      )}
-      {/* Pas tonen zodra de instellingen gelezen zijn (preferences.loaded), anders flitst de
-          intro even op bij iemand die hem al gedaan heeft. Bestaande gebruikers met events
-          of een eigen kindnaam slaan hem vanzelf over (zie db/onboarding.ts). */}
-      {preferences.loaded && !preferences.onboardingDone && (
-        <OnboardingFlow onDone={refetchChildren} onChildUpdated={refetchChildren} />
-      )}
-    </View>
+    </GlowProvider>
   );
 }
 

@@ -1,4 +1,5 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EVENT_TYPES } from '@/constants/event-types';
@@ -8,6 +9,9 @@ import { formatTimelineDetail } from '@/lib/event-summary';
 import { usePreferences } from '@/lib/preferences-context';
 import { minutesSinceMidnight } from '@/lib/time';
 import { EventIcon } from '@/components/ui/event-icon';
+import { mixOver, withAlpha } from '@/lib/color';
+import { Design, glowStyle } from '@/constants/design';
+import { useGlow } from '@/lib/glow-context';
 
 export const CAPSULE_WIDTH = 26;
 export const COLUMN_GAP = 6;
@@ -48,6 +52,8 @@ interface EventCapsuleProps {
    * app/index.tsx, which passes the computed lane width in. Defaults to the pre-lane
    * value (120) for callers outside the lane layout. */
   detailMaxWidth?: number;
+  /** Een ánder event wordt nu vastgehouden: deze capsule treedt terug. */
+  dimmed?: boolean;
 }
 
 export function EventCapsule({
@@ -61,9 +67,11 @@ export function EventCapsule({
   previewEdit = null,
   laneOffset = 0,
   detailMaxWidth = 120,
+  dimmed = false,
 }: EventCapsuleProps) {
   const { volumeUnit, tempUnit } = usePreferences();
   const { t } = useI18n();
+  const glow = useGlow();
   const type = EVENT_TYPES[event.kind];
 
   const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
@@ -109,6 +117,7 @@ export function EventCapsule({
   const offset = laneOffset + column * (CAPSULE_WIDTH + COLUMN_GAP);
   const sideStyle = mirrored ? { right: offset } : { left: offset };
   const isDragging = previewEdit !== null;
+  const markerFill = mixOver(type.color, Design.ground, isDragging ? 0.4 : 0.24);
 
   // Only the primary column has guaranteed clear space beside it — later columns exist
   // precisely because something else already overlaps that time range.
@@ -126,23 +135,26 @@ export function EventCapsule({
   return (
     <>
       <Pressable
-        style={[styles.wrapper, { top: wrapperTop, height }, sideStyle, isDragging && styles.dragging]}
+        style={[styles.wrapper, { top: wrapperTop, height, opacity: dimmed ? 0.3 : 1 }, sideStyle, isDragging && styles.dragging]}
         onPress={onPress}>
-        <View style={[styles.bar, { backgroundColor: type.color + 'A0' }]} />
-        <View style={[styles.marker, styles.startMarker, { backgroundColor: type.color }]}>
+        <LinearGradient
+          colors={[withAlpha(type.color, 0.55), withAlpha(type.color, 0.18)]}
+          style={[styles.bar, { borderColor: withAlpha(type.color, 0.7) }]}
+        />
+        <View style={[styles.marker, styles.startMarker, { backgroundColor: markerFill, borderColor: type.color, ...glowStyle(type.color, glow, 0.45, 8) }]}>
           {continuesBefore ? (
-            <MaterialCommunityIcons name="chevron-up" size={15} color="#12171C" />
+            <MaterialCommunityIcons name="chevron-up" size={15} color={type.color} />
           ) : (
-            <EventIcon name={type.icon} set={type.iconSet} size={15} color="#12171C" />
+            <EventIcon name={type.icon} set={type.iconSet} size={15} color={type.color} />
           )}
         </View>
         {continuesAfter ? (
-          <View style={[styles.marker, styles.endMarker, styles.endMarkerRing, { backgroundColor: type.color }]}>
-            <MaterialCommunityIcons name="chevron-down" size={15} color="#12171C" />
+          <View style={[styles.marker, styles.endMarker, styles.endMarkerRing, { backgroundColor: markerFill, borderColor: type.color, ...glowStyle(type.color, glow, 0.45, 8) }]}>
+            <MaterialCommunityIcons name="chevron-down" size={15} color={type.color} />
           </View>
         ) : event.end_at ? (
-          <View style={[styles.marker, styles.endMarker, styles.endMarkerRing, { backgroundColor: type.color }]}>
-            <EventIcon name={type.endIcon ?? type.icon} set={type.endIconSet ?? type.iconSet} size={15} color="#12171C" />
+          <View style={[styles.marker, styles.endMarker, styles.endMarkerRing, { backgroundColor: markerFill, borderColor: type.color, ...glowStyle(type.color, glow, 0.45, 8) }]}>
+            <EventIcon name={type.endIcon ?? type.icon} set={type.endIconSet ?? type.iconSet} size={15} color={type.color} />
           </View>
         ) : (
           type.isDuration && (
@@ -179,19 +191,23 @@ const styles = StyleSheet.create({
   },
   bar: {
     position: 'absolute',
-    left: (CAPSULE_WIDTH - 8) / 2,
+    left: (CAPSULE_WIDTH - 12) / 2,
     top: MARKER_SIZE / 2,
     bottom: MARKER_SIZE / 2,
-    width: 8,
-    borderRadius: 4,
+    width: 12,
+    borderRadius: 6,
+    borderWidth: 1,
   },
   marker: {
     position: 'absolute',
     width: MARKER_SIZE,
     height: MARKER_SIZE,
-    borderRadius: MARKER_SIZE / 2,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    backgroundColor: Design.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowOffset: { width: 0, height: 0 },
   },
   startMarker: {
     top: 0,
@@ -208,7 +224,6 @@ const styles = StyleSheet.create({
   },
   endMarkerRing: {
     borderWidth: 2,
-    borderColor: 'rgba(236, 237, 238, 0.8)',
   },
   openBadge: {
     position: 'absolute',
@@ -217,14 +232,14 @@ const styles = StyleSheet.create({
     width: 15,
     height: 15,
     borderRadius: 7.5,
-    backgroundColor: '#D9534F',
+    backgroundColor: Design.accent,
     borderWidth: 1.5,
-    borderColor: '#12171C',
+    borderColor: Design.ground,
     alignItems: 'center',
     justifyContent: 'center',
   },
   openBadgeText: {
-    color: '#fff',
+    color: Design.ground,
     fontSize: 10,
     fontWeight: '800',
     lineHeight: 12,

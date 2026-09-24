@@ -28,3 +28,12 @@ export function withAlpha(hex: string, alpha: number): string {
   const [r, g, b] = hexToRgb(hex);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+/** Ondoorzichtige mix van `hex` over een achtergrondkleur, in verhouding `amount` (0-1) —
+ * voor een getint vlak dat níet laat doorschijnen wat eronder ligt (bv. een capsule-marker
+ * die over zijn eigen balk valt). */
+export function mixOver(hex: string, background: string, amount: number): string {
+  const [r, g, b] = hexToRgb(hex);
+  const [br, bg, bb] = hexToRgb(background);
+  return rgbToHex(br + (r - br) * amount, bg + (g - bg) * amount, bb + (b - bb) * amount);
+}

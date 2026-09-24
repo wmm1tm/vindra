@@ -6,7 +6,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { TIMELINE_HORIZONTAL_PADDING, TIMELINE_LANES, type LaneId } from '@/constants/timeline-lanes';
 import { getEventsForRange, type EventRow } from '@/db/events';
 import { useActiveChild } from '@/lib/active-child-context';
-import { lighten } from '@/lib/color';
+import { lighten, withAlpha } from '@/lib/color';
 import { computeKindTotals, formatGroupBadge } from '@/lib/event-summary';
 import { useI18n } from '@/lib/i18n';
 import type { Dictionary } from '@/lib/i18n/translations';
@@ -61,11 +61,11 @@ export function LaneSummaryPills({ selectedDate, badgeRefreshToken }: LaneSummar
       {pills.map(({ lane, text }) => (
         <LinearGradient
           key={lane.id}
-          colors={[lighten(lane.color, 0.1), lane.color]}
+          colors={[withAlpha(lane.color, 0.26), withAlpha(lane.color, 0.12)]}
           start={{ x: 0.15, y: 0 }}
           end={{ x: 0.85, y: 1 }}
-          style={[styles.pill, { shadowColor: lane.color }]}>
-          <Text style={styles.pillText} numberOfLines={1}>
+          style={[styles.pill, { borderColor: withAlpha(lane.color, 0.4) }]}>
+          <Text style={[styles.pillText, { color: lighten(lane.color, 0.45) }]} numberOfLines={1}>
             {text}
           </Text>
         </LinearGradient>
@@ -88,12 +88,9 @@ const styles = StyleSheet.create({
   },
   pill: {
     borderRadius: 10,
+    borderWidth: 1,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    paddingVertical: 3,
   },
   pillText: {
     color: '#12171C',

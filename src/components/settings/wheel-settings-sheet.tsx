@@ -12,6 +12,7 @@ import Animated, {
 
 import { SettingsSheetShell } from '@/components/settings/settings-sheet-shell';
 import { EventIcon } from '@/components/ui/event-icon';
+import { withAlpha } from '@/lib/color';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { DEFAULT_WHEEL_ORDER, MAX_ACTIVE_WHEEL_ENTRIES, type WheelEntry } from '@/constants/event-types';
 import type { Dictionary } from '@/lib/i18n/translations';
@@ -127,8 +128,8 @@ function DraggableWheelRow({
         hitSlop={6}>
         {row.enabled && <MaterialCommunityIcons name="check" size={14} color="#12171C" />}
       </Pressable>
-      <View style={[styles.icon, { backgroundColor: row.entry.color }]}>
-        <EventIcon name={row.entry.icon} set={row.entry.iconSet} size={16} color="#12171C" />
+      <View style={[styles.icon, { borderColor: row.entry.color, backgroundColor: withAlpha(row.entry.color, 0.16) }]}>
+        <EventIcon name={row.entry.icon} set={row.entry.iconSet} size={18} color={row.entry.color} />
       </View>
       <Text style={[styles.rowLabel, !row.enabled && styles.rowLabelDisabled]} numberOfLines={1}>
         {row.entry.label(t)}
@@ -247,9 +248,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },

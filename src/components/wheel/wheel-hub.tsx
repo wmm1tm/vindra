@@ -5,7 +5,9 @@ import { Pressable, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
+import { Design, glowStyle } from '@/constants/design';
 import { withAlpha } from '@/lib/color';
+import { useGlow } from '@/lib/glow-context';
 import { useI18n } from '@/lib/i18n';
 
 export const HUB_SIZE = 52;
@@ -14,7 +16,7 @@ const HUB_SWIPE_THRESHOLD = 36;
 const HUB_LONG_PRESS_MS = 380;
 // Vindra's amber accent (zelfde als PrimaryButton/NowLine), zodat de hub bij de rest van
 // de app hoort maar niet als een extra (gekleurde) logknop leest.
-const HUB_COLOR = '#D6A866';
+const HUB_COLOR = Design.accent;
 
 interface WheelHubProps {
   mirrored: boolean;
@@ -37,6 +39,7 @@ interface WheelHubProps {
 export function WheelHub({ mirrored, y, expanded, onSetExpanded, onCustomize }: WheelHubProps) {
   const { t } = useI18n();
   const scale = useSharedValue(1);
+  const glow = useGlow();
 
   const pan = Gesture.Pan()
     .activeOffsetX([-10, 10])
@@ -60,7 +63,8 @@ export function WheelHub({ mirrored, y, expanded, onSetExpanded, onCustomize }: 
 
   return (
     <GestureDetector gesture={pan}>
-      <Animated.View style={[styles.wrapper, { top: y - HUB_SIZE / 2 }, sideStyle, animatedStyle]}>
+      <Animated.View
+        style={[styles.wrapper, glowStyle(HUB_COLOR, glow, 0.45, 10), { top: y - HUB_SIZE / 2 }, sideStyle, animatedStyle]}>
         <Pressable
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -73,13 +77,13 @@ export function WheelHub({ mirrored, y, expanded, onSetExpanded, onCustomize }: 
           accessibilityHint={t.wheel.hubHint}
           style={styles.pressable}>
           <LinearGradient
-            colors={['#252c38', '#181d25', '#12171C']}
+            colors={Design.coreGradient}
             locations={[0, 0.6, 1]}
             start={{ x: 0.3, y: 0.15 }}
             end={{ x: 0.8, y: 0.95 }}
             style={styles.fill}>
             <LinearGradient
-              colors={[withAlpha('#FFFFFF', 0.1), withAlpha('#FFFFFF', 0)]}
+              colors={[withAlpha(HUB_COLOR, 0.18), withAlpha(HUB_COLOR, 0)]}
               pointerEvents="none"
               style={styles.glossCap}
             />
@@ -97,9 +101,6 @@ const styles = StyleSheet.create({
     width: HUB_SIZE,
     height: HUB_SIZE,
     borderRadius: HUB_SIZE / 2,
-    shadowColor: HUB_COLOR,
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
     shadowOffset: { width: 0, height: 0 },
     elevation: 4,
   },

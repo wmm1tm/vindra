@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { Design } from '@/constants/design';
+import { withAlpha } from '@/lib/color';
 import { usePreferences } from '@/lib/preferences-context';
 import { minutesSinceMidnight } from '@/lib/time';
 import { formatTime } from '@/lib/time-options';
@@ -8,15 +10,18 @@ import { formatTime } from '@/lib/time-options';
 interface NowLineProps {
   pixelsPerHour: number;
   color?: string;
+  /** Gespiegeld (linkshandig): het tijdlabel staat dan rechts, bij de urenkolom. */
+  mirrored?: boolean;
 }
 
-// Same fix as target-time-line.tsx: alignItems:'center' centers every child (dot, line,
-// label) within the row's auto height, which drags the line itself down to the row's
-// vertical center instead of the real "now" pixel. A fixed height + half-height upward
-// shift puts the centered line exactly on time.
-const ROW_HEIGHT = 16;
+// Same fix as target-time-line.tsx: a fixed height + half-height upward shift puts the
+// centered line exactly on time.
+const ROW_HEIGHT = 20;
 
-export function NowLine({ pixelsPerHour, color = '#D6A866' }: NowLineProps) {
+/** "Nu"-lijn met de tijd als amberkleurig labeltje over de urenkolom (design-voorstel
+ * scherm 1). Stond eerst als losse tekst rechts, waar de wielhub hem bedekte, en de lijn
+ * liep over de event-labels heen; app/index.tsx tekent hem nu vóór de events, dus eronder. */
+export function NowLine({ pixelsPerHour, color = Design.accent, mirrored = false }: NowLineProps) {
   const { timeFormat } = usePreferences();
   const [now, setNow] = useState(() => new Date());
 
@@ -28,10 +33,11 @@ export function NowLine({ pixelsPerHour, color = '#D6A866' }: NowLineProps) {
   const top = (minutesSinceMidnight(now) / 60) * pixelsPerHour - ROW_HEIGHT / 2;
 
   return (
-    <View style={[styles.row, { top }]} pointerEvents="none">
-      <View style={[styles.dot, { backgroundColor: color }]} />
-      <View style={[styles.line, { backgroundColor: color }]} />
-      <Text style={[styles.label, { color }]}>{formatTime(now, timeFormat)}</Text>
+    <View style={[styles.row, mirrored && styles.rowMirrored, { top }]} pointerEvents="none">
+      <View style={[styles.pill, { backgroundColor: color }]}>
+        <Text style={styles.label}>{formatTime(now, timeFormat)}</Text>
+      </View>
+      <View style={[styles.line, { backgroundColor: withAlpha(color, 0.7) }]} />
     </View>
   );
 }
@@ -45,22 +51,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#D6A866',
-    marginRight: -3,
+  rowMirrored: {
+    flexDirection: 'row-reverse',
+  },
+  pill: {
+    paddingHorizontal: 6,
+    height: ROW_HEIGHT,
+    borderRadius: 7,
+    justifyContent: 'center',
+  },
+  label: {
+    color: Design.ground,
+    fontSize: 11,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
   },
   line: {
     flex: 1,
     height: 1.5,
-    backgroundColor: '#D6A866',
-  },
-  label: {
-    color: '#D6A866',
-    fontSize: 12,
-    fontVariant: ['tabular-nums'],
-    marginLeft: 6,
   },
 });
