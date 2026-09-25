@@ -175,6 +175,18 @@ export interface Dictionary {
     scanAgain: string;
     notConfigured: string;
   };
+  trends: {
+    title: string;
+    subtitle: string;
+    weeks: (count: number) => string;
+    thisWeek: string;
+    averagePerWeek: (count: string) => string;
+    lower: (percent: number, weeks: number) => string;
+    higher: (percent: number, weeks: number) => string;
+    same: (weeks: number) => string;
+    notEnoughData: string;
+    unlock: string;
+  };
   dayReport: {
     weekReport: string;
     dayReport: string;
@@ -189,6 +201,7 @@ export interface Dictionary {
     columnNote: string;
     dayMode: string;
     weekMode: string;
+    trendMode: string;
     emptyWeek: string;
     emptyDay: string;
     export: string;
@@ -513,6 +526,18 @@ export const nl: Dictionary = {
     scanAgain: 'Opnieuw scannen',
     notConfigured: 'Delen is nog niet beschikbaar in deze versie.',
   },
+  trends: {
+    title: 'Verloop',
+    subtitle: 'Aantal keer per week',
+    weeks: (count) => `${count} wk`,
+    thisWeek: 'deze week',
+    averagePerWeek: (count) => `Gemiddeld ${count} per week`,
+    lower: (percent, weeks) => `laatste ${weeks} weken ${percent}% minder dan de ${weeks} ervoor`,
+    higher: (percent, weeks) => `laatste ${weeks} weken ${percent}% meer dan de ${weeks} ervoor`,
+    same: (weeks) => `laatste ${weeks} weken gelijk aan de ${weeks} ervoor`,
+    notEnoughData: 'Na 4 weken loggen zie je hier een vergelijking.',
+    unlock: 'Bekijk het verloop met Pro',
+  },
   dayReport: {
     weekReport: 'Weekverslag',
     dayReport: 'Dagverslag',
@@ -527,6 +552,7 @@ export const nl: Dictionary = {
     columnNote: 'Notitie',
     dayMode: 'Dag',
     weekMode: 'Week',
+    trendMode: 'Verloop',
     emptyWeek: 'Nog niets gelogd deze week.',
     emptyDay: 'Nog niets gelogd vandaag.',
     export: 'Exporteren',
@@ -859,6 +885,18 @@ export const en: Dictionary = {
     scanAgain: 'Scan again',
     notConfigured: "Sharing isn't available yet in this version.",
   },
+  trends: {
+    title: 'Trend',
+    subtitle: 'Times per week',
+    weeks: (count) => `${count}w`,
+    thisWeek: 'this week',
+    averagePerWeek: (count) => `On average ${count} a week`,
+    lower: (percent, weeks) => `last ${weeks} weeks ${percent}% fewer than the ${weeks} before`,
+    higher: (percent, weeks) => `last ${weeks} weeks ${percent}% more than the ${weeks} before`,
+    same: (weeks) => `last ${weeks} weeks the same as the ${weeks} before`,
+    notEnoughData: 'A comparison appears after 4 weeks of logging.',
+    unlock: 'See the trend with Pro',
+  },
   dayReport: {
     weekReport: 'Week report',
     dayReport: 'Day report',
@@ -873,6 +911,7 @@ export const en: Dictionary = {
     columnNote: 'Note',
     dayMode: 'Day',
     weekMode: 'Week',
+    trendMode: 'Trend',
     emptyWeek: 'Nothing logged this week yet.',
     emptyDay: 'Nothing logged today yet.',
     export: 'Export',
@@ -1192,6 +1231,18 @@ export const de: Dictionary = {
     scanAgain: 'Erneut scannen',
     notConfigured: 'Teilen ist in dieser Version noch nicht verfügbar.',
   },
+  trends: {
+    title: 'Verlauf',
+    subtitle: 'Anzahl pro Woche',
+    weeks: (count) => `${count} Wo.`,
+    thisWeek: 'diese Woche',
+    averagePerWeek: (count) => `Im Schnitt ${count} pro Woche`,
+    lower: (percent, weeks) => `letzte ${weeks} Wochen ${percent}% weniger als die ${weeks} davor`,
+    higher: (percent, weeks) => `letzte ${weeks} Wochen ${percent}% mehr als die ${weeks} davor`,
+    same: (weeks) => `letzte ${weeks} Wochen genauso wie die ${weeks} davor`,
+    notEnoughData: 'Nach 4 Wochen Erfassen siehst du hier einen Vergleich.',
+    unlock: 'Den Verlauf mit Pro sehen',
+  },
   dayReport: {
     weekReport: 'Wochenbericht',
     dayReport: 'Tagesbericht',
@@ -1206,6 +1257,7 @@ export const de: Dictionary = {
     columnNote: 'Notiz',
     dayMode: 'Tag',
     weekMode: 'Woche',
+    trendMode: 'Verlauf',
     emptyWeek: 'Diese Woche noch nichts protokolliert.',
     emptyDay: 'Heute noch nichts protokolliert.',
     export: 'Exportieren',
@@ -1525,6 +1577,18 @@ export const es: Dictionary = {
     scanAgain: 'Escanear de nuevo',
     notConfigured: 'Compartir todavía no está disponible en esta versión.',
   },
+  trends: {
+    title: 'Tendencia',
+    subtitle: 'Veces por semana',
+    weeks: (count) => `${count} sem`,
+    thisWeek: 'esta semana',
+    averagePerWeek: (count) => `De media ${count} por semana`,
+    lower: (percent, weeks) => `últimas ${weeks} semanas un ${percent}% menos que las ${weeks} anteriores`,
+    higher: (percent, weeks) => `últimas ${weeks} semanas un ${percent}% más que las ${weeks} anteriores`,
+    same: (weeks) => `últimas ${weeks} semanas igual que las ${weeks} anteriores`,
+    notEnoughData: 'Tras 4 semanas registrando verás aquí una comparación.',
+    unlock: 'Ver la tendencia con Pro',
+  },
   dayReport: {
     weekReport: 'Informe semanal',
     dayReport: 'Informe diario',
@@ -1539,6 +1603,7 @@ export const es: Dictionary = {
     columnNote: 'Nota',
     dayMode: 'Día',
     weekMode: 'Semana',
+    trendMode: 'Tendencia',
     emptyWeek: 'Aún no se ha registrado nada esta semana.',
     emptyDay: 'Aún no se ha registrado nada hoy.',
     export: 'Exportar',
@@ -1858,6 +1923,18 @@ export const fr: Dictionary = {
     scanAgain: 'Scanner à nouveau',
     notConfigured: "Le partage n'est pas encore disponible dans cette version.",
   },
+  trends: {
+    title: 'Évolution',
+    subtitle: 'Nombre de fois par semaine',
+    weeks: (count) => `${count} sem`,
+    thisWeek: 'cette semaine',
+    averagePerWeek: (count) => `En moyenne ${count} par semaine`,
+    lower: (percent, weeks) => `${weeks} dernières semaines ${percent} % de moins que les ${weeks} précédentes`,
+    higher: (percent, weeks) => `${weeks} dernières semaines ${percent} % de plus que les ${weeks} précédentes`,
+    same: (weeks) => `${weeks} dernières semaines comme les ${weeks} précédentes`,
+    notEnoughData: 'Après 4 semaines de suivi, une comparaison apparaît ici.',
+    unlock: "Voir l'évolution avec Pro",
+  },
   dayReport: {
     weekReport: 'Rapport hebdomadaire',
     dayReport: 'Rapport journalier',
@@ -1872,6 +1949,7 @@ export const fr: Dictionary = {
     columnNote: 'Note',
     dayMode: 'Jour',
     weekMode: 'Semaine',
+    trendMode: 'Évolution',
     emptyWeek: "Rien n'a encore été enregistré cette semaine.",
     emptyDay: "Rien n'a encore été enregistré aujourd'hui.",
     export: 'Exporter',
@@ -2191,6 +2269,18 @@ export const pt: Dictionary = {
     scanAgain: 'Escanear novamente',
     notConfigured: 'O compartilhamento ainda não está disponível nesta versão.',
   },
+  trends: {
+    title: 'Tendência',
+    subtitle: 'Vezes por semana',
+    weeks: (count) => `${count} sem`,
+    thisWeek: 'esta semana',
+    averagePerWeek: (count) => `Em média ${count} por semana`,
+    lower: (percent, weeks) => `últimas ${weeks} semanas ${percent}% menos que as ${weeks} anteriores`,
+    higher: (percent, weeks) => `últimas ${weeks} semanas ${percent}% mais que as ${weeks} anteriores`,
+    same: (weeks) => `últimas ${weeks} semanas iguais às ${weeks} anteriores`,
+    notEnoughData: 'Depois de 4 semanas registrando, uma comparação aparece aqui.',
+    unlock: 'Ver a tendência com Pro',
+  },
   dayReport: {
     weekReport: 'Relatório semanal',
     dayReport: 'Relatório diário',
@@ -2205,6 +2295,7 @@ export const pt: Dictionary = {
     columnNote: 'Nota',
     dayMode: 'Dia',
     weekMode: 'Semana',
+    trendMode: 'Tendência',
     emptyWeek: 'Nada registrado ainda esta semana.',
     emptyDay: 'Nada registrado ainda hoje.',
     export: 'Exportar',

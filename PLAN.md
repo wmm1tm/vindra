@@ -1066,3 +1066,14 @@ verslepen en de kopbalk; eigen sectie "Hulp" bovenaan Instellingen (sleutel
 ## Vraag om een beoordeling (2026-09-24)
 
 `src/lib/review-prompt.ts` (gegevens in `src/db/review-prompt.ts`): na een log via het wiel het iOS-beoordelingsvenster (`expo-store-review`), alleen bij minstens 10 events op 3 verschillende dagen, hooguit 3 keer en minstens 120 dagen ertussen, nooit in de nachtmodus of tijdens de intro. Geen eigen vraag vooraf.
+
+## Verloop (trendgrafiek) (2026-09-25, op verzoek van de gebruiker)
+
+`src/components/day/trend-chart.tsx`, rekenwerk in `src/lib/trends.ts`: een derde modus
+"Verloop" in het verslag, naast Dag en Week. Per week (maandag t/m zondag) hoe vaak een
+type gelogd is, over 4, 8 of 12 weken; kies het type met de chips (standaard het meest
+gelogde, alleen momenttypen, dus geen slaap). Gestippelde gemiddeldelijn en een neutrale
+vergelijking van de eerste en de tweede helft ("minder"/"meer", pas vanaf 4 weken). Weken
+vóór de eerste log tellen niet mee. Juist dit wil een behandelaar zien. **Pro**: zonder
+abonnement staat de grafiek onder een slotje dat de paywall opent. Geen PDF-knop en geen
+lijst in deze modus.

@@ -5,12 +5,13 @@ import { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { TrendChart } from '@/components/day/trend-chart';
 import { PaywallScreen } from '@/components/paywall/paywall-screen';
 import { EventIcon } from '@/components/ui/event-icon';
 import { EVENT_TYPES, getEventVisual, type EventKind } from '@/constants/event-types';
 import { TIMELINE_LANES } from '@/constants/timeline-lanes';
 import { getDayRating } from '@/db/day-log';
-import { getEventsForRange, type EventRow } from '@/db/events';
+import { getEventsForRange, getFirstEventTime, type EventRow } from '@/db/events';
 import { useActiveChild } from '@/lib/active-child-context';
 import { formatDurationMinutes, formatEventDetailLine, formatEventTimeLabel, formatTemperature, formatVolume } from '@/lib/event-summary';
 import { useI18n } from '@/lib/i18n';
@@ -18,6 +19,7 @@ import type { Dictionary } from '@/lib/i18n/translations';
 import { usePreferences } from '@/lib/preferences-context';
 import { usePurchases } from '@/lib/purchases-context';
 import { dateKey } from '@/lib/time';
+import { trendFetchStart } from '@/lib/trends';
 import type { TempUnit, TimeFormat, VolumeUnit } from '@/db/child';
 
 const SEVERITY_VARIANTS = ['licht', 'matig', 'heftig'] as const;
@@ -27,7 +29,7 @@ const SEVERITY_VARIANTS = ['licht', 'matig', 'heftig'] as const;
 const SEVERITY_KINDS = ['gedrag', 'zelfverwonding'] as const;
 const WEEK_DAYS = 7;
 
-type Mode = 'day' | 'week';
+type Mode = 'day' | 'week' | 'trend';
 type SeverityKind = (typeof SEVERITY_KINDS)[number];
 
 interface DayReportSheetProps {
@@ -277,6 +279,8 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
   const [weekEvents, setWeekEvents] = useState<EventRow[]>([]);
   const [weekRatings, setWeekRatings] = useState<DayRatingEntry[]>([]);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [trendEvents, setTrendEvents] = useState<EventRow[]>([]);
+  const [firstEventTime, setFirstEventTime] = useState<number | null>(null);
 
   const weekStart = new Date(startOfDay(selectedDate).getTime() - (WEEK_DAYS - 1) * 24 * 60 * 60 * 1000);
   const weekEnd = new Date(startOfDay(selectedDate).getTime() + 24 * 60 * 60 * 1000);
@@ -296,14 +300,24 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, db, childId, weekStart.getTime(), weekEnd.getTime(), localeTag]);
 
+  // Trend: de laatste 12 weken in één keer (4 en 8 zijn daar een deel van), los van de
+  // gekozen dag, plus de eerste log zodat weken daarvoor niet meetellen.
+  useEffect(() => {
+    if (mode !== 'trend' || !childId) return;
+    const now = new Date();
+    const to = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    getEventsForRange(db, childId, trendFetchStart(now), to).then(setTrendEvents);
+    getFirstEventTime(db, childId).then(setFirstEventTime);
+  }, [mode, db, childId]);
+
   const displayedEvents = mode === 'week' ? weekEvents : events;
   const totals = computeTotals(displayedEvents);
   const sorted = [...displayedEvents].sort((a, b) => a.start_at.localeCompare(b.start_at));
   const severityStats = computeSeverityStats(displayedEvents);
   const weglopenTotal = computeWeglopenTotal(displayedEvents);
   const sleepTotal = computeSleepTotal(displayedEvents);
-  const periodLabel = mode === 'week' ? weekRangeLabel : dateLabel;
-  const headerRating = mode === 'week' ? null : rating;
+  const periodLabel = mode === 'trend' ? t.trends.subtitle : mode === 'week' ? weekRangeLabel : dateLabel;
+  const headerRating = mode === 'day' ? rating : null;
   const dayGroups = mode === 'week' ? groupEventsByDay(sorted, localeTag) : null;
 
   const handleExport = async () => {
@@ -338,7 +352,9 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
       <Pressable style={styles.backdrop} onPress={onClose}>
         <Pressable style={styles.card} onPress={() => {}}>
           <View style={styles.header}>
-            <Text style={styles.title}>{mode === 'week' ? t.dayReport.weekReport : t.dayReport.dayReport}</Text>
+            <Text style={styles.title}>
+              {mode === 'trend' ? t.trends.title : mode === 'week' ? t.dayReport.weekReport : t.dayReport.dayReport}
+            </Text>
             {headerRating !== null && (
               <View style={styles.ratingBadge}>
                 <Text style={styles.ratingBadgeLabel}>{headerRating}/10</Text>
@@ -358,7 +374,21 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
               onPress={() => setMode('week')}>
               <Text style={[styles.modeLabel, mode === 'week' && styles.modeLabelActive]}>{t.dayReport.weekMode}</Text>
             </Pressable>
+            <Pressable
+              style={[styles.modeOption, mode === 'trend' && styles.modeOptionActive]}
+              onPress={() => setMode('trend')}>
+              <Text style={[styles.modeLabel, mode === 'trend' && styles.modeLabelActive]}>{t.dayReport.trendMode}</Text>
+            </Pressable>
           </View>
+
+          {mode === 'trend' && (
+            <TrendChart
+              events={trendEvents}
+              firstEventTime={firstEventTime}
+              entitled={purchasesStatus === 'entitled'}
+              onUnlock={() => setShowPaywall(true)}
+            />
+          )}
 
           {mode === 'week' && weekRatings.length > 0 && (
             <View style={styles.weekRatingsRow}>
@@ -371,7 +401,7 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
             </View>
           )}
 
-          {(severityStats.length > 0 || weglopenTotal > 0 || sleepTotal) && (
+          {mode !== 'trend' && (severityStats.length > 0 || weglopenTotal > 0 || sleepTotal) && (
             <View style={styles.drinkStats}>
               {severityStats.map((stat) => {
                 const visual = getEventVisual(stat.kind, stat.variant);
@@ -408,7 +438,7 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
             </View>
           )}
 
-          {totals.size > 0 && (
+          {mode !== 'trend' && totals.size > 0 && (
             <View style={styles.totalsRow}>
               {orderedTotals(totals).map(([kind, total]) => {
                 const type = EVENT_TYPES[kind];
@@ -424,32 +454,36 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
             </View>
           )}
 
-          <ScrollView style={styles.list}>
-            {sorted.length === 0 && (
-              <Text style={styles.empty}>{mode === 'week' ? t.dayReport.emptyWeek : t.dayReport.emptyDay}</Text>
-            )}
-            {dayGroups
-              ? dayGroups.map((group) => (
-                  <View key={group.key}>
-                    <Text style={styles.dayGroupHeader}>{group.label}</Text>
-                    {group.events.map((event) => (
-                      <EventRowItem key={event.id} event={event} t={t} timeFormat={timeFormat} tempUnit={tempUnit} volumeUnit={volumeUnit} />
-                    ))}
-                  </View>
-                ))
-              : sorted.map((event) => (
-                  <EventRowItem key={event.id} event={event} t={t} timeFormat={timeFormat} tempUnit={tempUnit} volumeUnit={volumeUnit} />
-                ))}
-          </ScrollView>
+          {mode !== 'trend' && (
+            <ScrollView style={styles.list}>
+              {sorted.length === 0 && (
+                <Text style={styles.empty}>{mode === 'week' ? t.dayReport.emptyWeek : t.dayReport.emptyDay}</Text>
+              )}
+              {dayGroups
+                ? dayGroups.map((group) => (
+                    <View key={group.key}>
+                      <Text style={styles.dayGroupHeader}>{group.label}</Text>
+                      {group.events.map((event) => (
+                        <EventRowItem key={event.id} event={event} t={t} timeFormat={timeFormat} tempUnit={tempUnit} volumeUnit={volumeUnit} />
+                      ))}
+                    </View>
+                  ))
+                : sorted.map((event) => (
+                    <EventRowItem key={event.id} event={event} t={t} timeFormat={timeFormat} tempUnit={tempUnit} volumeUnit={volumeUnit} />
+                  ))}
+            </ScrollView>
+          )}
 
           <View style={styles.actionsRow}>
             <Pressable onPress={onClose}>
               <Text style={styles.closeLabel}>{t.common.close}</Text>
             </Pressable>
-            <Pressable style={styles.exportButton} onPress={handleExport}>
-              <MaterialCommunityIcons name="file-pdf-box" size={16} color="#12171C" />
-              <Text style={styles.exportLabel}>{t.dayReport.export}</Text>
-            </Pressable>
+            {mode !== 'trend' && (
+              <Pressable style={styles.exportButton} onPress={handleExport}>
+                <MaterialCommunityIcons name="file-pdf-box" size={16} color="#12171C" />
+                <Text style={styles.exportLabel}>{t.dayReport.export}</Text>
+              </Pressable>
+            )}
           </View>
         </Pressable>
       </Pressable>

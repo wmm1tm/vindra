@@ -100,6 +100,16 @@ export async function getAllEvents(db: SQLiteDatabase, childId: string): Promise
   return knownKindsOnly(rows);
 }
 
+/** Tijdstip (ms) van het eerste niet-verwijderde event van dit kind, of null. Voor de
+ * trendgrafiek: weken vóór je eerste log tellen niet mee. */
+export async function getFirstEventTime(db: SQLiteDatabase, childId: string): Promise<number | null> {
+  const row = await db.getFirstAsync<{ start_at: string }>(
+    `SELECT start_at FROM event WHERE child_id = ? AND deleted_at IS NULL ORDER BY start_at ASC LIMIT 1`,
+    [childId]
+  );
+  return row ? new Date(row.start_at).getTime() : null;
+}
+
 /** Zet een volledige event-rij terug (export/import), met behoud van het originele id en
  * de originele tijdstempels — geen nieuwe rij aanmaken zoals insertMomentEvent doet. */
 export async function importEventRow(db: SQLiteDatabase, childId: string, row: EventRow): Promise<void> {
