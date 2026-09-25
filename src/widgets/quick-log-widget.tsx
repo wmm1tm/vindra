@@ -15,7 +15,9 @@ import { createWidget, type WidgetEnvironment } from 'expo-widgets';
 /** Eén knop op de widget. `symbol` is een SF Symbol (de widget draait in een aparte
  * iOS-runtime die alleen SwiftUI-onderdelen kent, dus niet onze eigen iconen).
  * `sleep` = de slaapknop: die start of stopt een slaap i.p.v. een moment te loggen;
- * `since` is dan het starttijdstip (ms) van de lopende slaap, of null. */
+ * `since` is dan het starttijdstip (ms) van de lopende slaap, of 0 als er geen loopt.
+ * Bewust nergens null in deze props: iOS kan null niet opslaan in de gedeelde App Group,
+ * waardoor de hele update niet aankomt en de widget zwart blijft. */
 export interface QuickLogButton {
   id: string;
   label: string;
@@ -23,7 +25,7 @@ export interface QuickLogButton {
   color: string;
   count: number;
   sleep?: boolean;
-  since?: number | null;
+  since?: number;
 }
 
 /** Een tik op de widget die de app nog niet heeft verwerkt: type + tijdstip (ms), en voor
@@ -58,6 +60,17 @@ export interface QuickLogProps {
  * echte events in de database. */
 const QuickLogWidget = (props: QuickLogProps, environment: WidgetEnvironment) => {
   'widget';
+  // Nog geen gegevens van de app (net toegevoegd, app nog niet geopend): alleen de naam.
+  // Zonder deze check faalt de functie en toont iOS een leeg, zwart vlak.
+  if (!props || !props.buttons) {
+    return (
+      <VStack modifiers={[containerBackground('#12171C', 'widget')]}>
+        <Text modifiers={[font({ size: 15, weight: 'heavy', design: 'rounded' }), foregroundStyle('#D6A866')]}>
+          Vindra
+        </Text>
+      </VStack>
+    );
+  }
   const isSmall = environment.widgetFamily === 'systemSmall';
   const buttons = props.buttons.slice(0, 4);
 
@@ -72,11 +85,11 @@ const QuickLogWidget = (props: QuickLogProps, environment: WidgetEnvironment) =>
   const press = (button: QuickLogButton) => {
     const now = Date.now();
     if (button.sleep) {
-      const running = button.since !== null && button.since !== undefined;
+      const running = Boolean(button.since);
       return {
         pending: [...(props.pending || []), { k: button.id, t: now, a: running ? 'stop' : 'start' }],
         buttons: props.buttons.map((b) =>
-          b.id === button.id ? { ...b, since: running ? null : now, count: running ? b.count + 1 : b.count } : b
+          b.id === button.id ? { ...b, since: running ? 0 : now, count: running ? b.count + 1 : b.count } : b
         ),
       };
     }
@@ -88,7 +101,7 @@ const QuickLogWidget = (props: QuickLogProps, environment: WidgetEnvironment) =>
   };
 
   const renderButton = (button: QuickLogButton) => {
-    const running = Boolean(button.sleep && button.since !== null && button.since !== undefined);
+    const running = Boolean(button.sleep && button.since);
     const valueText = button.sleep
       ? running
         ? `${props.sleepSinceLabel} ${formatClock(button.since as number)}`

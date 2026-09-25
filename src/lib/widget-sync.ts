@@ -136,7 +136,7 @@ export async function syncWidget(
         symbol: EVENT_TYPES[kind].widgetSymbol,
         color: EVENT_TYPES[kind].color,
         count: todays.filter((event) => event.kind === kind).length,
-        ...(isSleep ? { sleep: true, since: activeSleep ? new Date(activeSleep.start_at).getTime() : null } : {}),
+        ...(isSleep ? { sleep: true, since: activeSleep ? new Date(activeSleep.start_at).getTime() : 0 } : {}),
       };
     });
     widget.updateSnapshot({
