@@ -184,7 +184,7 @@ Alleen NL en EN, want alleen die listings bestaan.
 **Wat moet waar:**
 - **What's New**: per taal, hieronder.
 - **Promotietekst**: per taal, hieronder, mee met de 1.1.0-versie (noemt de widget).
-- **Beschrijving**: voeg de nieuwe regel toe aan het lijstje "Wat Vindra anders maakt",
+- **Beschrijving**: voeg de nieuwe regels toe aan het lijstje "Wat Vindra anders maakt",
   direct na de regel over het dag- en weekrapport. De rest blijft gelijk.
 - **Screenshots**: nieuwe set met het nieuwe design, bij voorkeur één met de widget.
 - **App Review Notes**: de alinea "Update in 1.1.0" onderaan deze sectie bovenaan toevoegen.
@@ -194,9 +194,11 @@ Alleen NL en EN, want alleen die listings bestaan.
 **What's New:**
 ```
 • Nieuw: een widget voor je beginscherm. Log een moment in één tik, zonder de app te openen. Een slaap start je met één tik en stop je met de volgende. De knoppen volgen je wiel.
+• Nieuw: Verloop in het verslag. Zie per week hoe vaak iets gebeurde, over 4, 8 of 12 weken, handig voor school of behandelaar (met een abonnement).
 • Nieuw, rustig uiterlijk voor het wiel en de tijdlijn. In nachtmodus gaat de gloed uit.
 • Tijd aanpassen is duidelijker: houd een event vast en je ziet meteen de nieuwe tijd.
 • De ronde knop naast het wiel: tik om het wiel in of uit te klappen, houd vast om het aan te passen.
+• "Wiel aanpassen" loopt nu gelijk met het wiel, en laat zien welke knoppen op de widget staan.
 • Een korte uitleg bij de eerste start, terug te kijken via Instellingen.
 • Meer uitleg onder Hulp, bovenaan Instellingen.
 • Kleine verbeteringen en bugfixes.
@@ -205,17 +207,20 @@ Alleen NL en EN, want alleen die listings bestaan.
 **Promotietekst:**
 > Nieuw: de Vindra-widget. Log een moeilijk moment in één tik vanaf je beginscherm, en deel een duidelijk rapport met school of behandelaar. 7 dagen gratis.
 
-**Beschrijving, nieuwe regel:**
+**Beschrijving, nieuwe regels:**
 > • Widget voor je beginscherm — log een moment in één tik, zonder de app te openen
+> • Verloop over 4 tot 12 weken — hoe vaak iets per week gebeurt, in één grafiek
 
 ### EN
 
 **What's New:**
 ```
 • New: a home screen widget. Log a moment in one tap, without opening the app. Sleep starts with one tap and stops with the next. The buttons follow your wheel.
+• New: Trend in the report. See how often something happened each week, over 4, 8 or 12 weeks, handy for school or a care provider (with a subscription).
 • A fresh, calm look for the wheel and the timeline. In night mode the glow turns off.
 • Changing a time is clearer: hold an event and you see the new time right away.
 • The round button next to the wheel: tap to fold the wheel in or out, hold to customize it.
+• "Customize wheel" now matches the wheel and shows which buttons are on the widget.
 • A short intro on first launch, which you can replay from Settings.
 • More explanations under Help, at the top of Settings.
 • Small improvements and bug fixes.
@@ -224,9 +229,10 @@ Alleen NL en EN, want alleen die listings bestaan.
 **Promotional text:**
 > New: the Vindra widget. Log a difficult moment in one tap from your home screen, then share a clear report with school or a care provider. Free for 7 days.
 
-**Description, new line:**
+**Description, new lines:**
 > • A home screen widget — log a moment in one tap, without opening the app
+> • A 4-12 week trend — how often something happens each week, in one chart
 
 ### App Review Notes — alinea bovenaan (Engels)
 
-> Update in 1.1.0: a new home screen widget (long-press the home screen → + → Vindra). It shows the first buttons of the wheel that the user may log; without a subscription only Behavior, the same as in the app. Widget taps are stored on the device and turned into events the next time the app opens. The app may show the standard iOS rating prompt (SKStoreReviewController) after regular use; there is no custom pre-prompt.
+> Update in 1.1.0: a new home screen widget (long-press the home screen → + → Vindra). It shows the first buttons of the wheel that the user may log; without a subscription only Behavior, the same as in the app. Widget taps are stored on the device and turned into events the next time the app opens. The app may show the standard iOS rating prompt (SKStoreReviewController) after regular use; there is no custom pre-prompt. New in the report: a Trend mode (Day report → Trend) showing how often a type was logged each week over 4, 8 or 12 weeks. It is part of the subscription; without one it shows a lock that opens the paywall.
