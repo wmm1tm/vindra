@@ -761,7 +761,8 @@ Nederlandse omschrijving als Nuvo.
 **RevenueCat**: nieuw, eigen project `Vindra` (project-ID `projfde1932e`), entitlement
 `vindra_premium`, offering met Monthly + Yearly packages (Lifetime-suggestie van de
 wizard bewust overgeslagen — `paywall-screen.tsx` kent alleen `monthly`/`annual` uit een
-offering, een Lifetime-package zou stilzwijgend genegeerd worden). Nog geen App Store
+offering, een Lifetime-package zou stilzwijgend genegeerd worden; op 2026-09-25 definitief
+besloten: geen lifetime, omdat de partner-sync op Supabase doorlopend kost). Nog geen App Store
 Connect/Play Console-app gekoppeld, dus voorlopig draait alles op de gedeelde
 **Test Store**-key (`test_...`) voor zowel iOS als Android in `app.json`
 `extra.revenuecatIosApiKey`/`revenuecatAndroidApiKey` — zelfde tussenstap als Nuvo ooit
