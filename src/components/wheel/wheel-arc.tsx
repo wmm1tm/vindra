@@ -862,8 +862,12 @@ export function WheelArc({
 }
 
 const styles = StyleSheet.create({
+  // Boven alles op het scherm: het wiel en zijn invoerkaartjes (tijd, hoeveelheid,
+  // notitie) liggen over de kopbalk, en een kopbalk-rij met een eigen zIndex (Ebbly's
+  // voortgangschips) tekende zich anders dwars door het kaartje heen.
   layer: {
     ...StyleSheet.absoluteFill,
+    zIndex: 40,
   },
   activeLabel: {
     position: 'absolute',
