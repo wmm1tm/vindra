@@ -171,3 +171,62 @@ not a rejection reason.
   hand voor het geval het terugkomt — vijf punten: doel/doelgroep, setup zonder account,
   externe diensten (RevenueCat/Supabase), regioverschillen (geen), gereguleerde sector
   (niet van toepassing, geen medisch hulpmiddel).
+
+---
+
+## 1.1.0 — teksten klaar om in te voeren (geschreven 2026-09-25)
+
+Indienen kan pas als 1.0 is goedgekeurd (er kan maar één versie tegelijk in review).
+Klaarzetten kan nu al: maak in App Store Connect versie 1.1.0 aan, plak per taal de
+teksten hieronder en sla op. Build: de 1.1.0-build die de toesteltest doorstaat (nu build 5).
+Alleen NL en EN, want alleen die listings bestaan.
+
+**Wat moet waar:**
+- **What's New**: per taal, hieronder.
+- **Promotietekst**: per taal, hieronder, mee met de 1.1.0-versie (noemt de widget).
+- **Beschrijving**: voeg de nieuwe regel toe aan het lijstje "Wat Vindra anders maakt",
+  direct na de regel over het dag- en weekrapport. De rest blijft gelijk.
+- **Screenshots**: nieuwe set met het nieuwe design, bij voorkeur één met de widget.
+- **App Review Notes**: de alinea "Update in 1.1.0" onderaan deze sectie bovenaan toevoegen.
+
+### NL
+
+**What's New:**
+```
+• Nieuw: een widget voor je beginscherm. Log een moment in één tik, zonder de app te openen. Een slaap start je met één tik en stop je met de volgende. De knoppen volgen je wiel.
+• Nieuw, rustig uiterlijk voor het wiel en de tijdlijn. In nachtmodus gaat de gloed uit.
+• Tijd aanpassen is duidelijker: houd een event vast en je ziet meteen de nieuwe tijd.
+• De ronde knop naast het wiel: tik om het wiel in of uit te klappen, houd vast om het aan te passen.
+• Een korte uitleg bij de eerste start, terug te kijken via Instellingen.
+• Meer uitleg onder Hulp, bovenaan Instellingen.
+• Kleine verbeteringen en bugfixes.
+```
+
+**Promotietekst:**
+> Nieuw: de Vindra-widget. Log een moeilijk moment in één tik vanaf je beginscherm, en deel een duidelijk rapport met school of behandelaar. 7 dagen gratis.
+
+**Beschrijving, nieuwe regel:**
+> • Widget voor je beginscherm — log een moment in één tik, zonder de app te openen
+
+### EN
+
+**What's New:**
+```
+• New: a home screen widget. Log a moment in one tap, without opening the app. Sleep starts with one tap and stops with the next. The buttons follow your wheel.
+• A fresh, calm look for the wheel and the timeline. In night mode the glow turns off.
+• Changing a time is clearer: hold an event and you see the new time right away.
+• The round button next to the wheel: tap to fold the wheel in or out, hold to customize it.
+• A short intro on first launch, which you can replay from Settings.
+• More explanations under Help, at the top of Settings.
+• Small improvements and bug fixes.
+```
+
+**Promotional text:**
+> New: the Vindra widget. Log a difficult moment in one tap from your home screen, then share a clear report with school or a care provider. Free for 7 days.
+
+**Description, new line:**
+> • A home screen widget — log a moment in one tap, without opening the app
+
+### App Review Notes — alinea bovenaan (Engels)
+
+> Update in 1.1.0: a new home screen widget (long-press the home screen → + → Vindra). It shows the first buttons of the wheel that the user may log; without a subscription only Behavior, the same as in the app. Widget taps are stored on the device and turned into events the next time the app opens. The app may show the standard iOS rating prompt (SKStoreReviewController) after regular use; there is no custom pre-prompt.
