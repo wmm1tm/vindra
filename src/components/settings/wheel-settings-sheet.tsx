@@ -18,6 +18,8 @@ import { DEFAULT_WHEEL_ORDER, MAX_ACTIVE_WHEEL_ENTRIES, type WheelEntry } from '
 import type { Dictionary } from '@/lib/i18n/translations';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/preferences-context';
+import { usePurchases } from '@/lib/purchases-context';
+import { widgetEntries } from '@/lib/widget-sync';
 
 interface WheelSettingsSheetProps {
   onClose: () => void;
@@ -33,21 +35,31 @@ interface Row {
 
 const ROW_HEIGHT = 52;
 
+/** De lijst staat in schermvolgorde: bovenaan = bovenaan in het wiel. Het wiel tekent de
+ * eerste knop van `wheelConfig` onderaan de boog, dus de ingeschakelde knoppen staan hier
+ * omgekeerd (en bij opslaan weer terug); uitgeschakelde volgen eronder. */
 function buildInitialRows(config: string[] | null): Row[] {
-  if (!config) {
-    // Alleen de kern-typen staan standaard aan — de conditie-specifieke (defaultEnabled:
-    // false) staan wél in de lijst hieronder (aan te vinken), maar beginnen uit.
-    return DEFAULT_WHEEL_ORDER.map((entry) => ({ entry, enabled: entry.defaultEnabled !== false }));
-  }
-  const enabled = config
-    .map((id) => DEFAULT_WHEEL_ORDER.find((entry) => entry.id === id))
-    .filter((entry): entry is WheelEntry => Boolean(entry))
-    .map((entry) => ({ entry, enabled: true }));
-  const disabled = DEFAULT_WHEEL_ORDER.filter((entry) => !config.includes(entry.id)).map((entry) => ({
+  // Zonder instelling staan alleen de kern-typen aan — de conditie-specifieke
+  // (defaultEnabled: false) staan wél in de lijst (aan te vinken), maar beginnen uit.
+  const enabledEntries = config
+    ? config
+        .map((id) => DEFAULT_WHEEL_ORDER.find((entry) => entry.id === id))
+        .filter((entry): entry is WheelEntry => Boolean(entry))
+    : DEFAULT_WHEEL_ORDER.filter((entry) => entry.defaultEnabled !== false);
+  const enabledIds = new Set(enabledEntries.map((entry) => entry.id));
+  const disabled = DEFAULT_WHEEL_ORDER.filter((entry) => !enabledIds.has(entry.id)).map((entry) => ({
     entry,
     enabled: false,
   }));
-  return [...enabled, ...disabled];
+  return [...enabledEntries.map((entry) => ({ entry, enabled: true })).reverse(), ...disabled];
+}
+
+/** Wielvolgorde (eerste = onderaan de boog) uit de schermvolgorde van de lijst. */
+function wheelOrderFromRows(rows: Row[]): WheelEntry[] {
+  return rows
+    .filter((row) => row.enabled)
+    .map((row) => row.entry)
+    .reverse();
 }
 
 /** One reorderable row. Only the drag-handle icon starts a pan — the checkbox and label
@@ -61,6 +73,7 @@ function DraggableWheelRow({
   row,
   index,
   rowCount,
+  onWidget,
   draggingId,
   dragStartIndex,
   dragY,
@@ -72,6 +85,8 @@ function DraggableWheelRow({
   row: Row;
   index: number;
   rowCount: number;
+  /** Staat deze knop ook op de beginscherm-widget? */
+  onWidget: boolean;
   draggingId: SharedValue<string | null>;
   dragStartIndex: SharedValue<number>;
   dragY: SharedValue<number>;
@@ -134,6 +149,11 @@ function DraggableWheelRow({
       <Text style={[styles.rowLabel, !row.enabled && styles.rowLabelDisabled]} numberOfLines={1}>
         {row.entry.label(t)}
       </Text>
+      {onWidget && (
+        <View style={styles.widgetBadge}>
+          <Text style={styles.widgetBadgeLabel}>{t.wheelSettings.widgetBadge}</Text>
+        </View>
+      )}
       <GestureDetector gesture={pan}>
         <View style={styles.dragHandle} hitSlop={6}>
           <MaterialCommunityIcons name="drag-horizontal-variant" size={22} color="#AAB4B6" />
@@ -146,8 +166,14 @@ function DraggableWheelRow({
 export function WheelSettingsSheet({ onClose, nested = true }: WheelSettingsSheetProps) {
   const preferences = usePreferences();
   const { t } = useI18n();
+  const { status: purchasesStatus } = usePurchases();
   const [rows, setRows] = useState<Row[]>(() => buildInitialRows(preferences.wheelConfig));
   const [saved, setSaved] = useState(false);
+  const widgetIds = new Set(
+    widgetEntries(wheelOrderFromRows(rows).slice(0, MAX_ACTIVE_WHEEL_ENTRIES), purchasesStatus === 'entitled').map(
+      (entry) => entry.id
+    )
+  );
 
   const draggingId = useSharedValue<string | null>(null);
   const dragStartIndex = useSharedValue(0);
@@ -180,7 +206,7 @@ export function WheelSettingsSheet({ onClose, nested = true }: WheelSettingsShee
   };
 
   const handleSave = () => {
-    const enabledIds = rows.filter((row) => row.enabled).map((row) => row.entry.id);
+    const enabledIds = wheelOrderFromRows(rows).map((entry) => entry.id);
     preferences.save({ wheelConfig: enabledIds.length > 0 ? enabledIds : null }).then(() => setSaved(true));
   };
 
@@ -198,6 +224,7 @@ export function WheelSettingsSheet({ onClose, nested = true }: WheelSettingsShee
         </>
       }>
       <Text style={styles.hint}>{t.wheelSettings.hint}</Text>
+      <Text style={styles.hint}>{t.wheelSettings.orderHint}</Text>
 
       <View style={[styles.list, { height: rows.length * ROW_HEIGHT }]}>
         {rows.map((row, index) => (
@@ -206,6 +233,7 @@ export function WheelSettingsSheet({ onClose, nested = true }: WheelSettingsShee
             row={row}
             index={index}
             rowCount={rows.length}
+            onWidget={widgetIds.has(row.entry.id)}
             draggingId={draggingId}
             dragStartIndex={dragStartIndex}
             dragY={dragY}
@@ -263,6 +291,18 @@ const styles = StyleSheet.create({
   },
   rowLabelDisabled: {
     color: '#AAB4B6',
+  },
+  widgetBadge: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#3a4250',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  widgetBadgeLabel: {
+    color: '#AAB4B6',
+    fontSize: 11,
+    fontWeight: '600',
   },
   dragHandle: {
     width: 32,

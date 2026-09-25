@@ -133,6 +133,8 @@ export interface Dictionary {
   wheelSettings: {
     title: string;
     hint: string;
+    orderHint: string;
+    widgetBadge: string;
     maxReachedTitle: string;
     maxReachedMessage: (max: number) => string;
   };
@@ -467,6 +469,8 @@ export const nl: Dictionary = {
   wheelSettings: {
     title: 'Wiel aanpassen',
     hint: 'Vink aan/uit welke knoppen in het wiel staan (ook minder gangbare, bv. bij een specifieke situatie), en versleep het handvat rechts om de volgorde aan te passen.',
+    orderHint: 'Bovenaan de lijst staat ook bovenaan in het wiel. Knoppen met "Widget" staan op je beginscherm-widget.',
+    widgetBadge: 'Widget',
     maxReachedTitle: 'Maximum bereikt',
     maxReachedMessage: (max) => `Het wiel toont maximaal ${max} knoppen tegelijk. Vink er eerst één uit voordat je deze aanzet.`,
   },
@@ -811,6 +815,8 @@ export const en: Dictionary = {
   wheelSettings: {
     title: 'Customize wheel',
     hint: 'Turn wheel buttons on or off (including less common ones, e.g. for a specific situation), and drag the handle on the right to reorder them.',
+    orderHint: 'The top of the list is the top of the wheel. Buttons marked "Widget" appear on your home screen widget.',
+    widgetBadge: 'Widget',
     maxReachedTitle: 'Maximum reached',
     maxReachedMessage: (max) => `The wheel shows a maximum of ${max} buttons at once. Turn one off first before enabling this one.`,
   },
@@ -1142,6 +1148,8 @@ export const de: Dictionary = {
   wheelSettings: {
     title: 'Rad anpassen',
     hint: 'Aktiviere oder deaktiviere Buttons im Rad (auch weniger gängige, z. B. für eine bestimmte Situation), und ziehe den Griff rechts, um die Reihenfolge zu ändern.',
+    orderHint: 'Oben in der Liste ist auch oben im Rad. Buttons mit „Widget“ erscheinen auf deinem Home-Bildschirm-Widget.',
+    widgetBadge: 'Widget',
     maxReachedTitle: 'Maximum erreicht',
     maxReachedMessage: (max) => `Das Rad zeigt maximal ${max} Buttons gleichzeitig. Deaktiviere zuerst einen, bevor du diesen aktivierst.`,
   },
@@ -1473,6 +1481,8 @@ export const es: Dictionary = {
   wheelSettings: {
     title: 'Personalizar rueda',
     hint: 'Activa o desactiva los botones de la rueda (incluidos los menos habituales, por ejemplo para una situación concreta), y arrastra el tirador de la derecha para cambiar el orden.',
+    orderHint: 'Lo primero de la lista es lo de arriba en la rueda. Los botones con «Widget» aparecen en el widget de tu pantalla de inicio.',
+    widgetBadge: 'Widget',
     maxReachedTitle: 'Máximo alcanzado',
     maxReachedMessage: (max) => `La rueda muestra un máximo de ${max} botones a la vez. Desactiva uno antes de activar este.`,
   },
@@ -1804,6 +1814,8 @@ export const fr: Dictionary = {
   wheelSettings: {
     title: 'Personnaliser la roue',
     hint: 'Active ou désactive les boutons de la roue (y compris les moins courants, par exemple pour une situation particulière), et fais glisser la poignée à droite pour changer leur ordre.',
+    orderHint: 'Le haut de la liste correspond au haut de la roue. Les boutons marqués « Widget » apparaissent sur le widget de ton écran d\'accueil.',
+    widgetBadge: 'Widget',
     maxReachedTitle: 'Maximum atteint',
     maxReachedMessage: (max) => `La roue affiche au maximum ${max} boutons à la fois. Désactive d'abord un bouton avant d'activer celui-ci.`,
   },
@@ -2135,6 +2147,8 @@ export const pt: Dictionary = {
   wheelSettings: {
     title: 'Personalizar roda',
     hint: 'Ative ou desative botões da roda (inclusive os menos comuns, por exemplo para uma situação específica), e arraste a alça à direita para reordená-los.',
+    orderHint: 'O topo da lista é o topo da roda. Os botões com "Widget" aparecem no widget da sua tela de início.',
+    widgetBadge: 'Widget',
     maxReachedTitle: 'Máximo atingido',
     maxReachedMessage: (max) => `A roda mostra no máximo ${max} botões ao mesmo tempo. Desative um antes de ativar este.`,
   },

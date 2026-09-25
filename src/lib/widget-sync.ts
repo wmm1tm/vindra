@@ -2,7 +2,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { EVENT_TYPES, isKnownEventKind, resolveWheelOrder, type EventKind } from '@/constants/event-types';
+import { EVENT_TYPES, isKnownEventKind, resolveWheelOrder, type EventKind, type WheelEntry } from '@/constants/event-types';
 import { closeEvent, getActiveEvent, getEventsForRange, insertMomentEvent, type EventRow } from '@/db/events';
 import type { Dictionary } from '@/lib/i18n/translations';
 import type { PendingLog, QuickLogButton, QuickLogProps } from '@/widgets/quick-log-widget';
@@ -43,6 +43,17 @@ function dayRange(dayStartHour: number) {
 
 function mayLog(kind: EventKind, entitled: boolean) {
   return entitled || !EVENT_TYPES[kind].requiresPremium;
+}
+
+/** De wielknoppen die op de widget komen: de eerste die je mag loggen, in wielvolgorde
+ * (duur-types alleen slaap). Ook gebruikt door "Wiel aanpassen" om ze te markeren. */
+export function widgetEntries(wheelOrder: WheelEntry[], entitled: boolean): WheelEntry[] {
+  return wheelOrder
+    .filter(
+      (entry) =>
+        entry.kind && mayLog(entry.kind, entitled) && (!EVENT_TYPES[entry.kind].isDuration || entry.kind === SLEEP_KIND)
+    )
+    .slice(0, WIDGET_BUTTON_COUNT);
 }
 
 /** Zet één wachtende widget-tik om in een database-wijziging. Geeft de nieuwe of gewijzigde
@@ -121,13 +132,11 @@ export async function syncWidget(
   try {
     const { start, end } = dayRange(dayStartHour);
     const todays = await getEventsForRange(db, childId, start, end);
-    const allowed = resolveWheelOrder(wheelConfig).filter(
-      (entry) => entry.kind && mayLog(entry.kind, entitled) && (!EVENT_TYPES[entry.kind].isDuration || entry.kind === SLEEP_KIND)
-    );
+    const allowed = widgetEntries(resolveWheelOrder(wheelConfig), entitled);
     const activeSleep = allowed.some((entry) => entry.kind === SLEEP_KIND)
       ? await getActiveEvent(db, childId, SLEEP_KIND)
       : null;
-    const buttons: QuickLogButton[] = allowed.slice(0, WIDGET_BUTTON_COUNT).map((entry) => {
+    const buttons: QuickLogButton[] = allowed.map((entry) => {
       const kind = entry.kind!;
       const isSleep = kind === SLEEP_KIND;
       return {
