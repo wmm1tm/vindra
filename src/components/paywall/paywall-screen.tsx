@@ -216,7 +216,11 @@ export function PaywallScreen({ onClose }: { onClose?: () => void }) {
              * + het aangepaste knoplabel hieronder, in plaats van alleen de prijs te tonen. */}
             {selectedTrialDays != null && selectedPackage && (
               <Text style={styles.trialIntro}>
-                {t.subscription.trialIntro(selectedTrialDays, selectedPackage.product.priceString)}
+                {t.subscription.trialIntro(
+                  selectedTrialDays,
+                  selectedPackage.product.priceString,
+                  selectedPackage === state.annual ? 'annual' : 'monthly',
+                )}
               </Text>
             )}
             <PrimaryButton

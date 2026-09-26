@@ -326,7 +326,7 @@ export interface Dictionary {
     monthlyLabel: string;
     yearlyLabel: string;
     trialBadge: (days: number) => string;
-    trialIntro: (days: number, price: string) => string;
+    trialIntro: (days: number, price: string, period: 'monthly' | 'annual') => string;
     startTrialButton: string;
     subscribeButton: string;
     purchaseError: string;
@@ -690,7 +690,7 @@ export const nl: Dictionary = {
     monthlyLabel: 'Maandelijks',
     yearlyLabel: 'Jaarlijks',
     trialBadge: (days) => `eerste ${days} dagen gratis`,
-    trialIntro: (days, price) => `${days} dagen gratis, daarna ${price} tenzij je binnen die periode opzegt.`,
+    trialIntro: (days, price, period) => `${days} dagen gratis, daarna ${price} ${period === 'annual' ? 'per jaar' : 'per maand'} tenzij je binnen die periode opzegt.`,
     startTrialButton: 'Start gratis proefperiode',
     subscribeButton: 'Abonneren',
     purchaseError: 'Aankoop mislukt. Probeer het opnieuw.',
@@ -1038,7 +1038,7 @@ export const en: Dictionary = {
     monthlyLabel: 'Monthly',
     yearlyLabel: 'Yearly',
     trialBadge: (days) => `first ${days} days free`,
-    trialIntro: (days, price) => `${days} days free, then ${price} unless you cancel within that period.`,
+    trialIntro: (days, price, period) => `${days} days free, then ${price} ${period === 'annual' ? 'per year' : 'per month'} unless you cancel within that period.`,
     startTrialButton: 'Start free trial',
     subscribeButton: 'Subscribe',
     purchaseError: 'Purchase failed. Please try again.',
@@ -1384,7 +1384,7 @@ export const de: Dictionary = {
     monthlyLabel: 'Monatlich',
     yearlyLabel: 'Jährlich',
     trialBadge: (days) => `erste ${days} Tage gratis`,
-    trialIntro: (days, price) => `${days} Tage gratis, danach ${price}, außer du kündigst innerhalb dieses Zeitraums.`,
+    trialIntro: (days, price, period) => `${days} Tage gratis, danach ${price} ${period === 'annual' ? 'pro Jahr' : 'pro Monat'}, außer du kündigst innerhalb dieses Zeitraums.`,
     startTrialButton: 'Kostenlose Testphase starten',
     subscribeButton: 'Abonnieren',
     purchaseError: 'Kauf fehlgeschlagen. Bitte versuche es erneut.',
@@ -1730,7 +1730,7 @@ export const es: Dictionary = {
     monthlyLabel: 'Mensual',
     yearlyLabel: 'Anual',
     trialBadge: (days) => `primeros ${days} días gratis`,
-    trialIntro: (days, price) => `${days} días gratis, después ${price} a menos que canceles dentro de ese período.`,
+    trialIntro: (days, price, period) => `${days} días gratis, después ${price} ${period === 'annual' ? 'al año' : 'al mes'} a menos que canceles dentro de ese período.`,
     startTrialButton: 'Iniciar prueba gratuita',
     subscribeButton: 'Suscribirse',
     purchaseError: 'Error en la compra. Inténtalo de nuevo.',
@@ -2076,7 +2076,7 @@ export const fr: Dictionary = {
     monthlyLabel: 'Mensuel',
     yearlyLabel: 'Annuel',
     trialBadge: (days) => `${days} premiers jours gratuits`,
-    trialIntro: (days, price) => `${days} jours gratuits, puis ${price} sauf annulation pendant cette période.`,
+    trialIntro: (days, price, period) => `${days} jours gratuits, puis ${price} ${period === 'annual' ? 'par an' : 'par mois'} sauf annulation pendant cette période.`,
     startTrialButton: "Démarrer l'essai gratuit",
     subscribeButton: "S'abonner",
     purchaseError: "Échec de l'achat. Réessaie.",
@@ -2422,7 +2422,7 @@ export const pt: Dictionary = {
     monthlyLabel: 'Mensal',
     yearlyLabel: 'Anual',
     trialBadge: (days) => `primeiros ${days} dias grátis`,
-    trialIntro: (days, price) => `${days} dias grátis, depois ${price} a menos que você cancele dentro desse período.`,
+    trialIntro: (days, price, period) => `${days} dias grátis, depois ${price} ${period === 'annual' ? 'por ano' : 'por mês'} a menos que você cancele dentro desse período.`,
     startTrialButton: 'Iniciar teste grátis',
     subscribeButton: 'Assinar',
     purchaseError: 'Falha na compra. Tente novamente.',
