@@ -15,21 +15,26 @@ import type { LanguageSetting, TempUnit, TimeFormat, VolumeUnit } from '@/db/chi
 import { softDeleteEventsForDay, type EventRow } from '@/db/events';
 import { useActiveChild } from '@/lib/active-child-context';
 import { exportBackupJson, exportEventsCsv, importBackupFromUri } from '@/lib/backup';
+import type { TimeWindow } from '@/lib/day-window';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/preferences-context';
 import { usePurchases } from '@/lib/purchases-context';
+import { formatTime } from '@/lib/time-options';
 
 interface SettingsSheetProps {
   onClose: () => void;
-  /** Dag die de tijdlijn op dit moment toont — bepaalt welke events de "verwijder alle
-   * events van deze dag"-rij treft. */
-  selectedDate: Date;
+  /** Dagvenster dat de tijdlijn op dit moment toont (dagstart-uur tot dagstart-uur) —
+   * bepaalt welke events de "verwijder alle events van deze dag"-rij treft. */
+  dayWindow: TimeWindow;
   /** Al opgemaakt label voor diezelfde dag (bv. "Vandaag" of de weekdagnaam), voor in de
    * bevestigingswaarschuwing — instellingen zelf weet niet of dit vandaag is. */
   dayLabel: string;
   /** De verwijderde rijen (met hun nieuwe deleted_at/updated_at) — de aanroeper filtert
    * ze net als bij een losse verwijdering uit zijn eigen state en pusht ze naar sync. */
   onDayEventsDeleted: (rows: EventRow[]) => void;
+  /** Na een geslaagde back-up-import: de tijdlijn, badges en kinderlijst opnieuw laden en
+   * wat de import veranderde naar de partner pushen. */
+  onDataImported: () => void;
 }
 
 // Lang genoeg voor de sluit-animatie van Instellingen voordat de intro-Modal opent.
@@ -40,7 +45,7 @@ function clampDayStartHour(text: string): number {
   return text.trim() && !Number.isNaN(parsed) ? Math.min(Math.max(Math.round(parsed), 0), 23) : 0;
 }
 
-export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDeleted }: SettingsSheetProps) {
+export function SettingsSheet({ onClose, dayWindow, dayLabel, onDayEventsDeleted, onDataImported }: SettingsSheetProps) {
   const db = useSQLiteContext();
   const preferences = usePreferences();
   const { t } = useI18n();
@@ -67,26 +72,33 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
   const [showPaywall, setShowPaywall] = useState(false);
   const { status: purchasesStatus } = usePurchases();
 
+  // CSV is Pro (zelfde gegevens als verslag/PDF); de JSON-back-up maken en terugzetten is
+  // altijd gratis — je eigen gegevens veiligstellen mag nooit achter een betaalmuur.
   const handleExportCsv = () => {
     if (!childId) return;
+    if (purchasesStatus !== 'entitled') {
+      setShowPaywall(true);
+      return;
+    }
     setExportBusy('csv');
-    exportEventsCsv(db, childId).finally(() => setExportBusy(null));
+    exportEventsCsv(db, childId, t)
+      .catch(showExportError)
+      .finally(() => setExportBusy(null));
+  };
+
+  const showExportError = (error: unknown) => {
+    console.warn('[settings] export failed', error);
+    Alert.alert(t.settings.exportErrorTitle, t.settings.exportErrorMessage);
   };
 
   const handleExportJson = () => {
-    if (purchasesStatus !== 'entitled') {
-      setShowPaywall(true);
-      return;
-    }
     setExportBusy('json');
-    exportBackupJson(db).finally(() => setExportBusy(null));
+    exportBackupJson(db)
+      .catch(showExportError)
+      .finally(() => setExportBusy(null));
   };
 
   const handlePickImport = async () => {
-    if (purchasesStatus !== 'entitled') {
-      setShowPaywall(true);
-      return;
-    }
     const result = await DocumentPicker.getDocumentAsync({ type: 'application/json' });
     if (result.canceled || !result.assets?.[0]) return;
     setImportStatus(null);
@@ -101,6 +113,7 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
       const { childCount, eventCount, ratingCount } = await importBackupFromUri(db, pendingImportUri, t);
       setImportStatus(t.settings.importResult(childCount, eventCount, ratingCount));
       await preferences.refresh();
+      onDataImported();
     } catch (error) {
       setImportStatus(error instanceof Error ? error.message : t.settings.importError);
     }
@@ -111,7 +124,7 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
 
   const handleDeleteDay = () => {
     if (!childId) return;
-    softDeleteEventsForDay(db, childId, selectedDate).then((rows) => {
+    softDeleteEventsForDay(db, childId, dayWindow).then((rows) => {
       if (rows.length === 0) {
         Alert.alert(t.settings.deleteDayConfirmTitle, t.settings.deleteDayEmpty);
         return;
@@ -122,7 +135,9 @@ export function SettingsSheet({ onClose, selectedDate, dayLabel, onDayEventsDele
   };
 
   const confirmDeleteDay = () => {
-    Alert.alert(t.settings.deleteDayConfirmTitle, t.settings.deleteDayConfirmMessage(dayLabel), [
+    const from = formatTime(dayWindow.start, preferences.timeFormat);
+    const to = formatTime(dayWindow.end, preferences.timeFormat);
+    Alert.alert(t.settings.deleteDayConfirmTitle, t.settings.deleteDayConfirmMessage(dayLabel, from, to), [
       { text: t.common.cancel, style: 'cancel' },
       { text: t.settings.deleteDayConfirmButton, style: 'destructive', onPress: handleDeleteDay },
     ]);

@@ -89,7 +89,8 @@ const QuickLogWidget = (props: QuickLogProps, environment: WidgetEnvironment) =>
       return {
         pending: [...(props.pending || []), { k: button.id, t: now, a: running ? 'stop' : 'start' }],
         buttons: props.buttons.map((b) =>
-          b.id === button.id ? { ...b, since: running ? 0 : now, count: running ? b.count + 1 : b.count } : b
+          // Teller +1 bij de START, net als de app (die telt gestarte slapen in het dagvenster).
+          b.id === button.id ? { ...b, since: running ? 0 : now, count: running ? b.count : b.count + 1 } : b
         ),
       };
     }

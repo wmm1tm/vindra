@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { DURATION_KINDS } from '@/constants/event-types';
 import { TIMELINE_HORIZONTAL_PADDING, TIMELINE_LANES, type LaneId } from '@/constants/timeline-lanes';
-import { getEventsForRange, type EventRow } from '@/db/events';
+import { getEventsOverlappingRange, type EventRow } from '@/db/events';
 import { useActiveChild } from '@/lib/active-child-context';
 import { lighten, withAlpha } from '@/lib/color';
+import { dayWindow } from '@/lib/day-window';
 import { computeKindTotals, formatGroupBadge } from '@/lib/event-summary';
 import { useI18n } from '@/lib/i18n';
 import type { Dictionary } from '@/lib/i18n/translations';
@@ -27,31 +29,27 @@ const SUMMARY_FORMATTERS: Record<LaneId, (t: Dictionary) => (value: string) => s
 };
 
 /** Samenvattingsrij bovenaan de tijdlijn ("4u22 slaap · 4 voeding · 3 luiers"), naast
- * (niet i.p.v.) de bestaande badges op de wielknoppen. Telt bewust over dezelfde
- * instelbare "dagstart" als die badges (usePreferences().dayStartHour) i.p.v. de
- * kalenderdag-scoped `events`-state van app/index.tsx — anders zouden deze cijfers en de
- * wiel-badges uiteen kunnen lopen zodra iemand een dagstart ≠ 00:00 gebruikt. Dat
- * betekent een eigen, kleine fetch die vergelijkbaar is met wheel-arc.tsx's
- * badgeEvents-effect — bewust niet hergebruikt/opgetild, om die bestaande, werkende
- * logica niet aan te hoeven raken voor dit ene extra gebruik. */
+ * (niet i.p.v.) de badges op de wielknoppen. Telt over hetzelfde dagvenster als de tijdlijn
+ * en de badges (lib/day-window.ts), met duur-totalen geknipt op de dagrand. */
 export function LaneSummaryPills({ selectedDate, badgeRefreshToken }: LaneSummaryPillsProps) {
   const db = useSQLiteContext();
   const { childId } = useActiveChild();
   const { dayStartHour } = usePreferences();
   const { t } = useI18n();
   const [rangeEvents, setRangeEvents] = useState<EventRow[]>([]);
+  const window = dayWindow(selectedDate, dayStartHour);
+  const from = window.start.getTime();
+  const to = window.end.getTime();
 
   useEffect(() => {
     if (!childId) return;
-    const rangeStart = new Date(selectedDate);
-    rangeStart.setHours(dayStartHour, 0, 0, 0);
-    const rangeEnd = new Date(rangeStart.getTime() + 24 * 60 * 60 * 1000);
-    getEventsForRange(db, childId, rangeStart, rangeEnd).then(setRangeEvents);
-  }, [db, childId, selectedDate, dayStartHour, badgeRefreshToken]);
+    // Incl. de nacht die gisteren begon: die telt vandaag mee voor het deel na de dagstart.
+    getEventsOverlappingRange(db, childId, new Date(from), new Date(to), DURATION_KINDS).then(setRangeEvents);
+  }, [db, childId, from, to, badgeRefreshToken]);
 
-  const kindTotals = computeKindTotals(rangeEvents);
+  const kindTotals = computeKindTotals(rangeEvents, from, to);
   const pills = TIMELINE_LANES.map((lane) => {
-    const badge = formatGroupBadge(kindTotals, lane.kinds, t);
+    const badge = formatGroupBadge(kindTotals, lane.summaryKinds ?? lane.kinds, t);
     const formatSummary = SUMMARY_FORMATTERS[lane.id](t);
     return { lane, text: badge ? formatSummary(badge) : null };
   }).filter((pill): pill is { lane: (typeof TIMELINE_LANES)[number]; text: string } => pill.text !== null);

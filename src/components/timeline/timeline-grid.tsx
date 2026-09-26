@@ -1,19 +1,25 @@
 import { StyleSheet, View } from 'react-native';
 
+import { windowHours, type TimeWindow } from '@/lib/day-window';
+
 interface TimelineGridProps {
   pixelsPerHour: number;
+  window: TimeWindow;
 }
 
-export function TimelineGrid({ pixelsPerHour }: TimelineGridProps) {
+/** Uurlijnen over het dagvenster; elke zesde lijn (00:00, 06:00, …) iets sterker. */
+export function TimelineGrid({ pixelsPerHour, window }: TimelineGridProps) {
+  const hours = Math.round(windowHours(window));
+  const startMs = window.start.getTime();
   return (
     <View style={styles.grid}>
-      {Array.from({ length: 24 }, (_, hour) => (
+      {Array.from({ length: hours }, (_, index) => (
         <View
-          key={hour}
+          key={index}
           style={[
             styles.hourLine,
-            hour % 6 === 0 && styles.majorHourLine,
-            { top: hour * pixelsPerHour },
+            new Date(startMs + index * 3_600_000).getHours() % 6 === 0 && styles.majorHourLine,
+            { top: index * pixelsPerHour },
           ]}
         />
       ))}

@@ -25,13 +25,22 @@ export async function recordReviewPrompt(db: SQLiteDatabase, state: ReviewPrompt
   await db.runAsync(upsert, [LAST_ASKED_KEY, at.toISOString()]);
 }
 
-/** Aantal niet-verwijderde events en op hoeveel verschillende dagen ze gelogd zijn, over
- * alle kinderen heen. De datum is het deel vóór de "T" van start_at (lokale tijd met
- * tijdzone, zie SPEC), dus een dag zoals de gebruiker hem beleefde. */
+/** Aantal niet-verwijderde events en op hoeveel verschillende LOKALE dagen ze gelogd zijn,
+ * over alle kinderen heen. start_at staat in UTC (toISOString), dus de dag rekenen we hier
+ * in lokale tijd uit — anders telt een log om 00:30 bij de dag ervoor. De laatste 200 events
+ * zijn genoeg om "minstens 3 dagen" te zien. */
 export async function getLoggingStats(db: SQLiteDatabase): Promise<{ events: number; days: number }> {
-  const row = await db.getFirstAsync<{ events: number; days: number }>(
-    `SELECT COUNT(*) AS events, COUNT(DISTINCT substr(start_at, 1, 10)) AS days
-     FROM event WHERE deleted_at IS NULL`
+  const count = await db.getFirstAsync<{ events: number }>(
+    `SELECT COUNT(*) AS events FROM event WHERE deleted_at IS NULL`
   );
-  return { events: row?.events ?? 0, days: row?.days ?? 0 };
+  const recent = await db.getAllAsync<{ start_at: string }>(
+    `SELECT start_at FROM event WHERE deleted_at IS NULL ORDER BY start_at DESC LIMIT 200`
+  );
+  const days = new Set(
+    recent.map((row) => {
+      const date = new Date(row.start_at);
+      return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    })
+  );
+  return { events: count?.events ?? 0, days: days.size };
 }

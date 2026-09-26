@@ -43,7 +43,7 @@ export default function RootLayout() {
                       <Stack.Screen name="index" options={{ headerShown: false }} />
                     </Stack>
                   </PurchasesProvider>
-                  <StatusBar style="auto" />
+                  <StatusBar style="light" />
                 </ThemeProvider>
               </I18nProvider>
             </PreferencesProvider>

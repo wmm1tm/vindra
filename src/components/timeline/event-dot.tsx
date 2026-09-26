@@ -19,7 +19,7 @@ import { useGlow } from '@/lib/glow-context';
 import { formatTimelineDetail } from '@/lib/event-summary';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/preferences-context';
-import { minutesSinceMidnight } from '@/lib/time';
+import { minutesFromWindowStart } from '@/lib/day-window';
 
 /** Tegeltje (vierkant met ronde hoeken) i.p.v. het oude bolletje: onderscheidt een gelogd
  * event van de ronde wielknoppen (design-voorstel 2026-09-24, scherm 5). */
@@ -33,6 +33,8 @@ interface EventDotProps {
   event: EventRow;
   column: number;
   pixelsPerHour: number;
+  /** Begin van het dagvenster van de tijdlijn (dagstart-uur). */
+  windowStart: Date;
   onPress: () => void;
   mirrored?: boolean;
   /** Live offset (in minutes) while this event is being rescheduled by dragging it on
@@ -53,6 +55,7 @@ export function EventDot({
   event,
   column,
   pixelsPerHour,
+  windowStart,
   onPress,
   mirrored = false,
   previewOffsetMinutes = null,
@@ -65,7 +68,7 @@ export function EventDot({
   const glow = useGlow();
   const visual = getEventVisual(event.kind, event.variant);
 
-  const baseTop = (minutesSinceMidnight(new Date(event.start_at)) / 60) * pixelsPerHour - DOT_SIZE / 2;
+  const baseTop = (minutesFromWindowStart(new Date(event.start_at), windowStart) / 60) * pixelsPerHour - DOT_SIZE / 2;
   const dragOffsetPx = ((previewOffsetMinutes ?? 0) / 60) * pixelsPerHour;
   const top = baseTop + dragOffsetPx;
   const offset = laneOffset + column * (DOT_SIZE + DOT_GAP);

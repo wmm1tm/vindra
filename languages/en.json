@@ -1,0 +1,5 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "Camera access is needed to scan your partner's pairing code."
+  }
+}

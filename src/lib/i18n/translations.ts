@@ -67,6 +67,8 @@ export interface Dictionary {
     endTimeCaption: string;
     endOfDayCaption: string;
     sinceMidnightCaption: string;
+    /** "Sinds middernacht" als de dagstart niet 00:00 is: "Sinds 06:00". */
+    sinceTimeCaption: (time: string) => string;
     cancelLabel: string;
     doneLabel: string;
     hourPlaceholder: string;
@@ -77,6 +79,8 @@ export interface Dictionary {
     hubHint: string;
   };
   settings: {
+    exportErrorTitle: string;
+    exportErrorMessage: string;
     title: string;
     sectionDisplay: string;
     sectionTimeUnits: string;
@@ -113,7 +117,7 @@ export interface Dictionary {
     deleteDayButton: string;
     swipeToDeleteHint: string;
     deleteDayConfirmTitle: string;
-    deleteDayConfirmMessage: (day: string) => string;
+    deleteDayConfirmMessage: (day: string, from: string, to: string) => string;
     deleteDayConfirmButton: string;
     deleteDayEmpty: string;
     deleteDayDone: (count: number) => string;
@@ -172,6 +176,11 @@ export interface Dictionary {
     linkSuccess: (name: string) => string;
     linkError: string;
     linkNetworkError: string;
+    /** Gekoppeld, maar de eerste pull mislukte. */
+    linkPullError: (name: string) => string;
+    /** Sync gepauzeerd omdat het abonnement verlopen is. */
+    pausedHint: string;
+    pausedButton: string;
     scanAgain: string;
     notConfigured: string;
   };
@@ -188,6 +197,8 @@ export interface Dictionary {
     unlock: string;
   };
   dayReport: {
+    exportErrorTitle: string;
+    exportErrorMessage: string;
     weekReport: string;
     dayReport: string;
     ratingSuffix: (rating: number) => string;
@@ -347,6 +358,17 @@ export interface Dictionary {
     termsOfUseLabel: string;
     privacyPolicyLabel: string;
   };
+  sleepConflict: {
+    staleStartTitle: string;
+    staleStartMessage: (since: string, at: string) => string;
+    stop: string;
+    keepRunning: string;
+    alreadyStoppedTitle: string;
+    alreadyStoppedAt: (time: string) => string;
+    alreadyStopped: string;
+    startNew: string;
+    ok: string;
+  };
   /** Teksten op de beginscherm-widget (lib/widget-sync.ts). */
   widget: {
     today: string;
@@ -415,6 +437,7 @@ export const nl: Dictionary = {
     endTimeCaption: 'Eindtijd',
     endOfDayCaption: 'Einde dag',
     sinceMidnightCaption: 'Sinds middernacht',
+    sinceTimeCaption: (time) => `Sinds ${time}`,
     cancelLabel: 'Annuleren',
     doneLabel: 'Klaar',
     hourPlaceholder: 'uu',
@@ -424,6 +447,8 @@ export const nl: Dictionary = {
     hubHint: 'Tik om het wiel te tonen of te verbergen. Houd ingedrukt om het wiel aan te passen.',
   },
   settings: {
+    exportErrorTitle: 'Exporteren mislukt',
+    exportErrorMessage: 'Het bestand kon niet gemaakt of gedeeld worden. Probeer het opnieuw.',
     title: 'Instellingen',
     sectionDisplay: 'Weergave',
     sectionTimeUnits: 'Tijd & eenheden',
@@ -460,8 +485,8 @@ export const nl: Dictionary = {
     deleteDayButton: 'Verwijder alle events van deze dag',
     swipeToDeleteHint: 'Veeg naar links om te verwijderen',
     deleteDayConfirmTitle: 'Events verwijderen?',
-    deleteDayConfirmMessage: (day) =>
-      `Alle events van ${day} worden verwijderd. Dit kan niet ongedaan worden gemaakt.`,
+    deleteDayConfirmMessage: (day, from, to) =>
+      `Alle events van ${day} (${from} – ${to}) worden verwijderd. Een slaap die de dag ervoor begon blijft staan. Dit kan niet ongedaan worden gemaakt.`,
     deleteDayConfirmButton: 'Verwijderen',
     deleteDayEmpty: 'Geen events om te verwijderen op deze dag.',
     deleteDayDone: (count) => `${count} event${count === 1 ? '' : 's'} verwijderd.`,
@@ -523,6 +548,11 @@ export const nl: Dictionary = {
     linkSuccess: (name) => `${name} gekoppeld — geschiedenis wordt opgehaald.`,
     linkError: 'Deze code kon niet gelezen worden. Probeer het nog eens.',
     linkNetworkError: 'Koppelen mislukt — controleer je internetverbinding en probeer opnieuw.',
+    linkPullError: (name) =>
+      `${name} is gekoppeld, maar de gegevens ophalen lukte nog niet (geen verbinding?). Vindra probeert het vanzelf opnieuw.`,
+    pausedHint:
+      'Delen is gepauzeerd omdat je abonnement verlopen is. Je gegevens blijven gewoon op dit toestel staan; met een abonnement synchroniseert Vindra weer alles wat intussen veranderde.',
+    pausedButton: 'Bekijk abonnement',
     scanAgain: 'Opnieuw scannen',
     notConfigured: 'Delen is nog niet beschikbaar in deze versie.',
   },
@@ -539,6 +569,8 @@ export const nl: Dictionary = {
     unlock: 'Bekijk het verloop met Pro',
   },
   dayReport: {
+    exportErrorTitle: 'Exporteren mislukt',
+    exportErrorMessage: 'De PDF kon niet gemaakt of gedeeld worden. Probeer het opnieuw.',
     weekReport: 'Weekverslag',
     dayReport: 'Dagverslag',
     ratingSuffix: (rating) => ` · Dagcijfer: ${rating}/10`,
@@ -712,6 +744,17 @@ export const nl: Dictionary = {
     termsOfUseLabel: 'Gebruiksvoorwaarden',
     privacyPolicyLabel: 'Privacybeleid',
   },
+  sleepConflict: {
+    staleStartTitle: "Slaap loopt al",
+    staleStartMessage: (since, at) => `Slaap loopt sinds ${since}. Om ${at} stoppen?`,
+    stop: "Stoppen",
+    keepRunning: "Nee",
+    alreadyStoppedTitle: "Slaap al gestopt",
+    alreadyStoppedAt: (time) => `De slaap was al gestopt om ${time} (door je partner of op een ander toestel).`,
+    alreadyStopped: "De slaap was al gestopt (door je partner of op een ander toestel).",
+    startNew: "Nieuwe slaap starten",
+    ok: 'OK',
+  },
   widget: {
     today: 'vandaag',
     sleepStart: 'Start',
@@ -776,6 +819,7 @@ export const en: Dictionary = {
     endTimeCaption: 'End time',
     endOfDayCaption: 'End of day',
     sinceMidnightCaption: 'Since midnight',
+    sinceTimeCaption: (time) => `Since ${time}`,
     cancelLabel: 'Cancel',
     doneLabel: 'Done',
     hourPlaceholder: 'hh',
@@ -785,6 +829,8 @@ export const en: Dictionary = {
     hubHint: 'Tap to show or hide the wheel. Hold to customize the wheel.',
   },
   settings: {
+    exportErrorTitle: 'Export failed',
+    exportErrorMessage: 'The file could not be created or shared. Please try again.',
     title: 'Settings',
     sectionDisplay: 'Display',
     sectionTimeUnits: 'Time & units',
@@ -820,7 +866,8 @@ export const en: Dictionary = {
     deleteDayButton: 'Delete all events for this day',
     swipeToDeleteHint: 'Swipe left to delete',
     deleteDayConfirmTitle: 'Delete events?',
-    deleteDayConfirmMessage: (day) => `All events for ${day} will be deleted. This cannot be undone.`,
+    deleteDayConfirmMessage: (day, from, to) =>
+      `All events on ${day} (${from} – ${to}) will be deleted. A sleep that started the day before stays. This cannot be undone.`,
     deleteDayConfirmButton: 'Delete',
     deleteDayEmpty: 'No events to delete on this day.',
     deleteDayDone: (count) => `${count} event${count === 1 ? '' : 's'} deleted.`,
@@ -882,6 +929,11 @@ export const en: Dictionary = {
     linkSuccess: (name) => `${name} linked — retrieving history.`,
     linkError: 'This code could not be read. Please try again.',
     linkNetworkError: 'Linking failed — check your internet connection and try again.',
+    linkPullError: (name) =>
+      `${name} is linked, but fetching the data didn't work yet (no connection?). Vindra will keep trying.`,
+    pausedHint:
+      'Sharing is paused because your subscription has ended. Your data stays on this device; with a subscription Vindra syncs everything that changed in the meantime.',
+    pausedButton: 'View subscription',
     scanAgain: 'Scan again',
     notConfigured: "Sharing isn't available yet in this version.",
   },
@@ -898,6 +950,8 @@ export const en: Dictionary = {
     unlock: 'See the trend with Pro',
   },
   dayReport: {
+    exportErrorTitle: 'Export failed',
+    exportErrorMessage: 'The PDF could not be created or shared. Please try again.',
     weekReport: 'Week report',
     dayReport: 'Day report',
     ratingSuffix: (rating) => ` · Day rating: ${rating}/10`,
@@ -1060,6 +1114,17 @@ export const en: Dictionary = {
     termsOfUseLabel: 'Terms of Use',
     privacyPolicyLabel: 'Privacy Policy',
   },
+  sleepConflict: {
+    staleStartTitle: "Sleep already running",
+    staleStartMessage: (since, at) => `Sleep running since ${since}. Stop it at ${at}?`,
+    stop: "Stop",
+    keepRunning: "No",
+    alreadyStoppedTitle: "Sleep already stopped",
+    alreadyStoppedAt: (time) => `The sleep was already stopped at ${time} (by your partner or on another device).`,
+    alreadyStopped: "The sleep was already stopped (by your partner or on another device).",
+    startNew: "Start a new sleep",
+    ok: 'OK',
+  },
   widget: {
     today: 'today',
     sleepStart: 'Start',
@@ -1122,6 +1187,7 @@ export const de: Dictionary = {
     endTimeCaption: 'Endzeit',
     endOfDayCaption: 'Tagesende',
     sinceMidnightCaption: 'Seit Mitternacht',
+    sinceTimeCaption: (time) => `Seit ${time}`,
     cancelLabel: 'Abbrechen',
     doneLabel: 'Fertig',
     hourPlaceholder: 'ss',
@@ -1131,6 +1197,8 @@ export const de: Dictionary = {
     hubHint: 'Tippen zeigt oder verbirgt das Rad. Gedrückt halten, um das Rad anzupassen.',
   },
   settings: {
+    exportErrorTitle: 'Export fehlgeschlagen',
+    exportErrorMessage: 'Die Datei konnte nicht erstellt oder geteilt werden. Bitte versuche es erneut.',
     title: 'Einstellungen',
     sectionDisplay: 'Anzeige',
     sectionTimeUnits: 'Zeit & Einheiten',
@@ -1166,7 +1234,8 @@ export const de: Dictionary = {
     deleteDayButton: 'Alle Ereignisse dieses Tages löschen',
     swipeToDeleteHint: 'Nach links wischen zum Löschen',
     deleteDayConfirmTitle: 'Ereignisse löschen?',
-    deleteDayConfirmMessage: (day) => `Alle Ereignisse vom ${day} werden gelöscht. Das kann nicht rückgängig gemacht werden.`,
+    deleteDayConfirmMessage: (day, from, to) =>
+      `Alle Ereignisse vom ${day} (${from} – ${to}) werden gelöscht. Ein Schlaf, der am Vortag begann, bleibt erhalten. Das kann nicht rückgängig gemacht werden.`,
     deleteDayConfirmButton: 'Löschen',
     deleteDayEmpty: 'Keine Ereignisse an diesem Tag zu löschen.',
     deleteDayDone: (count) => `${count} Ereignis${count === 1 ? '' : 'se'} gelöscht.`,
@@ -1228,6 +1297,11 @@ export const de: Dictionary = {
     linkSuccess: (name) => `${name} verknüpft — Verlauf wird abgerufen.`,
     linkError: 'Dieser Code konnte nicht gelesen werden. Bitte versuche es erneut.',
     linkNetworkError: 'Verknüpfen fehlgeschlagen — überprüfe deine Internetverbindung und versuche es erneut.',
+    linkPullError: (name) =>
+      `${name} ist verknüpft, aber das Laden der Daten hat noch nicht geklappt (keine Verbindung?). Vindra versucht es automatisch weiter.`,
+    pausedHint:
+      'Das Teilen ist pausiert, weil dein Abo abgelaufen ist. Deine Daten bleiben auf diesem Gerät; mit einem Abo synchronisiert Vindra alles, was sich inzwischen geändert hat.',
+    pausedButton: 'Abo ansehen',
     scanAgain: 'Erneut scannen',
     notConfigured: 'Teilen ist in dieser Version noch nicht verfügbar.',
   },
@@ -1244,6 +1318,8 @@ export const de: Dictionary = {
     unlock: 'Den Verlauf mit Pro sehen',
   },
   dayReport: {
+    exportErrorTitle: 'Export fehlgeschlagen',
+    exportErrorMessage: 'Das PDF konnte nicht erstellt oder geteilt werden. Bitte versuche es erneut.',
     weekReport: 'Wochenbericht',
     dayReport: 'Tagesbericht',
     ratingSuffix: (rating) => ` · Tagesbewertung: ${rating}/10`,
@@ -1406,6 +1482,17 @@ export const de: Dictionary = {
     termsOfUseLabel: 'Nutzungsbedingungen',
     privacyPolicyLabel: 'Datenschutzerklärung',
   },
+  sleepConflict: {
+    staleStartTitle: "Schlaf läuft schon",
+    staleStartMessage: (since, at) => `Schlaf läuft seit ${since}. Um ${at} beenden?`,
+    stop: "Beenden",
+    keepRunning: "Nein",
+    alreadyStoppedTitle: "Schlaf schon beendet",
+    alreadyStoppedAt: (time) => `Der Schlaf wurde schon um ${time} beendet (von deinem Partner oder auf einem anderen Gerät).`,
+    alreadyStopped: "Der Schlaf wurde schon beendet (von deinem Partner oder auf einem anderen Gerät).",
+    startNew: "Neuen Schlaf starten",
+    ok: 'OK',
+  },
   widget: {
     today: 'heute',
     sleepStart: 'Start',
@@ -1468,6 +1555,7 @@ export const es: Dictionary = {
     endTimeCaption: 'Hora de fin',
     endOfDayCaption: 'Fin del día',
     sinceMidnightCaption: 'Desde medianoche',
+    sinceTimeCaption: (time) => `Desde las ${time}`,
     cancelLabel: 'Cancelar',
     doneLabel: 'Listo',
     hourPlaceholder: 'hh',
@@ -1477,6 +1565,8 @@ export const es: Dictionary = {
     hubHint: 'Toca para mostrar u ocultar la rueda. Mantén pulsado para personalizarla.',
   },
   settings: {
+    exportErrorTitle: 'Error al exportar',
+    exportErrorMessage: 'No se pudo crear o compartir el archivo. Inténtalo de nuevo.',
     title: 'Ajustes',
     sectionDisplay: 'Pantalla',
     sectionTimeUnits: 'Hora y unidades',
@@ -1512,7 +1602,8 @@ export const es: Dictionary = {
     deleteDayButton: 'Eliminar todos los eventos de este día',
     swipeToDeleteHint: 'Desliza hacia la izquierda para eliminar',
     deleteDayConfirmTitle: '¿Eliminar eventos?',
-    deleteDayConfirmMessage: (day) => `Se eliminarán todos los eventos del ${day}. Esta acción no se puede deshacer.`,
+    deleteDayConfirmMessage: (day, from, to) =>
+      `Se eliminarán todos los eventos del ${day} (${from} – ${to}). Un sueño que empezó el día anterior se mantiene. Esto no se puede deshacer.`,
     deleteDayConfirmButton: 'Eliminar',
     deleteDayEmpty: 'No hay eventos que eliminar este día.',
     deleteDayDone: (count) => `${count} evento${count === 1 ? '' : 's'} eliminado${count === 1 ? '' : 's'}.`,
@@ -1574,6 +1665,11 @@ export const es: Dictionary = {
     linkSuccess: (name) => `${name} vinculado — obteniendo historial.`,
     linkError: 'No se pudo leer este código. Inténtalo de nuevo.',
     linkNetworkError: 'Error al vincular — comprueba tu conexión a internet e inténtalo de nuevo.',
+    linkPullError: (name) =>
+      `${name} está vinculado, pero todavía no se pudieron descargar los datos (¿sin conexión?). Vindra lo seguirá intentando.`,
+    pausedHint:
+      'Compartir está en pausa porque tu suscripción ha terminado. Tus datos siguen en este dispositivo; con una suscripción, Vindra sincroniza todo lo que cambió mientras tanto.',
+    pausedButton: 'Ver suscripción',
     scanAgain: 'Escanear de nuevo',
     notConfigured: 'Compartir todavía no está disponible en esta versión.',
   },
@@ -1590,6 +1686,8 @@ export const es: Dictionary = {
     unlock: 'Ver la tendencia con Pro',
   },
   dayReport: {
+    exportErrorTitle: 'Error al exportar',
+    exportErrorMessage: 'No se pudo crear o compartir el PDF. Inténtalo de nuevo.',
     weekReport: 'Informe semanal',
     dayReport: 'Informe diario',
     ratingSuffix: (rating) => ` · Valoración del día: ${rating}/10`,
@@ -1752,6 +1850,17 @@ export const es: Dictionary = {
     termsOfUseLabel: 'Condiciones de uso',
     privacyPolicyLabel: 'Política de privacidad',
   },
+  sleepConflict: {
+    staleStartTitle: "El sueño ya está en marcha",
+    staleStartMessage: (since, at) => `Sueño en marcha desde las ${since}. ¿Detenerlo a las ${at}?`,
+    stop: "Detener",
+    keepRunning: "No",
+    alreadyStoppedTitle: "El sueño ya se detuvo",
+    alreadyStoppedAt: (time) => `El sueño ya se detuvo a las ${time} (por tu pareja o en otro dispositivo).`,
+    alreadyStopped: "El sueño ya se detuvo (por tu pareja o en otro dispositivo).",
+    startNew: "Empezar un sueño nuevo",
+    ok: 'OK',
+  },
   widget: {
     today: 'hoy',
     sleepStart: 'Iniciar',
@@ -1814,6 +1923,7 @@ export const fr: Dictionary = {
     endTimeCaption: 'Heure de fin',
     endOfDayCaption: 'Fin de journée',
     sinceMidnightCaption: 'Depuis minuit',
+    sinceTimeCaption: (time) => `Depuis ${time}`,
     cancelLabel: 'Annuler',
     doneLabel: 'Terminé',
     hourPlaceholder: 'hh',
@@ -1823,6 +1933,8 @@ export const fr: Dictionary = {
     hubHint: 'Appuie pour afficher ou masquer la roue. Maintiens pour personnaliser la roue.',
   },
   settings: {
+    exportErrorTitle: "Échec de l'export",
+    exportErrorMessage: "Le fichier n'a pas pu être créé ou partagé. Réessaie.",
     title: 'Réglages',
     sectionDisplay: 'Affichage',
     sectionTimeUnits: 'Heure et unités',
@@ -1858,7 +1970,8 @@ export const fr: Dictionary = {
     deleteDayButton: 'Supprimer tous les événements de ce jour',
     swipeToDeleteHint: 'Glisser vers la gauche pour supprimer',
     deleteDayConfirmTitle: 'Supprimer les événements ?',
-    deleteDayConfirmMessage: (day) => `Tous les événements du ${day} seront supprimés. Cette action est irréversible.`,
+    deleteDayConfirmMessage: (day, from, to) =>
+      `Tous les événements du ${day} (${from} – ${to}) seront supprimés. Un sommeil commencé la veille est conservé. Cette action est irréversible.`,
     deleteDayConfirmButton: 'Supprimer',
     deleteDayEmpty: 'Aucun événement à supprimer ce jour-là.',
     deleteDayDone: (count) => `${count} événement${count === 1 ? '' : 's'} supprimé${count === 1 ? '' : 's'}.`,
@@ -1920,6 +2033,11 @@ export const fr: Dictionary = {
     linkSuccess: (name) => `${name} lié — récupération de l'historique en cours.`,
     linkError: "Ce code n'a pas pu être lu. Réessaie.",
     linkNetworkError: 'Échec de la liaison — vérifie ta connexion internet et réessaie.',
+    linkPullError: (name) =>
+      `${name} est associé, mais la récupération des données n'a pas encore fonctionné (pas de connexion ?). Vindra réessaiera automatiquement.`,
+    pausedHint:
+      "Le partage est en pause car ton abonnement a expiré. Tes données restent sur cet appareil ; avec un abonnement, Vindra synchronise tout ce qui a changé entre-temps.",
+    pausedButton: "Voir l'abonnement",
     scanAgain: 'Scanner à nouveau',
     notConfigured: "Le partage n'est pas encore disponible dans cette version.",
   },
@@ -1936,6 +2054,8 @@ export const fr: Dictionary = {
     unlock: "Voir l'évolution avec Pro",
   },
   dayReport: {
+    exportErrorTitle: "Échec de l'export",
+    exportErrorMessage: "Le PDF n'a pas pu être créé ou partagé. Réessaie.",
     weekReport: 'Rapport hebdomadaire',
     dayReport: 'Rapport journalier',
     ratingSuffix: (rating) => ` · Note du jour : ${rating}/10`,
@@ -2098,6 +2218,17 @@ export const fr: Dictionary = {
     termsOfUseLabel: "Conditions d'utilisation",
     privacyPolicyLabel: 'Politique de confidentialité',
   },
+  sleepConflict: {
+    staleStartTitle: "Sommeil déjà en cours",
+    staleStartMessage: (since, at) => `Sommeil en cours depuis ${since}. L’arrêter à ${at} ?`,
+    stop: "Arrêter",
+    keepRunning: "Non",
+    alreadyStoppedTitle: "Sommeil déjà arrêté",
+    alreadyStoppedAt: (time) => `Le sommeil a déjà été arrêté à ${time} (par ton partenaire ou sur un autre appareil).`,
+    alreadyStopped: "Le sommeil a déjà été arrêté (par ton partenaire ou sur un autre appareil).",
+    startNew: "Commencer un nouveau sommeil",
+    ok: 'OK',
+  },
   widget: {
     today: 'aujourd’hui',
     sleepStart: 'Début',
@@ -2160,6 +2291,7 @@ export const pt: Dictionary = {
     endTimeCaption: 'Hora de término',
     endOfDayCaption: 'Fim do dia',
     sinceMidnightCaption: 'Desde a meia-noite',
+    sinceTimeCaption: (time) => `Desde as ${time}`,
     cancelLabel: 'Cancelar',
     doneLabel: 'Concluído',
     hourPlaceholder: 'hh',
@@ -2169,6 +2301,8 @@ export const pt: Dictionary = {
     hubHint: 'Toque para mostrar ou ocultar a roda. Mantenha pressionado para personalizá-la.',
   },
   settings: {
+    exportErrorTitle: 'Falha ao exportar',
+    exportErrorMessage: 'Não foi possível criar ou compartilhar o arquivo. Tente novamente.',
     title: 'Configurações',
     sectionDisplay: 'Exibição',
     sectionTimeUnits: 'Hora e unidades',
@@ -2204,7 +2338,8 @@ export const pt: Dictionary = {
     deleteDayButton: 'Excluir todos os eventos deste dia',
     swipeToDeleteHint: 'Deslize para a esquerda para excluir',
     deleteDayConfirmTitle: 'Excluir eventos?',
-    deleteDayConfirmMessage: (day) => `Todos os eventos de ${day} serão excluídos. Isso não pode ser desfeito.`,
+    deleteDayConfirmMessage: (day, from, to) =>
+      `Todos os eventos de ${day} (${from} – ${to}) serão excluídos. Um sono que começou no dia anterior permanece. Isso não pode ser desfeito.`,
     deleteDayConfirmButton: 'Excluir',
     deleteDayEmpty: 'Não há eventos para excluir neste dia.',
     deleteDayDone: (count) => `${count} evento${count === 1 ? '' : 's'} excluído${count === 1 ? '' : 's'}.`,
@@ -2266,6 +2401,11 @@ export const pt: Dictionary = {
     linkSuccess: (name) => `${name} vinculado(a) — recuperando histórico.`,
     linkError: 'Não foi possível ler este código. Tente novamente.',
     linkNetworkError: 'Falha ao vincular — verifique sua conexão com a internet e tente novamente.',
+    linkPullError: (name) =>
+      `${name} foi vinculado, mas ainda não foi possível buscar os dados (sem conexão?). O Vindra vai continuar tentando.`,
+    pausedHint:
+      'O compartilhamento está pausado porque sua assinatura terminou. Seus dados continuam neste aparelho; com uma assinatura, o Vindra sincroniza tudo o que mudou nesse meio-tempo.',
+    pausedButton: 'Ver assinatura',
     scanAgain: 'Escanear novamente',
     notConfigured: 'O compartilhamento ainda não está disponível nesta versão.',
   },
@@ -2282,6 +2422,8 @@ export const pt: Dictionary = {
     unlock: 'Ver a tendência com Pro',
   },
   dayReport: {
+    exportErrorTitle: 'Falha ao exportar',
+    exportErrorMessage: 'Não foi possível criar ou compartilhar o PDF. Tente novamente.',
     weekReport: 'Relatório semanal',
     dayReport: 'Relatório diário',
     ratingSuffix: (rating) => ` · Avaliação do dia: ${rating}/10`,
@@ -2443,6 +2585,17 @@ export const pt: Dictionary = {
       'As assinaturas são renovadas automaticamente, a menos que você cancele pelo menos 24 horas antes do fim do período atual, nas configurações do seu Apple ID.',
     termsOfUseLabel: 'Termos de uso',
     privacyPolicyLabel: 'Política de privacidade',
+  },
+  sleepConflict: {
+    staleStartTitle: "O sono já está em andamento",
+    staleStartMessage: (since, at) => `Sono em andamento desde ${since}. Parar às ${at}?`,
+    stop: "Parar",
+    keepRunning: "Não",
+    alreadyStoppedTitle: "Sono já parado",
+    alreadyStoppedAt: (time) => `O sono já foi parado às ${time} (pelo seu parceiro ou em outro aparelho).`,
+    alreadyStopped: "O sono já foi parado (pelo seu parceiro ou em outro aparelho).",
+    startNew: "Começar um novo sono",
+    ok: 'OK',
   },
   widget: {
     today: 'hoje',

@@ -1,0 +1,5 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "Toegang tot de camera is nodig om de koppel-code van je partner te scannen."
+  }
+}

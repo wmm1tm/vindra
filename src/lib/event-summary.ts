@@ -16,6 +16,66 @@ export function formatTemperature(celsius: number, unit: TempUnit = 'celsius'): 
   return `${celsius}°C`;
 }
 
+/** Minuten van één event die binnen [from, to) vallen (ms). Dé gedeelde regel voor elk
+ * "totaal over een periode" (tijdlijn-pills, wielbadges, verslag, trend, weekkaart): een
+ * duur-event over de dag-/weekgrens (slaap 18:30 → 06:00) telt per periode alleen voor het
+ * deel dat erin valt, een lopend event telt mee tot nu, en slechte data (eind vóór begin)
+ * telt als 0 — nooit negatief. */
+export function minutesWithin(event: EventRow, from: number, to: number, now = Date.now()) {
+  const start = Math.max(new Date(event.start_at).getTime(), from);
+  const end = Math.min(event.end_at ? new Date(event.end_at).getTime() : now, to);
+  return Math.max(0, end - start) / 60000;
+}
+
+/** Of een event meetelt voor een periode. Keuze voor tellingen ("2× slaap"): een event telt
+ * mee zodra het de periode raakt — het begint erin, of het is een duur-event dat erin
+ * doorloopt. Een nacht over middernacht telt dus op beide dagen één keer mee, terwijl de
+ * minuten via minutesWithin over de twee dagen verdeeld worden. */
+export function overlapsPeriod(event: EventRow, from: number, to: number, now = Date.now()) {
+  const start = new Date(event.start_at).getTime();
+  if (start >= from && start < to) return true;
+  return EVENT_TYPES[event.kind].isDuration && minutesWithin(event, from, to, now) > 0;
+}
+
+/** Minuten binnen [from, to) die door minstens één van de events gedekt worden: de UNIE
+ * van de intervallen, geknipt op de periode. Twee overlappende slapen (bv. allebei de ouders
+ * startten er een) tellen zo nooit dubbel. Een lopend event telt tot `now`. */
+export function unionMinutesWithin(events: EventRow[], from: number, to: number, now = Date.now()) {
+  const intervals = events
+    .map((event) => {
+      const start = Math.max(new Date(event.start_at).getTime(), from);
+      const end = Math.min(event.end_at ? new Date(event.end_at).getTime() : now, to);
+      return [start, end] as const;
+    })
+    .filter(([start, end]) => end > start)
+    .sort((a, b) => a[0] - b[0]);
+  let total = 0;
+  let runStart = 0;
+  let runEnd = -Infinity;
+  for (const [start, end] of intervals) {
+    if (start > runEnd) {
+      if (runEnd > runStart) total += runEnd - runStart;
+      runStart = start;
+      runEnd = end;
+    } else if (end > runEnd) {
+      runEnd = end;
+    }
+  }
+  if (runEnd > runStart) total += runEnd - runStart;
+  return total / 60000;
+}
+
+/** Minuten slaap binnen [from, to) in ms: een slaap over de dagrand telt per periode voor
+ * het deel dat erin valt, een lopende slaap telt mee tot nu, overlappende slapen als unie. */
+export function sleepMinutesBetween(events: EventRow[], from: number, to: number, now = Date.now()) {
+  return unionMinutesWithin(
+    events.filter((event) => event.kind === 'slaap'),
+    from,
+    to,
+    now
+  );
+}
+
 export function formatVolume(ml: number, unit: VolumeUnit): string {
   return `${ml} ${unit}`;
 }
@@ -107,18 +167,31 @@ export interface KindTotal {
   minutes: number;
 }
 
-/** Per event-kind: hoeveel keer vandaag, en (voor duur-events) hoeveel minuten totaal. */
-export function computeKindTotals(events: EventRow[]): Map<EventKind, KindTotal> {
-  const totals = new Map<EventKind, KindTotal>();
+/** Per event-kind: hoeveel keer binnen [from, to) (ms), en (voor duur-events) hoeveel
+ * minuten daarvan binnen die periode vallen — zie minutesWithin/overlapsPeriod. Geef ook
+ * duur-events mee die vóór `from` begonnen (getEventsOverlappingRange in db/events.ts),
+ * anders mist de ochtend het staartje van de nacht. */
+export function computeKindTotals(
+  events: EventRow[],
+  from: number,
+  to: number,
+  now = Date.now()
+): Map<EventKind, KindTotal> {
+  const byKind = new Map<EventKind, EventRow[]>();
   for (const event of events) {
-    const current = totals.get(event.kind) ?? { count: 0, minutes: 0 };
-    current.count += 1;
-    if (EVENT_TYPES[event.kind].isDuration) {
-      const end = event.end_at ? new Date(event.end_at).getTime() : Date.now();
-      current.minutes += Math.max(0, (end - new Date(event.start_at).getTime()) / 60000);
-    }
-    totals.set(event.kind, current);
+    if (!overlapsPeriod(event, from, to, now)) continue;
+    const list = byKind.get(event.kind) ?? [];
+    list.push(event);
+    byKind.set(event.kind, list);
   }
+  const totals = new Map<EventKind, KindTotal>();
+  byKind.forEach((kindEvents, kind) => {
+    totals.set(kind, {
+      count: kindEvents.length,
+      // Unie, geen som: een dubbele (overlappende) slaap telt maar één keer mee.
+      minutes: EVENT_TYPES[kind].isDuration ? unionMinutesWithin(kindEvents, from, to, now) : 0,
+    });
+  });
   return totals;
 }
 
@@ -150,4 +223,31 @@ export function formatGroupBadge(totals: Map<EventKind, KindTotal>, memberKinds:
   if (hasDuration) parts.push(formatDurationMinutes(durationMinutes, t));
   if (nonDurationCount > 0) parts.push(`${nonDurationCount}×`);
   return parts.length > 0 ? parts.join(' · ') : null;
+}
+
+/** Prikkelprofiel-waarden ('laag'/'hoog', 'opzoekend'/'vermijdend') in de taal van de app. */
+export function sensoryThresholdLabel(value: string | null, t: Dictionary): string {
+  if (!value) return '';
+  return value === 'laag' ? t.eventDetail.sensoryThresholdLow : t.eventDetail.sensoryThresholdHigh;
+}
+
+export function sensoryResponseLabel(value: string | null, t: Dictionary): string {
+  if (!value) return '';
+  return value === 'opzoekend' ? t.eventDetail.sensoryResponseSeeking : t.eventDetail.sensoryResponseAvoiding;
+}
+
+/** De ABC-velden en het prikkelprofiel van een event als losse "Label: waarde"-regels, voor
+ * het verslag/de PDF — alleen wat ingevuld is. */
+export function formatAbcAndSensory(event: EventRow, t: Dictionary): string[] {
+  return [
+    event.antecedent ? `${t.eventDetail.antecedentLabel}: ${event.antecedent}` : null,
+    event.location ? `${t.eventDetail.locationLabel}: ${event.location}` : null,
+    event.what_helped ? `${t.eventDetail.whatHelpedLabel}: ${event.what_helped}` : null,
+    event.sensory_threshold
+      ? `${t.eventDetail.sensoryThresholdLabel}: ${sensoryThresholdLabel(event.sensory_threshold, t)}`
+      : null,
+    event.sensory_response
+      ? `${t.eventDetail.sensoryResponseLabel}: ${sensoryResponseLabel(event.sensory_response, t)}`
+      : null,
+  ].filter((line): line is string => line !== null);
 }

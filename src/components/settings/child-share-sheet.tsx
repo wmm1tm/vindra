@@ -8,13 +8,12 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { PaywallScreen } from '@/components/paywall/paywall-screen';
 import { PrimaryButton } from '@/components/ui/primary-button';
-import { enableSync, linkSharedChild, type Child, type SharedChildPayload } from '@/db/child';
-import { getAllEvents } from '@/db/events';
+import { adoptRestoredChild, enableSync, getChildSyncInfo, linkSharedChild, type Child, type SharedChildPayload } from '@/db/child';
 import { useActiveChild } from '@/lib/active-child-context';
 import { useI18n } from '@/lib/i18n';
 import { usePurchases } from '@/lib/purchases-context';
 import { isSyncConfigured } from '@/lib/supabase';
-import { pullChanges, pushAllLocal } from '@/lib/sync';
+import { pullChanges, pushDirty } from '@/lib/sync';
 
 const QR_PAYLOAD_VERSION = 1;
 
@@ -79,10 +78,9 @@ function ShareView({ child }: { child: Child }) {
       };
       if (cancelled) return;
       setQrValue(JSON.stringify(payload));
-      // Zorg dat de partner bij het scannen meteen de volledige geschiedenis binnenkrijgt,
-      // niet alleen wat er ná dit moment nog bijkomt.
-      const events = await getAllEvents(db, child.id);
-      await pushAllLocal(db, child.id, events);
+      // Zorg dat de partner bij het scannen meteen de volledige geschiedenis binnenkrijgt:
+      // alles wat nog nooit gepusht is staat dirty, dus pushDirty stuurt het hele verleden.
+      await pushDirty(db, child.id);
     })();
     return () => {
       cancelled = true;
@@ -147,10 +145,25 @@ function LinkView({ onLinked }: { onLinked: () => void }) {
 
     try {
       const newChildId = await linkSharedChild(db, payload);
-      setLinkStatus({ ok: true, message: t.childShare.linkSuccess(payload.name) });
       await setChildId(newChildId);
-      await pullChanges(db, newChildId);
       onLinked();
+      // De koppeling zelf is lokaal gelukt; lukt het ophalen niet (geen internet, server-fout),
+      // dan zeggen we dat eerlijk — de sync-loop probeert het daarna vanzelf opnieuw.
+      const foreign = new Map<string, number>();
+      const pull = await pullChanges(db, newChildId, { foreign });
+      // Stond deze geschiedenis al bij een teruggezet kind op dit toestel? Dan dát kind koppelen
+      // i.p.v. de geschiedenis over twee kinderen te verdelen, en ontbrekende events pushen.
+      const keptChildId = await adoptRestoredChild(db, newChildId, foreign);
+      if (keptChildId !== newChildId) {
+        await setChildId(keptChildId);
+        onLinked();
+        pushDirty(db, keptChildId).catch((error) => console.warn('[link] push after adopt failed', error));
+      }
+      setLinkStatus(
+        pull.error
+          ? { ok: false, message: t.childShare.linkPullError(payload.name) }
+          : { ok: true, message: t.childShare.linkSuccess(payload.name) }
+      );
     } catch {
       setLinkStatus({ ok: false, message: t.childShare.linkNetworkError });
     }
@@ -193,8 +206,22 @@ function LinkView({ onLinked }: { onLinked: () => void }) {
 
 export function ChildShareSheet(props: ChildShareSheetProps) {
   const { t } = useI18n();
+  const db = useSQLiteContext();
   const { mode, onClose } = props;
   const { status: purchasesStatus } = usePurchases();
+  const sharedChildId = mode === 'share' ? props.child.id : null;
+  // Was dit kind al gedeeld? Dan staat het delen zonder abonnement op pauze (data blijft).
+  const [wasShared, setWasShared] = useState(false);
+  useEffect(() => {
+    if (!sharedChildId) return;
+    let ignore = false;
+    getChildSyncInfo(db, sharedChildId).then((info) => {
+      if (!ignore) setWasShared(Boolean(info?.syncEnabled && info.syncId));
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [db, sharedChildId]);
 
   // Partner-sync is een premium-feature — net als bij de PDF-export en de niet-gratis
   // wiel-knoppen (zie WheelArc/DayReportSheet), maar hier géén los <Modal> bovenop de
@@ -203,7 +230,7 @@ export function ChildShareSheet(props: ChildShareSheetProps) {
   if (purchasesStatus !== 'entitled') {
     return (
       <View style={[StyleSheet.absoluteFill, styles.backdropNested]}>
-        <PaywallScreen onClose={onClose} />
+        <PaywallScreen onClose={onClose} notice={wasShared ? t.childShare.pausedHint : undefined} />
       </View>
     );
   }

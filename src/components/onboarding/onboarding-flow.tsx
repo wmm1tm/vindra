@@ -16,7 +16,7 @@ import { EventIcon } from '@/components/ui/event-icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Design, GLOW, glowStyle } from '@/constants/design';
 import { EVENT_TYPES } from '@/constants/event-types';
-import { DEFAULT_CHILD_NAME, getChildWithSettings, renameChild, updateChildBirthDate } from '@/db/child';
+import { getChildWithSettings, isDefaultChildName, renameChild, updateChildBirthDate } from '@/db/child';
 import { useActiveChild } from '@/lib/active-child-context';
 import { withAlpha } from '@/lib/color';
 import { useI18n } from '@/lib/i18n';
@@ -75,7 +75,7 @@ export function OnboardingFlow({ onDone, onChildUpdated }: OnboardingFlowProps) 
     if (!childId) return;
     let ignore = false;
     getChildWithSettings(db, childId).then((child) => {
-      if (ignore || !child || child.name === DEFAULT_CHILD_NAME) return;
+      if (ignore || !child || isDefaultChildName(child.name)) return;
       setDraft((current) => (current.name ? current : { ...current, name: child.name }));
       setSavedName(child.name);
     });

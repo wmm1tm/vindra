@@ -20,7 +20,6 @@ import {
 } from '@/db/child';
 import { useActiveChild } from '@/lib/active-child-context';
 import { useI18n } from '@/lib/i18n';
-import { unshareChild } from '@/lib/sync';
 
 interface ChildrenSettingsSheetProps {
   onClose: () => void;
@@ -89,9 +88,8 @@ export function ChildrenSettingsSheet({ onClose }: ChildrenSettingsSheetProps) {
   };
 
   const handleDeleteChild = async (id: string) => {
-    // Best effort, before the local rows disappear — deleteChild itself needs no sync
-    // knowledge (see its own comment), so this stays here rather than inside it.
-    await unshareChild(db, id);
+    // Alleen lokaal: bij een gedeeld kind koppelt dit DIT toestel los. De gedeelde gegevens op
+    // de server blijven staan, zodat de partner niets kwijtraakt.
     await deleteChild(db, id);
     const fresh = await listChildren(db, true);
     setChildren(fresh);

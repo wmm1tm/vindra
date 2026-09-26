@@ -2,25 +2,35 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { TrendChart } from '@/components/day/trend-chart';
 import { PaywallScreen } from '@/components/paywall/paywall-screen';
 import { EventIcon } from '@/components/ui/event-icon';
-import { EVENT_TYPES, getEventVisual, type EventKind } from '@/constants/event-types';
+import { DURATION_KINDS, EVENT_TYPES, getEventVisual, type EventKind } from '@/constants/event-types';
 import { TIMELINE_LANES } from '@/constants/timeline-lanes';
 import { getDayRating } from '@/db/day-log';
-import { getEventsForRange, getFirstEventTime, type EventRow } from '@/db/events';
+import { getEventsForRange, getEventsOverlappingRange, getFirstEventTime, type EventRow } from '@/db/events';
 import { useActiveChild } from '@/lib/active-child-context';
-import { formatDurationMinutes, formatEventDetailLine, formatEventTimeLabel, formatTemperature, formatVolume } from '@/lib/event-summary';
+import {
+  formatDurationMinutes,
+  formatEventDetailLine,
+  formatEventTimeLabel,
+  formatTemperature,
+  formatAbcAndSensory,
+  formatVolume,
+  overlapsPeriod,
+  sleepMinutesBetween,
+} from '@/lib/event-summary';
 import { useI18n } from '@/lib/i18n';
 import type { Dictionary } from '@/lib/i18n/translations';
 import { usePreferences } from '@/lib/preferences-context';
 import { usePurchases } from '@/lib/purchases-context';
+import { addDays, dayWindow, logicalDateKey, periodWindow } from '@/lib/day-window';
 import { dateKey } from '@/lib/time';
 import { trendFetchStart } from '@/lib/trends';
-import type { TempUnit, TimeFormat, VolumeUnit } from '@/db/child';
+import { isDefaultChildName, listChildren, type TempUnit, type TimeFormat, type VolumeUnit } from '@/db/child';
 
 const SEVERITY_VARIANTS = ['licht', 'matig', 'heftig'] as const;
 // De twee event-typen die de ernstschaal delen (zelfde variant-id's/labels, zie
@@ -63,10 +73,6 @@ interface DayGroup {
   events: EventRow[];
 }
 
-function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
 function formatShortDay(date: Date, localeTag: string) {
   return new Intl.DateTimeFormat(localeTag, { weekday: 'short', day: 'numeric', month: 'short' }).format(date);
 }
@@ -77,14 +83,12 @@ function formatWeekRangeLabel(weekStart: Date, weekEndInclusive: Date, localeTag
   return `${start} – ${end}`;
 }
 
-/** Groepeert een al-gesorteerde eventlijst per dag, voor de weekmodus-lijst op het scherm
- * — zelfde groepering als de PDF-export al langer toepast op zijn eigen tabel (zie
- * `grouped` in buildReportHtml hieronder), nu ook zichtbaar in de app zelf i.p.v. alleen
- * een weekdag-achtervoegsel per rij. */
-function groupEventsByDay(events: EventRow[], localeTag: string): DayGroup[] {
+/** Groepeert een al-gesorteerde eventlijst per logische dag (dagstart-uur), voor de weeklijst
+ * op het scherm — dezelfde groepering als de PDF-export (zie `grouped` in buildReportHtml). */
+function groupEventsByDay(events: EventRow[], localeTag: string, dayStartHour: number): DayGroup[] {
   const groups = new Map<string, EventRow[]>();
   for (const event of events) {
-    const key = dateKey(new Date(event.start_at));
+    const key = logicalDateKey(new Date(event.start_at), dayStartHour);
     const list = groups.get(key) ?? [];
     list.push(event);
     groups.set(key, list);
@@ -163,15 +167,12 @@ function computeWeglopenTotal(events: EventRow[]): number {
 
 /** Slaap krijgt, net als gedrag, een eigen prominente totaalregel bovenaan i.p.v. tussen
  * de kleinere "overige" chips verderop — een lopende (nog niet afgesloten) sessie telt
- * mee tot nu, net als computeKindTotals in lib/event-summary.ts. */
-function computeSleepTotal(events: EventRow[]): Totals | null {
-  const sleepEvents = events.filter((event) => event.kind === 'slaap');
+ * mee tot nu, en een nacht over de periodegrens alleen voor het deel binnen [from, to) —
+ * net als computeKindTotals in lib/event-summary.ts. */
+function computeSleepTotal(events: EventRow[], from: number, to: number): Totals | null {
+  const sleepEvents = events.filter((event) => event.kind === 'slaap' && overlapsPeriod(event, from, to));
   if (sleepEvents.length === 0) return null;
-  const minutes = sleepEvents.reduce((sum, event) => {
-    const end = event.end_at ? new Date(event.end_at).getTime() : Date.now();
-    return sum + Math.max(0, (end - new Date(event.start_at).getTime()) / 60000);
-  }, 0);
-  return { count: sleepEvents.length, minutes };
+  return { count: sleepEvents.length, minutes: sleepMinutesBetween(sleepEvents, from, to) };
 }
 
 function formatEventExtras(event: EventRow, tempUnit: TempUnit, volumeUnit: VolumeUnit, t: Dictionary) {
@@ -180,9 +181,21 @@ function formatEventExtras(event: EventRow, tempUnit: TempUnit, volumeUnit: Volu
     detail,
     event.amount_ml !== null ? formatVolume(event.amount_ml, volumeUnit) : null,
     event.temperature_c !== null ? formatTemperature(event.temperature_c, tempUnit) : null,
+    // Vindra: ABC-velden en prikkelprofiel horen in het verslag (daar vraagt een behandelaar naar).
+    ...formatAbcAndSensory(event, t),
   ]
     .filter(Boolean)
     .join(' · ');
+}
+
+/** Vrije tekst (notities) kan <, > of & bevatten: zonder escapen breekt de PDF of verdwijnt
+ * er tekst. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function buildReportHtml(
@@ -199,15 +212,17 @@ function buildReportHtml(
   volumeUnit: VolumeUnit,
   grouped: boolean,
   t: Dictionary,
-  localeTag: string
+  localeTag: string,
+  dayStartHour: number,
+  childName: string | null
 ) {
   const rowHtml = (event: EventRow) => {
     const type = EVENT_TYPES[event.kind];
     return `<tr>
       <td style="color:${type.color};font-weight:600;">${type.label(t)}</td>
       <td>${formatEventTimeLabel(event, timeFormat, t)}</td>
-      <td>${formatEventExtras(event, tempUnit, volumeUnit, t)}</td>
-      <td>${event.note ?? ''}</td>
+      <td>${escapeHtml(formatEventExtras(event, tempUnit, volumeUnit, t))}</td>
+      <td>${escapeHtml(event.note ?? '')}</td>
     </tr>`;
   };
 
@@ -215,7 +230,7 @@ function buildReportHtml(
   if (grouped) {
     const groups = new Map<string, EventRow[]>();
     for (const event of sorted) {
-      const key = dateKey(new Date(event.start_at));
+      const key = logicalDateKey(new Date(event.start_at), dayStartHour);
       const list = groups.get(key) ?? [];
       list.push(event);
       groups.set(key, list);
@@ -253,8 +268,8 @@ function buildReportHtml(
 
   return `<html><head><meta charset="utf-8" /></head>
     <body style="font-family: -apple-system, sans-serif; padding: 24px; color: #12171C;">
-      <h1 style="margin-bottom: 0;">${grouped ? t.dayReport.weekReport : t.dayReport.dayReport}</h1>
-      <p style="color:#555; margin-top:4px;">${periodLabel}${rating !== null ? t.dayReport.ratingSuffix(rating) : ''}</p>
+      <h1 style="margin-bottom: 0;">${grouped ? t.dayReport.weekReport : t.dayReport.dayReport}${childName ? ` · ${escapeHtml(childName)}` : ''}</h1>
+      <p style="color:#555; margin-top:4px;">${escapeHtml(periodLabel)}${rating !== null ? t.dayReport.ratingSuffix(rating) : ''}</p>
       ${ratingsHtml}
       ${behaviorRows ? `<h3>${t.dayReport.behavior}</h3><ul>${behaviorRows}</ul>` : ''}
       ${sleepTotal ? `<h3>${EVENT_TYPES.slaap.label(t)}</h3><p>${formatDurationMinutes(sleepTotal.minutes, t)} (${sleepTotal.count}×)</p>` : ''}
@@ -271,7 +286,7 @@ function buildReportHtml(
 
 export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClose }: DayReportSheetProps) {
   const db = useSQLiteContext();
-  const { timeFormat, tempUnit, volumeUnit } = usePreferences();
+  const { timeFormat, tempUnit, volumeUnit, dayStartHour } = usePreferences();
   const { t, localeTag } = useI18n();
   const { childId } = useActiveChild();
   const { status: purchasesStatus } = usePurchases();
@@ -281,17 +296,33 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
   const [showPaywall, setShowPaywall] = useState(false);
   const [trendEvents, setTrendEvents] = useState<EventRow[]>([]);
   const [firstEventTime, setFirstEventTime] = useState<number | null>(null);
+  // Naam van het kind in de PDF-kop (een verslag gaat vaak naar een behandelaar).
+  const [childName, setChildName] = useState<string | null>(null);
+  useEffect(() => {
+    if (!childId) return;
+    let ignore = false;
+    listChildren(db, true).then((children) => {
+      const child = children.find((c) => c.id === childId);
+      if (!ignore) setChildName(child && !isDefaultChildName(child.name) ? child.name : null);
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [db, childId]);
 
-  const weekStart = new Date(startOfDay(selectedDate).getTime() - (WEEK_DAYS - 1) * 24 * 60 * 60 * 1000);
-  const weekEnd = new Date(startOfDay(selectedDate).getTime() + 24 * 60 * 60 * 1000);
-  const weekRangeLabel = formatWeekRangeLabel(weekStart, startOfDay(selectedDate), localeTag);
+  // De week = de 7 logische dagen t/m de gekozen dag, elk van dagstart-uur tot dagstart-uur.
+  const firstWeekDay = addDays(selectedDate, -(WEEK_DAYS - 1));
+  const { start: weekStart, end: weekEnd } = periodWindow(firstWeekDay, WEEK_DAYS, dayStartHour);
+  const weekRangeLabel = formatWeekRangeLabel(firstWeekDay, selectedDate, localeTag);
+  const selectedWindow = dayWindow(selectedDate, dayStartHour);
 
   useEffect(() => {
     if (mode !== 'week' || !childId) return;
 
-    getEventsForRange(db, childId, weekStart, weekEnd).then(setWeekEvents);
+    // Incl. een nacht die vóór de week begon: die telt mee voor het deel binnen de week.
+    getEventsOverlappingRange(db, childId, weekStart, weekEnd, DURATION_KINDS).then(setWeekEvents);
 
-    const dayDates = Array.from({ length: WEEK_DAYS }, (_, i) => new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000));
+    const dayDates = Array.from({ length: WEEK_DAYS }, (_, i) => addDays(firstWeekDay, i));
     Promise.all(dayDates.map((date) => getDayRating(db, childId, dateKey(date)))).then((ratings) => {
       setWeekRatings(
         dayDates.map((date, i) => ({ dateKey: dateKey(date), label: formatShortDay(date, localeTag), rating: ratings[i] }))
@@ -305,20 +336,30 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
   useEffect(() => {
     if (mode !== 'trend' || !childId) return;
     const now = new Date();
-    const to = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    getEventsForRange(db, childId, trendFetchStart(now), to).then(setTrendEvents);
+    getEventsForRange(db, childId, trendFetchStart(now, dayStartHour), new Date(now.getTime() + 60_000)).then(
+      setTrendEvents
+    );
     getFirstEventTime(db, childId).then(setFirstEventTime);
-  }, [mode, db, childId]);
+  }, [mode, db, childId, dayStartHour]);
 
+  // `events` (dagweergave) = het dagvenster van de tijdlijn plus een doorlopende nacht van
+  // ervoor (app/index.tsx); totalen knippen op datzelfde venster.
   const displayedEvents = mode === 'week' ? weekEvents : events;
-  const totals = computeTotals(displayedEvents);
-  const sorted = [...displayedEvents].sort((a, b) => a.start_at.localeCompare(b.start_at));
-  const severityStats = computeSeverityStats(displayedEvents);
-  const weglopenTotal = computeWeglopenTotal(displayedEvents);
-  const sleepTotal = computeSleepTotal(displayedEvents);
+  const periodFrom = mode === 'week' ? weekStart.getTime() : selectedWindow.start.getTime();
+  const periodTo = mode === 'week' ? weekEnd.getTime() : selectedWindow.end.getTime();
+  // Alleen wat de periode raakt: een doorlopende slaap van de avond ervoor telt mee voor het
+  // deel binnen de periode, maar de rest van die vorige dag niet.
+  const periodEvents = displayedEvents.filter((event) => overlapsPeriod(event, periodFrom, periodTo));
+  // In de lijst alleen wat in de periode begon (anders een losse dag-kop van vóór de week).
+  const listedEvents = periodEvents.filter((event) => new Date(event.start_at).getTime() >= periodFrom);
+  const totals = computeTotals(listedEvents);
+  const sorted = [...listedEvents].sort((a, b) => a.start_at.localeCompare(b.start_at));
+  const severityStats = computeSeverityStats(listedEvents);
+  const weglopenTotal = computeWeglopenTotal(listedEvents);
+  const sleepTotal = computeSleepTotal(displayedEvents, periodFrom, periodTo);
   const periodLabel = mode === 'trend' ? t.trends.subtitle : mode === 'week' ? weekRangeLabel : dateLabel;
   const headerRating = mode === 'day' ? rating : null;
-  const dayGroups = mode === 'week' ? groupEventsByDay(sorted, localeTag) : null;
+  const dayGroups = mode === 'week' ? groupEventsByDay(sorted, localeTag, dayStartHour) : null;
 
   const handleExport = async () => {
     if (purchasesStatus !== 'entitled') {
@@ -339,11 +380,18 @@ export function DayReportSheet({ selectedDate, dateLabel, rating, events, onClos
       volumeUnit,
       mode === 'week',
       t,
-      localeTag
+      localeTag,
+      dayStartHour,
+      childName
     );
-    const { uri } = await Print.printToFileAsync({ html });
-    if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' });
+    try {
+      const { uri } = await Print.printToFileAsync({ html });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf' });
+      }
+    } catch (error) {
+      console.warn('[day-report] PDF export failed', error);
+      Alert.alert(t.dayReport.exportErrorTitle, t.dayReport.exportErrorMessage);
     }
   };
 

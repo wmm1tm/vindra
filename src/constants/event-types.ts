@@ -187,6 +187,13 @@ export const EVENT_TYPES: Record<EventKind, EventTypeConfig> = {
   },
 };
 
+/** De duur-types (slaap), voor db-queries die events zoeken die vóór een periode begonnen
+ * maar erin doorlopen (getOpenOrOverlappingEvents/getEventsOverlappingRange) — de db-laag
+ * weet zelf niet welke types een duur hebben. */
+export const DURATION_KINDS: EventKind[] = Object.values(EVENT_TYPES)
+  .filter((type) => type.isDuration)
+  .map((type) => type.kind);
+
 export interface WheelEntry {
   id: string;
   label: Translated;

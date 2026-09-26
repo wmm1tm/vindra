@@ -44,8 +44,9 @@ const PreferencesContext = createContext<PreferencesContextValue>({
   refresh: async () => {},
 });
 
-/** Instellingen horen bij het actieve kind — wisselen van kind (zie ActiveChildProvider)
- * ververst deze automatisch, zodat elk kind zijn eigen wiel/etc. behoudt. */
+/** Instellingen van het actieve kind — wisselen van kind (zie ActiveChildProvider) ververst
+ * deze automatisch, zodat elk kind zijn eigen wiel en eenheden behoudt. Taal, tijdnotatie,
+ * dagstart, nachtmodus en linkshandig gelden per toestel (db/child.ts alignDeviceSettings). */
 export function PreferencesProvider({ children }: { children: ReactNode }) {
   const db = useSQLiteContext();
   const { childId } = useActiveChild();

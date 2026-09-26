@@ -1,4 +1,4 @@
-import { minutesSinceMidnight } from '@/lib/time';
+import { minutesFromWindowStart } from '@/lib/day-window';
 
 interface TimedItem {
   start_at: string;
@@ -7,14 +7,17 @@ interface TimedItem {
 export function assignColumns<T extends TimedItem>(
   items: T[],
   dotSize: number,
-  pixelsPerHour: number
+  pixelsPerHour: number,
+  /** Begin van het dagvenster: posities zijn verstreken tijd sinds dan, zodat 23:50 en
+   * 00:05 gewoon onder elkaar staan (ze delen geen kolom meer door de middernacht-sprong). */
+  windowStart: Date
 ): Map<T, number> {
   const sorted = [...items].sort((a, b) => a.start_at.localeCompare(b.start_at));
   const columnBottoms: number[] = [];
   const result = new Map<T, number>();
 
   for (const item of sorted) {
-    const top = (minutesSinceMidnight(new Date(item.start_at)) / 60) * pixelsPerHour;
+    const top = (minutesFromWindowStart(new Date(item.start_at), windowStart) / 60) * pixelsPerHour;
     let column = columnBottoms.findIndex((bottom) => top - bottom >= dotSize);
 
     if (column === -1) {

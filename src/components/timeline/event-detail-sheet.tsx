@@ -11,7 +11,9 @@ import {
   formatTemperature,
   formatVolume,
 } from '@/lib/event-summary';
+import { AmPmToggle } from '@/components/ui/am-pm-toggle';
 import { useI18n } from '@/lib/i18n';
+import { hourFieldValue, parseHourField } from '@/lib/time';
 import { usePreferences } from '@/lib/preferences-context';
 
 function currentOptionId(event: EventRow): string | null {
@@ -40,9 +42,11 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
   const start = new Date(event.start_at);
   const end = event.end_at ? new Date(event.end_at) : null;
 
-  const [startHour, setStartHour] = useState(String(start.getHours()));
+  const [startHour, setStartHour] = useState(hourFieldValue(start.getHours(), timeFormat));
   const [startMinute, setStartMinute] = useState(String(start.getMinutes()));
-  const [endHour, setEndHour] = useState(end ? String(end.getHours()) : '');
+  const [startPm, setStartPm] = useState(start.getHours() >= 12);
+  const [endHour, setEndHour] = useState(end ? hourFieldValue(end.getHours(), timeFormat) : '');
+  const [endPm, setEndPm] = useState(end ? end.getHours() >= 12 : false);
   const [endMinute, setEndMinute] = useState(end ? String(end.getMinutes()) : '');
   // Springt automatisch door naar het minuut-veld zodra het uur-veld 2 cijfers heeft.
   const startMinuteRef = useRef<TextInput>(null);
@@ -72,9 +76,11 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
   const showSensoryFields = event.kind === 'prikkel';
 
   const startEditing = () => {
-    setStartHour(String(start.getHours()));
+    setStartHour(hourFieldValue(start.getHours(), timeFormat));
     setStartMinute(String(start.getMinutes()));
-    setEndHour(end ? String(end.getHours()) : '');
+    setStartPm(start.getHours() >= 12);
+    setEndHour(end ? hourFieldValue(end.getHours(), timeFormat) : '');
+    setEndPm(end ? end.getHours() >= 12 : false);
     setEndMinute(end ? String(end.getMinutes()) : '');
     setNoteValue(event.note ?? '');
     setAmountValue(event.amount_ml !== null ? String(event.amount_ml) : '');
@@ -87,21 +93,22 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
     setEditing(true);
   };
 
-  const clampedTime = (date: Date, hourStr: string, minuteStr: string) => {
+  const clampedTime = (date: Date, hourStr: string, minuteStr: string, pm: boolean) => {
     const next = new Date(date);
-    const hours = Math.min(Math.max(Number(hourStr) || 0, 0), 23);
+    const hours = parseHourField(hourStr, timeFormat, pm);
     const minutes = Math.min(Math.max(Number(minuteStr) || 0, 0), 59);
     next.setHours(hours, minutes, 0, 0);
     return next;
   };
 
   const handleSave = () => {
-    const newStartAt = clampedTime(start, startHour, startMinute);
+    const newStartAt = clampedTime(start, startHour, startMinute, startPm);
     const hasEndInput = endHour.trim() !== '' && endMinute.trim() !== '';
-    const newEndAt = hasEndInput ? clampedTime(end ?? start, endHour, endMinute) : null;
-    // "0:00" (or any clock time earlier than the start) means the end of the day the
-    // event started, i.e. the start of the next calendar day — not a moment before it
-    // even began. Roll forward a day rather than saving a negative/zero-length span.
+    // Verankerd aan de (nieuwe) startdatum, niet aan de oude einddatum: een slaap die eerst
+    // over middernacht liep en nu op dezelfde avond eindigt, werd anders 24 uur te lang.
+    // Alleen als de eindtijd dan vóór de start valt ("0:00", of 06:30 na een start om 21:00)
+    // is het de volgende dag.
+    const newEndAt = hasEndInput ? clampedTime(newStartAt, endHour, endMinute, endPm) : null;
     if (newEndAt && newEndAt.getTime() < newStartAt.getTime()) {
       newEndAt.setDate(newEndAt.getDate() + 1);
     }
@@ -244,6 +251,7 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                   placeholder={t.wheel.minutePlaceholder}
                   placeholderTextColor="#AAB4B6"
                 />
+                {timeFormat === '12h' && <AmPmToggle pm={startPm} onChange={setStartPm} />}
               </View>
 
               {supportsEndTime && (
@@ -273,6 +281,7 @@ export function EventDetailSheet({ event, onClose, onDelete, onSaved }: EventDet
                     placeholder={t.wheel.minutePlaceholder}
                     placeholderTextColor="#AAB4B6"
                   />
+                  {timeFormat === '12h' && <AmPmToggle pm={endPm} onChange={setEndPm} />}
                 </View>
               )}
 

@@ -4,11 +4,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Design } from '@/constants/design';
 import { withAlpha } from '@/lib/color';
 import { usePreferences } from '@/lib/preferences-context';
-import { minutesSinceMidnight } from '@/lib/time';
+import { minutesFromWindowStart } from '@/lib/day-window';
 import { formatTime } from '@/lib/time-options';
 
 interface NowLineProps {
   pixelsPerHour: number;
+  /** Begin van het dagvenster (dagstart-uur): de lijn staat op de verstreken tijd sinds dan. */
+  windowStart: Date;
   color?: string;
   /** Gespiegeld (linkshandig): het tijdlabel staat dan rechts, bij de urenkolom. */
   mirrored?: boolean;
@@ -21,7 +23,7 @@ const ROW_HEIGHT = 20;
 /** "Nu"-lijn met de tijd als amberkleurig labeltje over de urenkolom (design-voorstel
  * scherm 1). Stond eerst als losse tekst rechts, waar de wielhub hem bedekte, en de lijn
  * liep over de event-labels heen; app/index.tsx tekent hem nu vóór de events, dus eronder. */
-export function NowLine({ pixelsPerHour, color = Design.accent, mirrored = false }: NowLineProps) {
+export function NowLine({ pixelsPerHour, windowStart, color = Design.accent, mirrored = false }: NowLineProps) {
   const { timeFormat } = usePreferences();
   const [now, setNow] = useState(() => new Date());
 
@@ -30,7 +32,7 @@ export function NowLine({ pixelsPerHour, color = Design.accent, mirrored = false
     return () => clearInterval(id);
   }, []);
 
-  const top = (minutesSinceMidnight(now) / 60) * pixelsPerHour - ROW_HEIGHT / 2;
+  const top = (minutesFromWindowStart(now, windowStart) / 60) * pixelsPerHour - ROW_HEIGHT / 2;
 
   return (
     <View style={[styles.row, mirrored && styles.rowMirrored, { top }]} pointerEvents="none">

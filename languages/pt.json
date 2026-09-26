@@ -1,0 +1,5 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "O acesso à câmera é necessário para escanear o código de pareamento do seu parceiro."
+  }
+}

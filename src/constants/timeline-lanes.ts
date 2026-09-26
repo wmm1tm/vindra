@@ -6,6 +6,8 @@ export interface TimelineLane {
   id: LaneId;
   label: Translated;
   kinds: EventKind[];
+  /** Wat de samenvattingspil telt, als dat afwijkt van `kinds`. */
+  summaryKinds?: EventKind[];
   color: string;
 }
 

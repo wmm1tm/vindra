@@ -1,0 +1,5 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "Se necesita acceso a la cámara para escanear el código de vinculación de tu pareja."
+  }
+}

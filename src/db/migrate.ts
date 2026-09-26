@@ -14,8 +14,10 @@ import {
   CREATE_SCHEMA_V11,
   CREATE_SCHEMA_V12,
   CREATE_SCHEMA_V13,
+  CREATE_SCHEMA_V14,
   DATABASE_VERSION,
 } from '@/db/schema';
+import { alignDeviceSettings } from '@/db/child';
 
 async function ensureColumn(db: SQLiteDatabase, table: string, column: string, addColumnSql: string) {
   const columns = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(${table})`);
@@ -104,6 +106,18 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
       currentVersion = 13;
     }
 
+    if (currentVersion === 13) {
+      await db.execAsync(CREATE_SCHEMA_V14);
+      currentVersion = 14;
+    }
+
+    if (currentVersion === 14) {
+      // Taal, tijdnotatie, dagstart, nachtmodus en linkshandig gelden voortaan per toestel:
+      // eenmalig alle kinderen gelijkzetten aan het kind dat nu bekeken wordt.
+      await alignDeviceSettings(db);
+      currentVersion = 15;
+    }
+
     await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
   }
 
@@ -151,4 +165,18 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
   await ensureColumn(db, 'event', 'what_helped', 'ALTER TABLE event ADD COLUMN what_helped TEXT;');
   await ensureColumn(db, 'event', 'sensory_threshold', 'ALTER TABLE event ADD COLUMN sensory_threshold TEXT;');
   await ensureColumn(db, 'event', 'sensory_response', 'ALTER TABLE event ADD COLUMN sensory_response TEXT;');
+  await ensureColumn(db, 'event', 'pushed_updated_at', 'ALTER TABLE event ADD COLUMN pushed_updated_at TEXT;');
+  await ensureColumn(db, 'day_log', 'pushed_updated_at', 'ALTER TABLE day_log ADD COLUMN pushed_updated_at TEXT;');
+  await ensureColumn(
+    db,
+    'child',
+    'sync_seq_events',
+    'ALTER TABLE child ADD COLUMN sync_seq_events INTEGER NOT NULL DEFAULT 0;'
+  );
+  await ensureColumn(
+    db,
+    'child',
+    'sync_seq_ratings',
+    'ALTER TABLE child ADD COLUMN sync_seq_ratings INTEGER NOT NULL DEFAULT 0;'
+  );
 }

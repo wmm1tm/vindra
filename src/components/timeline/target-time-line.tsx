@@ -2,12 +2,14 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { usePreferences } from '@/lib/preferences-context';
-import { minutesSinceMidnight } from '@/lib/time';
+import { minutesFromWindowStart } from '@/lib/day-window';
 import { formatTime } from '@/lib/time-options';
 
 interface TargetTimeLineProps {
   time: Date;
   pixelsPerHour: number;
+  /** Begin van het dagvenster van de tijdlijn. */
+  windowStart: Date;
   /** Omit while showing a live, self-clearing time (e.g. during a drag) — there's
    * nothing for the user to manually clear, so the close button is hidden. */
   onClear?: () => void;
@@ -21,9 +23,9 @@ interface TargetTimeLineProps {
 // where it belongs, same fix as event-capsule.tsx's marker anchoring.
 const ROW_HEIGHT = 26;
 
-export function TargetTimeLine({ time, pixelsPerHour, onClear }: TargetTimeLineProps) {
+export function TargetTimeLine({ time, pixelsPerHour, windowStart, onClear }: TargetTimeLineProps) {
   const { timeFormat } = usePreferences();
-  const top = (minutesSinceMidnight(time) / 60) * pixelsPerHour - ROW_HEIGHT / 2;
+  const top = (minutesFromWindowStart(time, windowStart) / 60) * pixelsPerHour - ROW_HEIGHT / 2;
 
   return (
     <View style={[styles.row, { top }]}>

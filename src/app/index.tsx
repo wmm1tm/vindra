@@ -26,7 +26,7 @@ import { TargetTimeLine } from '@/components/timeline/target-time-line';
 import { TimelineGrid } from '@/components/timeline/timeline-grid';
 import { IconButton } from '@/components/ui/icon-button';
 import { WheelArc } from '@/components/wheel/wheel-arc';
-import { EVENT_TYPES } from '@/constants/event-types';
+import { DURATION_KINDS, EVENT_TYPES } from '@/constants/event-types';
 import { HOUR_COLUMN_WIDTH, PIXELS_PER_HOUR } from '@/constants/timeline';
 import {
   TIMELINE_HORIZONTAL_PADDING,
@@ -35,24 +35,32 @@ import {
   laneWidth,
 } from '@/constants/timeline-lanes';
 import { getDayRating, setDayRating } from '@/db/day-log';
-import { DEFAULT_CHILD_NAME, listChildren, type Child } from '@/db/child';
+import { isDefaultChildName, listChildren, listSyncedChildIds, type Child } from '@/db/child';
 import {
-  getEventsForDay,
-  getOpenOrOverlappingEvents,
+  getEventsOverlappingRange,
   rescheduleEvent,
   softDeleteEvent,
   type EventRow,
 } from '@/db/events';
+import { useWidgetSync } from '@/hooks/use-widget-sync';
 import { useActiveChild } from '@/lib/active-child-context';
 import { GlowProvider } from '@/lib/glow-context';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/preferences-context';
 import { usePurchases } from '@/lib/purchases-context';
 import { pushDayRating, pushEvent, useSyncLoop } from '@/lib/sync';
-import { dateKey, minutesSinceMidnight, TIME_SNAP_MINUTES } from '@/lib/time';
+import {
+  dayWindow,
+  isSameDay,
+  logicalDay,
+  minutesFromWindowStart,
+  startOfCalendarDay,
+  windowHours,
+  type TimeWindow,
+} from '@/lib/day-window';
+import { dateKey, TIME_SNAP_MINUTES } from '@/lib/time';
 import { maybeAskForReview } from '@/lib/review-prompt';
 import { assignColumns, assignIntervalColumns } from '@/lib/timeline-layout';
-import { syncWidget } from '@/lib/widget-sync';
 
 const MIN_PIXELS_PER_HOUR = 55;
 const MAX_PIXELS_PER_HOUR = 280;
@@ -68,16 +76,6 @@ const MIN_EVENT_DURATION_MINUTES = TIME_SNAP_MINUTES;
 const LONG_PRESS_MAX_DISTANCE = 10000;
 /** Wacht tot de log-animatie van het wiel klaar is voordat het review-venster verschijnt. */
 const REVIEW_PROMPT_DELAY_MS = 1500;
-
-// Which event kinds are duration-based, for getOpenOrOverlappingEvents — the db layer
-// itself doesn't know this (that's app-level config), so callers supply the list.
-const DURATION_KINDS = Object.values(EVENT_TYPES)
-  .filter((type) => type.isDuration)
-  .map((type) => type.kind);
-
-function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
 
 /** Which part of an event a long-press landed on. A duration event's own start/end
  * markers can be grabbed independently (the duration is then recomputed automatically)
@@ -111,7 +109,7 @@ function findEventNear(
   y: number,
   events: EventRow[],
   pixelsPerHour: number,
-  dayStart: Date,
+  window: TimeWindow,
   columns: Map<EventRow, number>,
   durationColumns: Map<EventRow, number>,
   mirrored: boolean,
@@ -123,7 +121,9 @@ function findEventNear(
   isToday: boolean,
   laneWidthPx: number
 ): ReschedulingTarget | null {
-  const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+  const dayStart = window.start;
+  const dayEnd = window.end;
+  const topFor = (date: Date) => (minutesFromWindowStart(date, dayStart) / 60) * pixelsPerHour;
 
   for (const event of events) {
     const isDuration = EVENT_TYPES[event.kind].isDuration;
@@ -137,7 +137,7 @@ function findEventNear(
 
     const trueStart = new Date(event.start_at);
     const continuesBefore = trueStart.getTime() < dayStart.getTime();
-    const startTop = continuesBefore ? 0 : (minutesSinceMidnight(trueStart) / 60) * pixelsPerHour;
+    const startTop = continuesBefore ? 0 : topFor(trueStart);
 
     if (!isDuration) {
       if (Math.abs(y - startTop) <= LONG_PRESS_TOLERANCE) return { event, edge: 'whole' };
@@ -152,7 +152,7 @@ function findEventNear(
     // >= , not > : an end landing exactly on the boundary (midnight) must still count
     // as "continues" — see the identical fix in EventCapsule for why.
     const continuesAfter = trueEnd.getTime() >= dayEnd.getTime();
-    const endTop = continuesAfter ? 24 * pixelsPerHour : (minutesSinceMidnight(trueEnd) / 60) * pixelsPerHour;
+    const endTop = continuesAfter ? windowHours(window) * pixelsPerHour : topFor(trueEnd);
     if (event.end_at && !continuesAfter && Math.abs(y - endTop) <= LONG_PRESS_TOLERANCE) return { event, edge: 'end' };
     const top = Math.min(startTop, endTop) - LONG_PRESS_TOLERANCE;
     const bottom = Math.max(startTop, endTop) + LONG_PRESS_TOLERANCE;
@@ -165,12 +165,13 @@ function snapMinutes(rawMinutes: number) {
   return Math.round(rawMinutes / TIME_SNAP_MINUTES) * TIME_SNAP_MINUTES;
 }
 
-function snappedTimeAt(y: number, pixelsPerHour: number, day: Date) {
+/** Tijdstip onder de vinger: verstreken minuten sinds het begin van het dagvenster, gesnapt
+ * op 5 minuten en binnen het venster gehouden (dat 23-25 uur lang kan zijn). */
+function snappedTimeAt(y: number, pixelsPerHour: number, window: TimeWindow) {
+  const windowMinutes = windowHours(window) * 60;
   const snapped = snapMinutes((y / pixelsPerHour) * 60);
-  const clamped = Math.min(Math.max(snapped, 0), 24 * 60 - TIME_SNAP_MINUTES);
-  const date = new Date(day);
-  date.setHours(Math.floor(clamped / 60), clamped % 60, 0, 0);
-  return date;
+  const clamped = Math.min(Math.max(snapped, 0), windowMinutes - TIME_SNAP_MINUTES);
+  return new Date(window.start.getTime() + clamped * 60000);
 }
 
 function isWithinNightWindow(date: Date) {
@@ -222,10 +223,17 @@ export default function TimelineScreen() {
   // Geopend door lang drukken op de wielknop in het midden (zie WheelHub), als eigen
   // Modal, los van Instellingen.
   const [showWheelSettings, setShowWheelSettings] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
+  const { dayStartHour } = preferences;
+  // De logische dag die de tijdlijn toont (00:00 van die kalenderdatum, zie lib/day-window.ts).
+  const [selectedDate, setSelectedDate] = useState(() => logicalDay(new Date(), dayStartHour));
+  // Keek je naar "vandaag"? Dan schuift de tijdlijn vanzelf door naar de nieuwe dag zodra de
+  // logische dag omslaat (minuut-tik, terugkomen in de app, dagstart gewijzigd) — anders zou
+  // het wiel na een nacht met de app open nog op gisteren loggen.
+  const [followToday, setFollowToday] = useState(true);
   const [markedTime, setMarkedTime] = useState<Date | null>(null);
   const [manualNightMode, setManualNightMode] = useState<boolean | null>(null);
-  const [autoNightNow, setAutoNightNow] = useState(() => new Date());
+  // Eén klok-tik per minuut voor alles wat van "nu" afhangt (nachtmodus-auto, dag-omslag).
+  const [clockNow, setClockNow] = useState(() => new Date());
   const [children, setChildren] = useState<Child[]>([]);
   const [showChildSwitcher, setShowChildSwitcher] = useState(false);
   const [badgeRefreshToken, setBadgeRefreshToken] = useState(0);
@@ -236,14 +244,27 @@ export default function TimelineScreen() {
   // bypassing the setEvents calls local edits use, so without re-running this fetch a
   // partner's events would sit in the local DB invisibly until something else happened
   // to trigger a refetch (switching day/child, reopening the app).
+  //
+  // Stale-response-guard: elke aanroep krijgt een volgnummer, en alleen het antwoord van de
+  // laatste aanroep mag de state zetten — anders kan een trage fetch voor de vorige dag/het
+  // vorige kind binnenkomen ná de nieuwe en de tijdlijn met verkeerde events vullen.
+  const refetchSeqRef = useRef(0);
+  const windowStartMs = dayWindow(selectedDate, dayStartHour).start.getTime();
+  const windowEndMs = dayWindow(selectedDate, dayStartHour).end.getTime();
   const refetchEvents = useCallback(() => {
     if (!childId) return;
-    Promise.all([
-      getEventsForDay(db, childId, selectedDate),
-      getOpenOrOverlappingEvents(db, childId, selectedDate, DURATION_KINDS),
-    ]).then(([dayEvents, carriedOver]) => setEvents([...carriedOver, ...dayEvents]));
-    getDayRating(db, childId, dateKey(selectedDate)).then(setDayRatingState);
-  }, [db, childId, selectedDate]);
+    refetchSeqRef.current += 1;
+    const seq = refetchSeqRef.current;
+    // Alles wat in het dagvenster begint, plus een slaap die eerder begon en erin doorloopt.
+    getEventsOverlappingRange(db, childId, new Date(windowStartMs), new Date(windowEndMs), DURATION_KINDS).then(
+      (rows) => {
+        if (seq === refetchSeqRef.current) setEvents(rows);
+      }
+    );
+    getDayRating(db, childId, dateKey(new Date(windowStartMs))).then((rating) => {
+      if (seq === refetchSeqRef.current) setDayRatingState(rating);
+    });
+  }, [db, childId, windowStartMs, windowEndMs]);
 
   useSyncLoop(
     db,
@@ -265,9 +286,11 @@ export default function TimelineScreen() {
   const activeChildName = children.length > 1 ? activeChild?.name : null;
   // Blijft staan tot de naam niet meer de auto-gegenereerde standaardwaarde is, of de
   // gebruiker 'm expliciet wegtikt — nooit als verplichte stap vóór de eerste tik.
-  const showOnboardingNameBanner = activeChild?.name === DEFAULT_CHILD_NAME && !preferences.onboardingNameDismissed;
+  const showOnboardingNameBanner = isDefaultChildName(activeChild?.name) && !preferences.onboardingNameDismissed;
 
-  const isToday = selectedDate.getTime() === startOfDay(new Date()).getTime();
+  const dayWindowRange = dayWindow(selectedDate, dayStartHour);
+  const logicalToday = logicalDay(clockNow, dayStartHour);
+  const isToday = isSameDay(selectedDate, logicalToday);
   const selectedDateKey = dateKey(selectedDate);
   const formattedDate = formatWeekdayDate(selectedDate, localeTag);
   // Header-only split of formattedDate into a short title line + a date subline, so the
@@ -278,20 +301,30 @@ export default function TimelineScreen() {
   // A manual tap always wins for the rest of this session; without one, auto mode
   // decides based on the clock (re-checked every minute so it flips on its own at
   // 22:00/06:00 if the app is left open).
-  const isNightMode = manualNightMode ?? (preferences.nightModeAuto && isWithinNightWindow(autoNightNow));
+  const isNightMode = manualNightMode ?? (preferences.nightModeAuto && isWithinNightWindow(clockNow));
 
   useEffect(() => {
-    if (!preferences.nightModeAuto) return;
-    const id = setInterval(() => setAutoNightNow(new Date()), 60_000);
-    return () => clearInterval(id);
-  }, [preferences.nightModeAuto]);
+    const id = setInterval(() => setClockNow(new Date()), 60_000);
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') setClockNow(new Date());
+    });
+    return () => {
+      clearInterval(id);
+      subscription.remove();
+    };
+  }, []);
+
+  // Dag-omslag: keek je naar vandaag en is de logische dag intussen veranderd (of de dagstart
+  // net geladen/gewijzigd), dan wordt de nieuwe dag "vandaag".
+  useEffect(() => {
+    if (!followToday || isSameDay(selectedDate, logicalToday)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedDate(logicalToday);
+  }, [followToday, selectedDate, logicalToday]);
 
   useEffect(() => {
     if (!childId) return;
-    // A session that started before today and hasn't ended yet (or only just did) —
-    // e.g. an overnight sleep — never shows up in getEventsForDay (that only matches on
-    // start_at), so it's fetched separately and merged in. The two sets never overlap:
-    // one is start_at within today, the other strictly before it. See refetchEvents.
+    // Incl. een slaap die vóór het dagvenster begon en erin doorloopt — zie refetchEvents.
     refetchEvents();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMarkedTime(null);
@@ -300,31 +333,35 @@ export default function TimelineScreen() {
   // Beginscherm-widget (lib/widget-sync.ts): bij openen en bij terugkomen naar de app de
   // tikken van de widget inlezen als events (ook slaap starten/stoppen), en na elke
   // wijziging de tellers en de slaapstand erop bijwerken. Doet niets in Expo Go.
-  const { wheelConfig, dayStartHour, timeFormat } = preferences;
+  const { wheelConfig, timeFormat } = preferences;
   const isEntitled = purchasesStatus === 'entitled';
-  const runWidgetSync = useCallback(() => {
-    if (!childId) return;
-    syncWidget(db, childId, wheelConfig, dayStartHour, isEntitled, timeFormat === '12h', t).then((changed) => {
-      if (changed.length === 0) return;
-      refetchEvents();
-      setBadgeRefreshToken((token) => token + 1);
-      for (const row of changed) pushEvent(db, childId, row);
-    });
-  }, [db, childId, wheelConfig, dayStartHour, isEntitled, timeFormat, t, refetchEvents]);
-  useEffect(() => {
-    runWidgetSync();
-  }, [runWidgetSync, badgeRefreshToken]);
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') runWidgetSync();
-    });
-    return () => subscription.remove();
-  }, [runWidgetSync]);
+  const purchasesLoaded = purchasesStatus !== 'loading';
+  useWidgetSync({
+    db,
+    childId,
+    ready: purchasesLoaded && preferences.loaded,
+    isEntitled,
+    wheelConfig,
+    timeFormat,
+    dayStartHour,
+    // Bij meer dan één kind de naam van het kind in de widgettitel.
+    title: children.length > 1 && activeChild ? activeChild.name : 'Vindra',
+    t,
+    refreshToken: badgeRefreshToken,
+    onChanged: useCallback(
+      (rows: EventRow[]) => {
+        if (childId) rows.forEach((row) => pushEvent(db, childId, row));
+        refetchEvents();
+        setBadgeRefreshToken((token) => token + 1);
+      },
+      [db, childId, refetchEvents]
+    ),
+  });
 
   useEffect(() => {
     if (!isToday) return;
-    const nowOffset = (minutesSinceMidnight(new Date()) / 60) * pixelsPerHour;
-    const maxScroll = 24 * pixelsPerHour - windowHeight;
+    const nowOffset = (minutesFromWindowStart(new Date(), dayWindowRange.start) / 60) * pixelsPerHour;
+    const maxScroll = windowHours(dayWindowRange) * pixelsPerHour - windowHeight;
     const target = Math.min(Math.max(nowOffset - windowHeight / 2, 0), Math.max(maxScroll, 0));
 
     scrollRef.current?.scrollTo({ y: target, animated: false });
@@ -349,7 +386,8 @@ export default function TimelineScreen() {
     assignColumns(
       laneEvents.filter((event) => !EVENT_TYPES[event.kind].isDuration),
       DOT_SIZE,
-      pixelsPerHour
+      pixelsPerHour,
+      dayWindowRange.start
     ).forEach((value, key) => columns.set(key, value));
     assignIntervalColumns(laneEvents.filter((event) => EVENT_TYPES[event.kind].isDuration)).forEach((value, key) =>
       durationColumns.set(key, value)
@@ -374,13 +412,22 @@ export default function TimelineScreen() {
   );
 
   // Alleen een log via het wiel is een "net iets gedaan"-moment om om een review te vragen:
-  // niet na bewerken/verslepen en niet vanuit de widget. Nooit in de nachtmodus en niet
-  // zolang de intro nog loopt. Even wachten zodat de log-animatie klaar is.
+  // niet na bewerken/verslepen en niet vanuit de widget. Nooit in de nachtmodus (een ouder
+  // om 3 uur 's nachts wil geen pop-up) en niet zolang de intro nog loopt. Even wachten zodat
+  // de log-animatie klaar is.
+  // Ongedaan maken (handleWheelCancelled) binnen die wachttijd annuleert de vraag.
   const reviewAllowed = preferences.loaded && preferences.onboardingDone && !isNightMode;
+  const reviewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleWheelLogged = useCallback(
     (row: EventRow) => {
       handleLogged(row);
-      if (reviewAllowed) setTimeout(() => maybeAskForReview(db), REVIEW_PROMPT_DELAY_MS);
+      if (reviewAllowed) {
+        if (reviewTimerRef.current) clearTimeout(reviewTimerRef.current);
+        reviewTimerRef.current = setTimeout(() => {
+          reviewTimerRef.current = null;
+          maybeAskForReview(db);
+        }, REVIEW_PROMPT_DELAY_MS);
+      }
     },
     [db, handleLogged, reviewAllowed]
   );
@@ -399,6 +446,10 @@ export default function TimelineScreen() {
 
   const handleWheelCancelled = useCallback(
     (row: EventRow) => {
+      if (reviewTimerRef.current) {
+        clearTimeout(reviewTimerRef.current);
+        reviewTimerRef.current = null;
+      }
       setEvents((current) => current.filter((event) => event.id !== row.id));
       setBadgeRefreshToken((token) => token + 1);
       if (childId) pushEvent(db, childId, row);
@@ -416,6 +467,15 @@ export default function TimelineScreen() {
     },
     [db, childId]
   );
+
+  // Een back-up kan events en dagcijfers van elk kind veranderd hebben: alles opnieuw laden en
+  // de gedeelde kinderen pushen (geïmporteerde rijen staan dirty).
+  const handleDataImported = useCallback(() => {
+    refetchEvents();
+    refetchChildren();
+    setBadgeRefreshToken((token) => token + 1);
+    listSyncedChildIds(db).then((ids) => ids.forEach((id) => pushEvent(db, id)));
+  }, [db, refetchEvents, refetchChildren]);
 
   const handleReschedule = useCallback(
     (event: EventRow, startAt: Date, endAt: Date | null) => {
@@ -437,7 +497,7 @@ export default function TimelineScreen() {
       setDayRating(db, childId, selectedDateKey, rating).then(() => {
         setDayRatingState(rating);
         setShowRatingSheet(false);
-        pushDayRating(db, childId, selectedDateKey, rating);
+        pushDayRating(db, childId);
       });
     },
     [db, childId, selectedDateKey]
@@ -486,7 +546,8 @@ export default function TimelineScreen() {
   // crossed the next snap boundary yet, instead of round-tripping to JS and calling
   // setState on every raw touch-move regardless of whether the value changed.
   const lastSentMs = useSharedValue<number | null>(null);
-  const dayStartMs = selectedDate.getTime();
+  const dayStartMs = dayWindowRange.start.getTime();
+  const windowMinutes = windowHours(dayWindowRange) * 60;
 
   const commitMarkedTime = useCallback((ms: number, isFirst: boolean) => {
     setMarkedTime(new Date(ms));
@@ -506,7 +567,7 @@ export default function TimelineScreen() {
       y,
       events,
       pixelsPerHour,
-      selectedDate,
+      dayWindowRange,
       columns,
       durationColumns,
       mirrored,
@@ -532,7 +593,7 @@ export default function TimelineScreen() {
       initialMs = Math.min(Math.max(dragAnchorMs.value, dragMinMs.value), dragMaxMs.value);
     } else {
       dragEdge.value = 'fresh';
-      initialMs = snappedTimeAt(y, pixelsPerHour, selectedDate).getTime();
+      initialMs = snappedTimeAt(y, pixelsPerHour, dayWindowRange).getTime();
     }
     lastSentMs.value = initialMs;
     commitMarkedTime(initialMs, true);
@@ -588,7 +649,7 @@ export default function TimelineScreen() {
       if (dragEdge.value === 'fresh') {
         const rawMinutes = (touch.y / pixelsPerHour) * 60;
         const snapped = Math.round(rawMinutes / TIME_SNAP_MINUTES) * TIME_SNAP_MINUTES;
-        const clamped = Math.min(Math.max(snapped, 0), 24 * 60 - TIME_SNAP_MINUTES);
+        const clamped = Math.min(Math.max(snapped, 0), windowMinutes - TIME_SNAP_MINUTES);
         nextMs = dayStartMs + clamped * 60000;
       } else {
         const rawDeltaMinutes = ((touch.y - dragAnchorY.value) / pixelsPerHour) * 60;
@@ -613,7 +674,7 @@ export default function TimelineScreen() {
       runOnJS(cancelPendingReschedule)();
     });
 
-  const timelineHeight = 24 * pixelsPerHour;
+  const timelineHeight = windowHours(dayWindowRange) * pixelsPerHour;
   const reschedulePreview =
     reschedulingTarget && markedTime ? { edge: reschedulingTarget.edge, time: markedTime } : null;
   // Caps the inline detail text so it doesn't run into the next lane — see
@@ -677,12 +738,20 @@ export default function TimelineScreen() {
           <GestureDetector gesture={pinchGesture}>
             <ScrollView ref={scrollRef} contentContainerStyle={{ height: timelineHeight }}>
               <View style={[styles.timelineRow, mirrored && styles.timelineRowMirrored]}>
-                <HourColumn pixelsPerHour={pixelsPerHour} />
-                {/* Vóór de events getekend, zodat de nu-lijn eronder loopt i.p.v. over de labels. */}
-                <NowLine pixelsPerHour={pixelsPerHour} mirrored={mirrored} color={isNightMode ? '#E0673A' : undefined} />
+                <HourColumn pixelsPerHour={pixelsPerHour} window={dayWindowRange} />
+                {/* Vóór de events getekend, zodat de nu-lijn eronder loopt i.p.v. over de labels.
+                    Alleen op vandaag: op een andere dag hoort "nu" niet in het venster. */}
+                {isToday && (
+                  <NowLine
+                    pixelsPerHour={pixelsPerHour}
+                    windowStart={dayWindowRange.start}
+                    mirrored={mirrored}
+                    color={isNightMode ? '#E0673A' : undefined}
+                  />
+                )}
                 <GestureDetector gesture={longPressGesture}>
                   <View style={styles.eventsArea}>
-                    <TimelineGrid pixelsPerHour={pixelsPerHour} />
+                    <TimelineGrid pixelsPerHour={pixelsPerHour} window={dayWindowRange} />
                     {durationEvents.map((event) => (
                       <EventCapsule
                         key={event.id}
@@ -691,7 +760,7 @@ export default function TimelineScreen() {
                         pixelsPerHour={pixelsPerHour}
                         onPress={() => setSelectedEvent(event)}
                         mirrored={mirrored}
-                        dayStart={selectedDate}
+                        window={dayWindowRange}
                         isToday={isToday}
                         previewEdit={reschedulingTarget?.event.id === event.id ? reschedulePreview : null}
                         laneOffset={laneOffsetForEvent(event, laneWidthPx)}
@@ -705,6 +774,7 @@ export default function TimelineScreen() {
                         event={event}
                         column={columns.get(event) ?? 0}
                         pixelsPerHour={pixelsPerHour}
+                        windowStart={dayWindowRange.start}
                         onPress={() => setSelectedEvent(event)}
                         mirrored={mirrored}
                         previewOffsetMinutes={
@@ -721,6 +791,7 @@ export default function TimelineScreen() {
                       <TargetTimeLine
                         time={markedTime}
                         pixelsPerHour={pixelsPerHour}
+                        windowStart={dayWindowRange.start}
                         onClear={reschedulingTarget ? undefined : () => setMarkedTime(null)}
                       />
                     )}
@@ -748,6 +819,7 @@ export default function TimelineScreen() {
           onCancelledEvent={handleWheelCancelled}
           mirrored={mirrored}
           selectedDate={selectedDate}
+          isToday={isToday}
           targetTime={markedTime}
           onTargetConsumed={() => setMarkedTime(null)}
           badgeRefreshToken={badgeRefreshToken}
@@ -783,7 +855,9 @@ export default function TimelineScreen() {
             selectedDate={selectedDate}
             onClose={() => setShowDayPicker(false)}
             onSelect={(date) => {
-              setSelectedDate(startOfDay(date));
+              const day = startOfCalendarDay(date);
+              setSelectedDate(day);
+              setFollowToday(isSameDay(day, logicalToday));
               setShowDayPicker(false);
             }}
           />
@@ -791,9 +865,10 @@ export default function TimelineScreen() {
         {showSettings && (
           <SettingsSheet
             onClose={() => setShowSettings(false)}
-            selectedDate={selectedDate}
+            dayWindow={dayWindowRange}
             dayLabel={isToday ? t.common.today : formattedDate}
             onDayEventsDeleted={handleDayEventsDeleted}
+            onDataImported={handleDataImported}
           />
         )}
         {showChildSwitcher && (

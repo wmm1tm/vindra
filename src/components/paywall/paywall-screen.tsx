@@ -2,7 +2,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Purchases, { PURCHASES_ERROR_CODE, type PurchasesPackage } from 'react-native-purchases';
+import Purchases, {
+  INTRO_ELIGIBILITY_STATUS,
+  PURCHASES_ERROR_CODE,
+  type PurchasesPackage,
+} from 'react-native-purchases';
 
 import { EventIcon } from '@/components/ui/event-icon';
 import { IconButton } from '@/components/ui/icon-button';
@@ -23,13 +27,36 @@ type OfferingsState =
   | { kind: 'loading' }
   | { kind: 'error' }
   | { kind: 'empty' }
-  | { kind: 'loaded'; monthly: PurchasesPackage | null; annual: PurchasesPackage | null };
+  | {
+      kind: 'loaded';
+      monthly: PurchasesPackage | null;
+      annual: PurchasesPackage | null;
+      /** Product-ids waarvoor deze Apple ID de proefperiode nog echt krijgt. */
+      trialEligible: Set<string>;
+    };
+
+/** Guideline 3.1.2: alleen een proefperiode beloven als Apple hem deze gebruiker ook echt
+ * geeft (wie al eens een proef had, krijgt hem niet opnieuw). Bij twijfel (onbekend, fout)
+ * tonen we hem niet — de gewone prijs klopt altijd. */
+async function loadTrialEligibility(packages: PurchasesPackage[]): Promise<Set<string>> {
+  const ids = packages.map((pkg) => pkg.product.identifier);
+  try {
+    const result = await Purchases.checkTrialOrIntroductoryPriceEligibility(ids);
+    return new Set(
+      ids.filter((id) => result[id]?.status === INTRO_ELIGIBILITY_STATUS.INTRO_ELIGIBILITY_STATUS_ELIGIBLE)
+    );
+  } catch {
+    return new Set();
+  }
+}
 
 async function loadOfferings(): Promise<OfferingsState> {
   try {
     const current = (await Purchases.getOfferings()).current;
     if (!current || (!current.monthly && !current.annual)) return { kind: 'empty' };
-    return { kind: 'loaded', monthly: current.monthly, annual: current.annual };
+    const packages = [current.monthly, current.annual].filter((pkg): pkg is PurchasesPackage => pkg !== null);
+    const trialEligible = await loadTrialEligibility(packages);
+    return { kind: 'loaded', monthly: current.monthly, annual: current.annual, trialEligible };
   } catch {
     return { kind: 'error' };
   }
@@ -90,7 +117,7 @@ function PlanOption({
  * mag afzien en verdergaan met wat al gratis is — zie EntitlementGate resp. WheelArc.
  * Prijzen komen live van RevenueCat/de App Store (`priceString`) i.p.v. hardcoded, zodat
  * ze automatisch kloppen per regio/valuta. */
-export function PaywallScreen({ onClose }: { onClose?: () => void }) {
+export function PaywallScreen({ onClose, notice }: { onClose?: () => void; notice?: string }) {
   const { t, language } = useI18n();
   const privacyPolicyUrl = language === 'nl' ? PRIVACY_POLICY_URL_NL : PRIVACY_POLICY_URL_EN;
   const insets = useSafeAreaInsets();
@@ -112,7 +139,11 @@ export function PaywallScreen({ onClose }: { onClose?: () => void }) {
 
   const selectedPackage =
     state.kind === 'loaded' ? (selected === 'monthly' ? state.monthly : state.annual) ?? state.monthly ?? state.annual : null;
-  const selectedTrialDays = selectedPackage ? freeTrialDays(selectedPackage.product) : null;
+  const trialDaysFor = (pkg: PurchasesPackage | null) =>
+    pkg && state.kind === 'loaded' && state.trialEligible.has(pkg.product.identifier) ? freeTrialDays(pkg.product) : null;
+  const selectedTrialDays = trialDaysFor(selectedPackage);
+  const monthlyTrialDays = trialDaysFor(state.kind === 'loaded' ? state.monthly : null);
+  const annualTrialDays = trialDaysFor(state.kind === 'loaded' ? state.annual : null);
 
   const handleSubscribe = () => {
     if (!selectedPackage) return;
@@ -154,6 +185,7 @@ export function PaywallScreen({ onClose }: { onClose?: () => void }) {
       )}
       <View style={styles.content}>
         <Text style={styles.title}>{t.subscription.title}</Text>
+        {notice && <Text style={styles.notice}>{notice}</Text>}
         <Text style={styles.benefitIntro}>{t.subscription.benefitIntro}</Text>
         <View style={styles.benefitList}>
           <Text style={styles.benefit}>{'• ' + t.subscription.benefit1}</Text>
@@ -188,11 +220,7 @@ export function PaywallScreen({ onClose }: { onClose?: () => void }) {
                 <PlanOption
                   label={t.subscription.monthlyLabel}
                   price={state.monthly.product.priceString}
-                  trialLabel={
-                    freeTrialDays(state.monthly.product) != null
-                      ? t.subscription.trialBadge(freeTrialDays(state.monthly.product)!)
-                      : undefined
-                  }
+                  trialLabel={monthlyTrialDays != null ? t.subscription.trialBadge(monthlyTrialDays) : undefined}
                   active={selected === 'monthly'}
                   onPress={() => setSelected('monthly')}
                 />
@@ -201,11 +229,7 @@ export function PaywallScreen({ onClose }: { onClose?: () => void }) {
                 <PlanOption
                   label={t.subscription.yearlyLabel}
                   price={state.annual.product.priceString}
-                  trialLabel={
-                    freeTrialDays(state.annual.product) != null
-                      ? t.subscription.trialBadge(freeTrialDays(state.annual.product)!)
-                      : undefined
-                  }
+                  trialLabel={annualTrialDays != null ? t.subscription.trialBadge(annualTrialDays) : undefined}
                   active={selected === 'annual'}
                   onPress={() => setSelected('annual')}
                 />
@@ -279,6 +303,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: 8,
+  },
+  notice: {
+    color: '#E3A857',
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 10,
   },
   benefitIntro: {
     color: '#F1EEE7',

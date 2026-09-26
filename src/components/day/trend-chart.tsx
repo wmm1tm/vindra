@@ -9,6 +9,7 @@ import type { EventRow } from '@/db/events';
 import { lighten, withAlpha } from '@/lib/color';
 import { useI18n } from '@/lib/i18n';
 import type { Dictionary } from '@/lib/i18n/translations';
+import { usePreferences } from '@/lib/preferences-context';
 import {
   TREND_RANGES,
   averageOf,
@@ -50,6 +51,7 @@ function comparisonText(comparison: TrendComparison, t: Dictionary) {
  * vergelijking staat er als tekst onder ("minder"/"meer"), zonder rood of groen. */
 export function TrendChart({ events, firstEventTime, entitled, onUnlock }: TrendChartProps) {
   const { t, localeTag } = useI18n();
+  const { dayStartHour } = usePreferences();
   const [range, setRange] = useState<TrendRange>(8);
   const [chosen, setChosen] = useState<EventKind | null>(null);
   const [chartWidth, setChartWidth] = useState(280);
@@ -59,8 +61,8 @@ export function TrendChart({ events, firstEventTime, entitled, onUnlock }: Trend
   const color = EVENT_TYPES[kind].color;
 
   const now = new Date();
-  const weeks = trendWeekStarts(range, now);
-  const { values, activeValues } = vindraTrendSeries(events, kind, weeks, firstEventTime, now);
+  const weeks = trendWeekStarts(range, now, dayStartHour);
+  const { values, activeValues } = vindraTrendSeries(events, kind, weeks, firstEventTime, now, dayStartHour);
   const average = averageOf(activeValues);
   const max = Math.max(1, ...values, average);
 
@@ -156,9 +158,12 @@ export function TrendChart({ events, firstEventTime, entitled, onUnlock }: Trend
         )}
       </View>
 
-      <Text style={styles.summary}>
-        {average > 0 ? `${t.trends.averagePerWeek(numberFormat.format(average))} · ${comparison}` : comparison}
-      </Text>
+      {/* Zonder abonnement ook de samenvatting niet: die verraadt anders wat onder het slot zit. */}
+      {entitled && (
+        <Text style={styles.summary}>
+          {average > 0 ? `${t.trends.averagePerWeek(numberFormat.format(average))} · ${comparison}` : comparison}
+        </Text>
+      )}
     </View>
   );
 }

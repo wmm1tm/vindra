@@ -4,6 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, w
 import { useSQLiteContext } from 'expo-sqlite';
 
 import {
+  DURATION_KINDS,
   EVENT_TYPES,
   SECOND_LEVEL_OPTIONS,
   resolveWheelOrder,
@@ -15,7 +16,8 @@ import {
 import {
   closeEvent,
   getActiveEvent,
-  getEventsForRange,
+  getEventById,
+  getEventsOverlappingRange,
   getFrequentNotes,
   getLastAmountMl,
   insertMomentEvent,
@@ -26,13 +28,19 @@ import {
   type EventRow,
 } from '@/db/events';
 import { useActiveChild } from '@/lib/active-child-context';
+import { dateAtClockTime, dayWindow, logicalDay } from '@/lib/day-window';
 import { AMOUNT_KINDS, computeKindTotals, formatGroupBadge, formatKindBadge } from '@/lib/event-summary';
 import { useI18n } from '@/lib/i18n';
 import { usePreferences } from '@/lib/preferences-context';
 import { usePurchases } from '@/lib/purchases-context';
-import { snapToNearestMinutes, TIME_SNAP_MINUTES } from '@/lib/time';
+import { stopOpenSessions } from '@/lib/sleep-actions';
+import { confirmStopRunningSleep, showSleepAlreadyStopped } from '@/lib/sleep-prompts';
+import { pullBeforeAction } from '@/lib/sync';
+import { hourFieldValue, parseHourField, safeEndTime, snapToNearestMinutes, TIME_SNAP_MINUTES } from '@/lib/time';
+import { formatTime } from '@/lib/time-options';
 import { arcPosition } from '@/lib/wheel-geometry';
 import { PaywallScreen } from '@/components/paywall/paywall-screen';
+import { AmPmToggle } from '@/components/ui/am-pm-toggle';
 import { InlineInputCard } from '@/components/wheel/inline-input-card';
 import { WheelBadge } from '@/components/wheel/wheel-badge';
 import { WheelButton } from '@/components/wheel/wheel-button';
@@ -68,6 +76,8 @@ interface WheelArcProps {
   onCancelledEvent: (row: EventRow) => void;
   mirrored?: boolean;
   selectedDate: Date;
+  /** Is `selectedDate` de logische dag van nu? Dan is "nu" een zinnige standaardtijd. */
+  isToday: boolean;
   targetTime?: Date | null;
   onTargetConsumed?: () => void;
   /** Verhoogd door de ouder bij elke wijziging die de badge-tellers kan raken (loggen,
@@ -83,33 +93,35 @@ export function WheelArc({
   onCancelledEvent,
   mirrored = false,
   selectedDate,
+  isToday,
   targetTime = null,
   onTargetConsumed,
   badgeRefreshToken = 0,
   onCustomizeWheel,
 }: WheelArcProps) {
   const db = useSQLiteContext();
-  const { volumeUnit, tempUnit, dayStartHour, wheelConfig } = usePreferences();
+  const { volumeUnit, tempUnit, dayStartHour, wheelConfig, timeFormat } = usePreferences();
   const { t } = useI18n();
   const { childId } = useActiveChild();
   const { status: purchasesStatus } = usePurchases();
   const isEntitled = purchasesStatus === 'entitled';
   const [showPaywall, setShowPaywall] = useState(false);
   const wheelOrder = resolveWheelOrder(wheelConfig);
-  const isToday = selectedDate.toDateString() === new Date().toDateString();
-  // Badge-telling volgt de ingestelde dagstart (bv. 06:00), los van hoe de tijdlijn zelf
-  // getekend wordt — die blijft altijd op de kalenderdag (00:00-24:00) staan. Herlaadt
-  // ook op badgeRefreshToken, zodat wijzigingen buiten het wiel om (bewerken/verwijderen/
-  // verslepen op de tijdlijn) de tellers hier ook bijwerken.
+  // Badges tellen over hetzelfde dagvenster als de tijdlijn (dagstart-uur tot dagstart-uur).
+  // Herlaadt ook op badgeRefreshToken, zodat wijzigingen buiten het wiel om (bewerken/
+  // verwijderen/verslepen op de tijdlijn) de tellers hier ook bijwerken.
   const [badgeEvents, setBadgeEvents] = useState<EventRow[]>([]);
+  const badgeWindow = dayWindow(selectedDate, dayStartHour);
+  const badgeFrom = badgeWindow.start.getTime();
+  const badgeTo = badgeWindow.end.getTime();
 
   useEffect(() => {
     if (!childId) return;
-    const rangeStart = new Date(selectedDate);
-    rangeStart.setHours(dayStartHour, 0, 0, 0);
-    const rangeEnd = new Date(rangeStart.getTime() + 24 * 60 * 60 * 1000);
-    getEventsForRange(db, childId, rangeStart, rangeEnd).then(setBadgeEvents);
-  }, [db, childId, selectedDate, dayStartHour, badgeRefreshToken]);
+    // Incl. de nacht die gisteren begon: die telt vandaag mee voor het deel na de dagstart.
+    getEventsOverlappingRange(db, childId, new Date(badgeFrom), new Date(badgeTo), DURATION_KINDS).then(
+      setBadgeEvents
+    );
+  }, [db, childId, badgeFrom, badgeTo, badgeRefreshToken]);
   // Lokale, niet-gepersisteerde UI-staat (geen ChildSettings-veld): dit is een tijdelijke
   // "geef me nu ruimte"-keuze, geen stabiele per-kind-instelling zoals leftHanded — een
   // gedeeld kind zou anders op een ander toestel de wiel-staat van dit toestel overnemen.
@@ -140,6 +152,7 @@ export function WheelArc({
   const [quickNotes, setQuickNotes] = useState<string[]>([]);
   const [temperatureValue, setTemperatureValue] = useState('');
   const [manualHour, setManualHour] = useState('');
+  const [manualPm, setManualPm] = useState(false);
   const [manualMinute, setManualMinute] = useState('');
   // Zodra het uur-veld 2 cijfers heeft, springt de focus vanzelf door naar minuten —
   // zie de handler bij de TextInput hieronder.
@@ -268,7 +281,8 @@ export function WheelArc({
       return;
     }
     const now = new Date();
-    setManualHour(String(now.getHours()));
+    setManualHour(hourFieldValue(now.getHours(), timeFormat));
+    setManualPm(now.getHours() >= 12);
     setManualMinute(String(now.getMinutes()));
     setStage('manualTime');
   };
@@ -299,14 +313,60 @@ export function WheelArc({
   const beginKindFlow = (kind: EventKind) => {
     if (!childId) return;
     if (EVENT_TYPES[kind].isDuration) {
-      getActiveEvent(db, childId, kind).then((active) => startKind(kind, active));
+      (async () => {
+        // Gedeeld kind: eerst kort ophalen, zodat een slaap die de partner net startte of
+        // stopte meetelt (hooguit ~3 s; zonder internet gaat het gewoon lokaal verder).
+        await pullBeforeAction(db, childId);
+        const active = await getActiveEvent(db, childId, kind);
+        const shownRunning = badgeEvents.find((event) => event.kind === kind && !event.end_at);
+        if (active) {
+          if (!shownRunning) {
+            // Het scherm toonde "start", maar er liep al een slaap (van de partner): nooit
+            // een tweede starten — vragen of deze tik hem moet stoppen.
+            onLogged(active);
+            const stopAt = targetTime ?? snapToNearestMinutes(new Date());
+            const stop = await confirmStopRunningSleep(t, timeFormat, new Date(active.start_at), stopAt);
+            if (!stop) {
+              reset();
+              return;
+            }
+          }
+          startKind(kind, active);
+          return;
+        }
+        // Het scherm toonde nog een lopende slaap, maar intussen is hij gestopt (door de
+        // partner, via sync): deze tik was dus als STOP bedoeld. Nooit stil een nieuwe slaap
+        // starten — melden, met de keuze om er toch een te starten.
+        const current = shownRunning ? await getEventById(db, shownRunning.id) : null;
+        if (shownRunning && current && (current.end_at || current.deleted_at)) {
+          onLogged(current);
+          showSleepAlreadyStopped(t, timeFormat, current.end_at ? new Date(current.end_at) : null, {
+            onDismiss: reset,
+            onStartNew: () => startKind(kind, null),
+          });
+          return;
+        }
+        startKind(kind, null);
+      })();
       return;
     }
     startKind(kind, null);
   };
 
+  // Een lopende slaap stoppen is altijd gratis (ook na een verlopen abonnement): de knop van
+  // een type dat nu loopt is dan niet op slot.
+  const isLocked = (entry: WheelEntry) => {
+    if (isEntitled || !wheelEntryRequiresPremium(entry)) return false;
+    const running = Boolean(
+      entry.kind &&
+        EVENT_TYPES[entry.kind].isDuration &&
+        badgeEvents.some((event) => event.kind === entry.kind && !event.end_at)
+    );
+    return !running;
+  };
+
   const handleEntryPress = (entry: WheelEntry) => {
-    if (!isEntitled && wheelEntryRequiresPremium(entry)) {
+    if (isLocked(entry)) {
       setShowPaywall(true);
       return;
     }
@@ -344,12 +404,19 @@ export function WheelArc({
     if (!childId) return;
 
     if (active) {
-      closeEvent(db, active.id, startAt).then((updatedAt) => {
-        const closedRow: EventRow = { ...active, end_at: startAt.toISOString(), updated_at: updatedAt };
+      // Nooit vóór (of op) de eigen start stoppen: de 5-minuten-snap van "nu" kan net vóór
+      // een ongesnapte widget-start vallen.
+      const endAt = safeEndTime(active.start_at, startAt);
+      closeEvent(db, active.id, endAt).then(async (updatedAt) => {
+        const closedRow: EventRow = { ...active, end_at: endAt.toISOString(), updated_at: updatedAt };
         onLogged(closedRow);
         setLoggedEvent(closedRow);
         setStage('details');
         onTargetConsumed?.();
+        // Liep er nog een tweede slaap (twee toestellen startten offline elk een)? Die ook
+        // sluiten, anders blijft er een "vergeten" open slaap staan.
+        const others = await stopOpenSessions(db, childId, kind, endAt);
+        others.forEach(onLogged);
       });
       return;
     }
@@ -382,7 +449,7 @@ export function WheelArc({
 
   const confirmManualTime = () => {
     if (!activeKind) return;
-    const hours = Math.min(Math.max(Number(manualHour) || 0, 0), 23);
+    const hours = parseHourField(manualHour, timeFormat, manualPm);
     const typedMinutes = Math.min(Math.max(Number(manualMinute) || 0, 0), 59);
     // Rounds the typed minute to the nearest 5-min mark (48 → 50, 02 → 00) so manually
     // entered times land on the same grid as the timeline — a 60 here (e.g. 58 rounds up)
@@ -393,11 +460,16 @@ export function WheelArc({
     // stopped, from the next day's timeline). Rolls forward a day if the typed time
     // would otherwise land before the event even started, since that's exactly what
     // "ended at 00:30" after an evening start means.
-    const anchorDay = stoppingEvent ? new Date(stoppingEvent.start_at) : selectedDate;
-    const date = new Date(anchorDay);
-    date.setHours(hours, minutes, 0, 0);
-    if (stoppingEvent && date.getTime() < new Date(stoppingEvent.start_at).getTime()) {
-      date.setDate(date.getDate() + 1);
+    // Een nieuwe log valt binnen de bekeken logische dag: bij dagstart 06:00 is "03:00" op
+    // maandag dus dinsdagnacht 03:00 (dateAtClockTime).
+    let date: Date;
+    if (stoppingEvent) {
+      date = new Date(stoppingEvent.start_at);
+      date.setHours(hours, minutes, 0, 0);
+      if (date.getTime() < new Date(stoppingEvent.start_at).getTime()) date.setDate(date.getDate() + 1);
+    } else {
+      date = dateAtClockTime(selectedDate, hours, 0, dayStartHour);
+      date.setMinutes(minutes);
     }
     // Dit is de enige overgebleven plek waar de gebruiker een tijd typt zonder dat er al
     // een zinnig standaard was (zie proceedToLog) — er valt hierna niks meer te kiezen,
@@ -476,15 +548,15 @@ export function WheelArc({
     });
   };
 
-  /** Sluit de lopende sessie meteen af op 00:00 van de volgende kalenderdag — een
-   * snelkoppeling naast "Eindtijd" voor de nacht: je weet nog niet wanneer het kind
-   * wakker wordt, maar wil vannacht niet als één (steeds langer lopend) open event op de
-   * tijdlijn laten staan. Anders dan de overige detail-opties is hier niks meer te typen,
-   * dus dit logt direct i.p.v. eerst een InlineInputCard te tonen (zie handleSelectDetailField). */
+  /** Sluit de lopende sessie meteen af op het einde van de logische dag waarin hij begon
+   * (de dagrand = dagstart-uur, standaard 00:00) — een snelkoppeling naast "Eindtijd" voor
+   * de nacht: je weet nog niet wanneer het kind wakker wordt, maar wil vannacht niet als één
+   * (steeds langer lopend) open event op de tijdlijn laten staan. Anders dan de overige
+   * detail-opties is hier niks meer te typen, dus dit logt direct. */
   const setEndOfDay = () => {
     if (!loggedEvent) return;
-    const dayEnd = new Date(loggedEvent.start_at);
-    dayEnd.setHours(24, 0, 0, 0);
+    const start = new Date(loggedEvent.start_at);
+    const dayEnd = dayWindow(logicalDay(start, dayStartHour), dayStartHour).end;
 
     closeEvent(db, loggedEvent.id, dayEnd).then((updatedAt) => {
       const updated: EventRow = { ...loggedEvent, end_at: dayEnd.toISOString(), updated_at: updatedAt };
@@ -504,8 +576,8 @@ export function WheelArc({
   const setSinceMidnight = () => {
     if (!loggedEvent) return;
     const anchor = new Date(loggedEvent.start_at);
-    const dayStart = new Date(anchor);
-    dayStart.setHours(0, 0, 0, 0);
+    // Vanaf de dagrand (dagstart-uur) van de logische dag van het gekozen moment.
+    const dayStart = dayWindow(logicalDay(anchor, dayStartHour), dayStartHour).start;
 
     rescheduleEvent(db, loggedEvent.id, dayStart, anchor).then((updatedAt) => {
       const updated: EventRow = {
@@ -544,7 +616,7 @@ export function WheelArc({
   };
 
   const activeEntry = wheelOrder.find((entry) => entry.id === activeEntryId) ?? null;
-  const kindTotals = computeKindTotals(badgeEvents);
+  const kindTotals = computeKindTotals(badgeEvents, badgeFrom, badgeTo);
 
   const groupItems: WheelRingItem[] =
     activeEntry?.groupMembers?.map((kind) => ({
@@ -587,7 +659,16 @@ export function WheelArc({
     ...(canSetEndTime ? [{ id: 'endTime', icon: 'clock-end' as const, caption: t.wheel.endTimeCaption }] : []),
     ...(canSetEndTime ? [{ id: 'endOfDay', icon: 'weather-night' as const, caption: t.wheel.endOfDayCaption }] : []),
     ...(canSetEndTime && isToday
-      ? [{ id: 'sinceMidnight', icon: 'weather-sunset-up' as const, caption: t.wheel.sinceMidnightCaption }]
+      ? [
+          {
+            id: 'sinceMidnight',
+            icon: 'weather-sunset-up' as const,
+            caption:
+              dayStartHour === 0
+                ? t.wheel.sinceMidnightCaption
+                : t.wheel.sinceTimeCaption(formatTime(new Date(2000, 0, 1, dayStartHour), timeFormat)),
+          },
+        ]
       : []),
     { id: 'note', icon: 'notebook-outline' as const, caption: t.common.note },
   ];
@@ -632,7 +713,7 @@ export function WheelArc({
             accessibilityLabel={entry.label(t)}
             caption={entry.label(t)}
             dimmed={activeEntryId !== null && activeEntryId !== entry.id}
-            locked={!isEntitled && wheelEntryRequiresPremium(entry)}
+            locked={isLocked(entry)}
             onPress={() => handleEntryPress(entry)}
           />
         ))}
@@ -734,6 +815,7 @@ export function WheelArc({
             placeholder={t.wheel.minutePlaceholder}
             placeholderTextColor="#AAB4B6"
           />
+          {timeFormat === '12h' && <AmPmToggle pm={manualPm} onChange={setManualPm} />}
         </InlineInputCard>
       )}
 

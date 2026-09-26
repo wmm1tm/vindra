@@ -1,6 +1,6 @@
 export const DATABASE_NAME = 'babytracker.db';
 
-export const DATABASE_VERSION = 13;
+export const DATABASE_VERSION = 15;
 
 export const CREATE_SCHEMA_V1 = `
 CREATE TABLE child (
@@ -125,4 +125,20 @@ ALTER TABLE event ADD COLUMN what_helped TEXT;
 export const CREATE_SCHEMA_V13 = `
 ALTER TABLE event ADD COLUMN sensory_threshold TEXT;
 ALTER TABLE event ADD COLUMN sensory_response TEXT;
+`;
+
+/** Partner-sync v2 (2026-09-26):
+ * - `pushed_updated_at`: de updated_at die het laatst naar de server ging. Een rij is
+ *   "dirty" (nog te pushen) zolang die leeg is of afwijkt van updated_at — elke lokale
+ *   wijziging zet een nieuwe updated_at en maakt de rij dus vanzelf dirty, ook een
+ *   verwijdering (deleted_at). Bestaande rijen starten leeg: één keer alles opnieuw pushen.
+ * - `sync_seq_events`/`sync_seq_ratings`: watermark = hoogste server-volgnummer (seq) dat
+ *   dit toestel al binnenhaalde. Start op 0: één keer alles opnieuw ophalen, wat veilig is
+ *   omdat toepassen laatste-schrijver-wint is. last_synced_at (oude watermark) blijft alleen
+ *   voor de terugval zolang de server de v2-functies nog niet heeft. */
+export const CREATE_SCHEMA_V14 = `
+ALTER TABLE event ADD COLUMN pushed_updated_at TEXT;
+ALTER TABLE day_log ADD COLUMN pushed_updated_at TEXT;
+ALTER TABLE child ADD COLUMN sync_seq_events INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE child ADD COLUMN sync_seq_ratings INTEGER NOT NULL DEFAULT 0;
 `;

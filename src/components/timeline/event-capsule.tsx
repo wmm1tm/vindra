@@ -7,7 +7,7 @@ import type { EventRow } from '@/db/events';
 import { useI18n } from '@/lib/i18n';
 import { formatTimelineDetail } from '@/lib/event-summary';
 import { usePreferences } from '@/lib/preferences-context';
-import { minutesSinceMidnight } from '@/lib/time';
+import { minutesFromWindowStart, windowHours, type TimeWindow } from '@/lib/day-window';
 import { EventIcon } from '@/components/ui/event-icon';
 import { mixOver, withAlpha } from '@/lib/color';
 import { Design, glowStyle } from '@/constants/design';
@@ -33,10 +33,10 @@ interface EventCapsuleProps {
   pixelsPerHour: number;
   onPress: () => void;
   mirrored?: boolean;
-  /** Start (midnight) of the day being viewed — this timeline only ever shows one
-   * calendar day, so an event that started earlier or hasn't ended yet gets clipped to
-   * this day's bounds with a "continues" chevron instead of its normal marker icon. */
-  dayStart: Date;
+  /** Het dagvenster van de tijdlijn (dagstart-uur tot dagstart-uur, 23-25 uur): een event
+   * dat eerder begon of nog niet klaar is wordt op die randen geknipt, met een "loopt
+   * door"-pijltje in plaats van het normale markeer-icoon. */
+  window: TimeWindow;
   /** Is the day being viewed today? An event with no end_at is still running, so it
    * should visually run up to "now" — but only when "now" actually falls on this day.
    * On a past day it would otherwise drag the bar through every day in between. */
@@ -62,7 +62,7 @@ export function EventCapsule({
   pixelsPerHour,
   onPress,
   mirrored = false,
-  dayStart,
+  window,
   isToday = true,
   previewEdit = null,
   laneOffset = 0,
@@ -74,7 +74,9 @@ export function EventCapsule({
   const glow = useGlow();
   const type = EVENT_TYPES[event.kind];
 
-  const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+  const dayStart = window.start;
+  const dayEnd = window.end;
+  const topFor = (date: Date) => (minutesFromWindowStart(date, dayStart) / 60) * pixelsPerHour;
   const trueStart = new Date(event.start_at);
   const trueEnd = event.end_at ? new Date(event.end_at) : null;
   // The real start/end may fall outside the day being shown (an overnight sleep that
@@ -88,15 +90,15 @@ export function EventCapsule({
   // onto the start marker instead of reaching the bottom of the day.
   const continuesAfter = effectiveEnd.getTime() >= dayEnd.getTime();
 
-  const rawStartTop = continuesBefore ? 0 : (minutesSinceMidnight(trueStart) / 60) * pixelsPerHour;
-  const rawEndTop = continuesAfter ? 24 * pixelsPerHour : (minutesSinceMidnight(effectiveEnd) / 60) * pixelsPerHour;
+  const rawStartTop = continuesBefore ? 0 : topFor(trueStart);
+  const rawEndTop = continuesAfter ? windowHours(window) * pixelsPerHour : topFor(effectiveEnd);
 
   // 'start'/'end' move only that marker (the other stays put, so the duration changes);
   // 'whole' shifts both by the same amount, preserving the duration.
   let startTop = rawStartTop;
   let endTop = rawEndTop;
   if (previewEdit) {
-    const previewTop = (minutesSinceMidnight(previewEdit.time) / 60) * pixelsPerHour;
+    const previewTop = topFor(previewEdit.time);
     if (previewEdit.edge === 'start') {
       startTop = previewTop;
     } else if (previewEdit.edge === 'end') {

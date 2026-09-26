@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { DEFAULT_CHILD_NAME } from '@/db/child';
+import { ALL_DEFAULT_CHILD_NAMES } from '@/db/child';
 
 /** Sleutel in `app_state` (toestelniveau, zoals het actieve kind), bewust geen kolom op
  * `child`: instellingen in Vindra horen per kind, maar de intro hoort bij het toestel. Als
@@ -25,8 +25,8 @@ export async function getOnboardingDone(db: SQLiteDatabase): Promise<boolean> {
   const existingUse = await db.getFirstAsync<{ found: number }>(
     `SELECT 1 AS found
      WHERE EXISTS (SELECT 1 FROM event)
-        OR EXISTS (SELECT 1 FROM child WHERE name <> ?)`,
-    [DEFAULT_CHILD_NAME]
+        OR EXISTS (SELECT 1 FROM child WHERE name NOT IN (${ALL_DEFAULT_CHILD_NAMES.map(() => '?').join(', ')}))`,
+    ALL_DEFAULT_CHILD_NAMES
   );
   if (existingUse) {
     await setOnboardingDone(db, true);

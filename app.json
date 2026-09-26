@@ -6,12 +6,21 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "vindra",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "ios": {
       "bundleIdentifier": "com.woutertm.vindra",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleAllowMixedLocalizations": true
       }
+    },
+    "locales": {
+      "nl": "./languages/nl.json",
+      "en": "./languages/en.json",
+      "de": "./languages/de.json",
+      "es": "./languages/es.json",
+      "fr": "./languages/fr.json",
+      "pt": "./languages/pt.json"
     },
     "android": {
       "package": "com.woutertm.vindra",
@@ -50,7 +59,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Toegang tot de camera is nodig om de koppel-code van je partner te scannen.",
+          "cameraPermission": "Camera access is needed to scan your partner's pairing code.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
